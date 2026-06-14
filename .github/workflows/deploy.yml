@@ -38,6 +38,12 @@ jobs:
           uv run marimo export html-wasm notebooks/reachability_dashboard.py -o dist/reachability -f
           uv run marimo export html-wasm notebooks/bn_experiment_dashboard.py -o dist/bn_experiment -f
           uv run marimo export html-wasm notebooks/network_graph_dashboard.py -o dist/network_graph -f
+          
+          # Copy local package source to each dashboard directory for Pyodide runtime loading
+          cp -r src/ai_research_template dist/reachability/
+          cp -r src/ai_research_template dist/bn_experiment/
+          cp -r src/ai_research_template dist/network_graph/
+          
           cp scripts/portal_index.html dist/index.html
           touch dist/.nojekyll
 
