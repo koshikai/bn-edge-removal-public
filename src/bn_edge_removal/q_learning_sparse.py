@@ -1,35 +1,19 @@
-"""Tabular Q-learning for edge removal control."""
+"""Sparse tabular Q-learning for large augmented state spaces."""
 
 from __future__ import annotations
 
-from dataclasses import dataclass
-
 import numpy as np
 
-from ai_research_template.bn_edge_removal.action_selection import (
+from bn_edge_removal.action_selection import (
     select_greedy_action_with_sparse_tiebreak,
 )
-from ai_research_template.bn_edge_removal.env import EdgeRemovalEnv
+from bn_edge_removal.env import EdgeRemovalEnv
+from bn_edge_removal.q_learning import (
+    EpsilonSchedule,
+    QLearningConfig,
+)
 
-
-@dataclass(frozen=True)
-class EpsilonSchedule:
-    start: float = 1.0
-    end: float = 0.05
-
-    def value(self, episode: int, total_episodes: int) -> float:
-        if total_episodes <= 1:
-            return self.end
-        ratio = min(max(episode / (total_episodes - 1), 0.0), 1.0)
-        return self.start + ratio * (self.end - self.start)
-
-
-@dataclass(frozen=True)
-class QLearningConfig:
-    alpha: float = 0.5
-    gamma: float = 0.99
-    episodes: int = 15000
-    epsilon: EpsilonSchedule = EpsilonSchedule()
+type SparseQTable = dict[int, np.ndarray]
 
 
 def _epsilon_greedy_action(
@@ -43,15 +27,25 @@ def _epsilon_greedy_action(
     return select_greedy_action_with_sparse_tiebreak(q_values, allowed)
 
 
-def train_q_learning(
+def _get_or_create_row(
+    q_table: SparseQTable, state_id: int, num_actions: int
+) -> np.ndarray:
+    row = q_table.get(state_id)
+    if row is None:
+        row = np.zeros(num_actions, dtype=float)
+        q_table[state_id] = row
+    return row
+
+
+def train_q_learning_sparse(
     env: EdgeRemovalEnv,
     config: QLearningConfig,
     rng: np.random.Generator | None = None,
     initial_states: list[list[int]] | None = None,
     initial_state_strategy: str = "random",
-) -> tuple[np.ndarray, list[dict[str, float]]]:
+) -> tuple[SparseQTable, list[dict[str, float]]]:
     rng = rng or np.random.default_rng()
-    q_table = np.zeros((env.num_states, env.num_actions), dtype=float)
+    q_table: SparseQTable = {}
     history: list[dict[str, float]] = []
 
     if initial_states is not None and len(initial_states) == 0:
@@ -68,23 +62,28 @@ def train_q_learning(
             else:
                 raise ValueError("initial_state_strategy must be 'random' or 'cycle'")
             state_id = env.reset(initial_state=init_state)
+
         episode_reward = 0.0
         epsilon = config.epsilon.value(episode, config.episodes)
 
         for _ in range(env.horizon.max_steps):
+            q_row = _get_or_create_row(q_table, state_id, env.num_actions)
             allowed = env.allowed_actions()
             preferred = env.goal_preserving_actions(allowed)
-            action = _epsilon_greedy_action(q_table[state_id], epsilon, rng, preferred)
+            action = _epsilon_greedy_action(q_row, epsilon, rng, preferred)
+
             next_state_id, reward, done, _info = env.step(action)
             episode_reward += reward
 
             next_allowed = env.allowed_actions()
             next_preferred = env.goal_preserving_actions(next_allowed)
-            next_max = float(np.max(q_table[next_state_id][next_preferred]))
-            td_target = reward + config.gamma * next_max
-            q_table[state_id, action] += config.alpha * (
-                td_target - q_table[state_id, action]
+            next_row = q_table.get(next_state_id)
+            next_max = (
+                0.0 if next_row is None else float(np.max(next_row[next_preferred]))
             )
+
+            td_target = reward + config.gamma * next_max
+            q_row[action] += config.alpha * (td_target - q_row[action])
 
             state_id = next_state_id
             if done:
@@ -101,3 +100,11 @@ def train_q_learning(
         )
 
     return q_table, history
+
+
+__all__ = [
+    "EpsilonSchedule",
+    "QLearningConfig",
+    "SparseQTable",
+    "train_q_learning_sparse",
+]

@@ -4,28 +4,27 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-from ai_research_template.bn_edge_removal.env import (
+from bn_edge_removal.env import (
     EdgeRemovalEnv,
     HorizonConfig,
     RewardConfig,
 )
-from ai_research_template.bn_edge_removal.evaluation_sparse import (
+from bn_edge_removal.evaluation_sparse import (
     evaluate_policy_sparse,
 )
-from ai_research_template.bn_edge_removal.plotting import (
+from bn_edge_removal.plotting import (
     plot_training_curves,
     plot_trajectories,
 )
-from ai_research_template.bn_edge_removal.q_learning import (
+from bn_edge_removal.q_learning import (
     EpsilonSchedule,
     QLearningConfig,
 )
-from ai_research_template.bn_edge_removal.q_learning_sparse import (
+from bn_edge_removal.q_learning_sparse import (
     SparseQTable,
     train_q_learning_sparse,
 )
-from ai_research_template.bn_edge_removal.wnt5a import Wnt5aModel
-from ai_research_template.utils import (
+from bn_edge_removal.utils import (
     current_timestamp,
     load_config,
     prepare_output_dir,
@@ -36,6 +35,7 @@ from ai_research_template.utils import (
     write_daily_report_request,
     write_report,
 )
+from bn_edge_removal.wnt5a import Wnt5aModel
 
 
 def _state_pool(model: Wnt5aModel, pool_name: str) -> list[list[int]]:

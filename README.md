@@ -48,7 +48,7 @@ uv run poe exp-cell-cycle10
 ```
 
 ## ディレクトリ構成
-- `src/ai_research_template/bn_edge_removal/`: コアとなるアルゴリズム（強化学習、ネットワーク定義）
+- `src/bn_edge_removal/`: コアとなるアルゴリズム（強化学習、ネットワーク定義）
 - `scripts/`: 各種実験の実行エントリーポイント
 - `configs/`: 実験パラメータ定義。`optimal.yaml` が決定版、`baselines/` に比較用、`paper_reproducibility/` に既報再現用を配置。
 - `notebooks/`: Marimo ダッシュボードコード

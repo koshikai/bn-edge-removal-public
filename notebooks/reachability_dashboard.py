@@ -14,7 +14,7 @@ def __():
     import numpy as np
     import pandas as pd
 
-    from ai_research_template.bn_edge_removal.network_spec import load_network_spec
+    from bn_edge_removal.network_spec import load_network_spec
 
     def get_model_dimensions(model_name: str) -> tuple[int, int] | None:
         try:

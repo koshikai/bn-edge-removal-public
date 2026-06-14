@@ -8,12 +8,12 @@ from typing import Any
 
 import pandas as pd
 
-from ai_research_template.bn_edge_removal.reachability import (
+from bn_edge_removal.reachability import (
     ReachabilityConfig,
     ReachabilityResult,
     verify_all_models,
 )
-from ai_research_template.utils import (
+from bn_edge_removal.utils import (
     current_timestamp,
     load_config,
     prepare_output_dir,

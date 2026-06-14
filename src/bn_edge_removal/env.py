@@ -7,23 +7,23 @@ from typing import Any, Protocol
 
 import numpy as np
 
-from ai_research_template.bn_edge_removal.encoding import bits_to_int, int_to_bits
-from ai_research_template.bn_edge_removal.stl_monotone import (
+from bn_edge_removal.encoding import bits_to_int, int_to_bits
+from bn_edge_removal.stl_monotone import (
     allowed_actions as allowed_actions_monotone,
 )
-from ai_research_template.bn_edge_removal.stl_monotone import (
+from bn_edge_removal.stl_monotone import (
     check_violation as check_violation_monotone,
 )
-from ai_research_template.bn_edge_removal.stl_monotone import (
+from bn_edge_removal.stl_monotone import (
     update_flags as update_flags_monotone,
 )
-from ai_research_template.bn_edge_removal.stl_recovery import (
+from bn_edge_removal.stl_recovery import (
     allowed_actions as allowed_actions_recovery,
 )
-from ai_research_template.bn_edge_removal.stl_recovery import (
+from bn_edge_removal.stl_recovery import (
     check_violation as check_violation_recovery,
 )
-from ai_research_template.bn_edge_removal.stl_recovery import (
+from bn_edge_removal.stl_recovery import (
     update_flags as update_flags_recovery,
 )
 

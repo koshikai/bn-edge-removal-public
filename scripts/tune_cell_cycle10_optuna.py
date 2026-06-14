@@ -13,19 +13,19 @@ import numpy as np
 import optuna
 import yaml
 
-from ai_research_template.bn_edge_removal.cell_cycle10 import CellCycle10Model
-from ai_research_template.bn_edge_removal.env import (
+from bn_edge_removal.cell_cycle10 import CellCycle10Model
+from bn_edge_removal.env import (
     EdgeRemovalEnv,
     HorizonConfig,
     RewardConfig,
 )
-from ai_research_template.bn_edge_removal.evaluation import evaluate_policy
-from ai_research_template.bn_edge_removal.q_learning import (
+from bn_edge_removal.evaluation import evaluate_policy
+from bn_edge_removal.q_learning import (
     EpsilonSchedule,
     QLearningConfig,
     train_q_learning,
 )
-from ai_research_template.utils import (
+from bn_edge_removal.utils import (
     current_timestamp,
     load_config,
     prepare_output_dir,

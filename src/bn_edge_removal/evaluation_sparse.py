@@ -1,29 +1,23 @@
-"""Evaluation utilities for trained policies."""
+"""Evaluation utilities for sparse Q-tables."""
 
 from __future__ import annotations
 
-from dataclasses import dataclass
 from typing import Any
 
 import numpy as np
 
-from ai_research_template.bn_edge_removal.action_selection import (
+from bn_edge_removal.action_selection import (
     select_greedy_action_with_sparse_tiebreak,
 )
-from ai_research_template.bn_edge_removal.encoding import int_to_bits
-from ai_research_template.bn_edge_removal.env import EdgeRemovalEnv
+from bn_edge_removal.encoding import int_to_bits
+from bn_edge_removal.env import EdgeRemovalEnv
+from bn_edge_removal.evaluation import EvaluationResult
+from bn_edge_removal.q_learning_sparse import SparseQTable
 
 
-@dataclass(frozen=True)
-class EvaluationResult:
-    metrics: dict[str, float]
-    trajectories: list[dict[str, Any]]
-    actions: list[dict[str, Any]]
-
-
-def evaluate_policy(
+def evaluate_policy_sparse(
     env: EdgeRemovalEnv,
-    q_table: np.ndarray,
+    q_table: SparseQTable,
     initial_states: list[list[int]] | None = None,
 ) -> EvaluationResult:
     model = env.model
@@ -40,6 +34,8 @@ def evaluate_policy(
     total_first_goal = 0.0
     first_goal_count = 0
 
+    zero_q = np.zeros(env.num_actions, dtype=float)
+
     for init_state in initial_states:
         state_id = env.reset(initial_state=init_state)
         init_id = model.state_to_id(init_state)
@@ -48,7 +44,7 @@ def evaluate_policy(
         for step in range(env.horizon.max_steps):
             allowed = env.allowed_actions()
             preferred = env.goal_preserving_actions(allowed)
-            q_values = q_table[state_id]
+            q_values = q_table.get(state_id, zero_q)
             action = select_greedy_action_with_sparse_tiebreak(q_values, preferred)
 
             next_state_id, _reward, done, _info = env.step(action)

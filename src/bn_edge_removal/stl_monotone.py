@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from ai_research_template.bn_edge_removal.encoding import int_to_bits
+from bn_edge_removal.encoding import int_to_bits
 
 
 def update_flags(h: list[int], u: list[int]) -> list[int]:

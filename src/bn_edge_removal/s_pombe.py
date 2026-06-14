@@ -9,8 +9,8 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from ai_research_template.bn_edge_removal.encoding import bits_to_int, int_to_bits
-from ai_research_template.bn_edge_removal.network_spec import load_network_spec
+from bn_edge_removal.encoding import bits_to_int, int_to_bits
+from bn_edge_removal.network_spec import load_network_spec
 
 _S_POMBE_SPEC = load_network_spec("s_pombe")
 

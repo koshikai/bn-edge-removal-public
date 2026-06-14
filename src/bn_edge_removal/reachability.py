@@ -6,23 +6,23 @@ from collections.abc import Callable
 from dataclasses import dataclass, replace
 from functools import cache
 
-from ai_research_template.bn_edge_removal.cell_cycle10 import CellCycle10Model
-from ai_research_template.bn_edge_removal.cortical import CorticalModel
-from ai_research_template.bn_edge_removal.encoding import int_to_bits
-from ai_research_template.bn_edge_removal.env import EdgeRemovalModel
-from ai_research_template.bn_edge_removal.stl_monotone import (
+from bn_edge_removal.cell_cycle10 import CellCycle10Model
+from bn_edge_removal.cortical import CorticalModel
+from bn_edge_removal.encoding import int_to_bits
+from bn_edge_removal.env import EdgeRemovalModel
+from bn_edge_removal.stl_monotone import (
     check_violation as check_violation_monotone,
 )
-from ai_research_template.bn_edge_removal.stl_monotone import (
+from bn_edge_removal.stl_monotone import (
     update_flags as update_flags_monotone,
 )
-from ai_research_template.bn_edge_removal.stl_recovery import (
+from bn_edge_removal.stl_recovery import (
     check_violation as check_violation_recovery,
 )
-from ai_research_template.bn_edge_removal.stl_recovery import (
+from bn_edge_removal.stl_recovery import (
     update_flags as update_flags_recovery,
 )
-from ai_research_template.bn_edge_removal.wnt5a import Wnt5aModel
+from bn_edge_removal.wnt5a import Wnt5aModel
 
 type BinaryState = tuple[int, ...]
 type FlagState = tuple[int, ...]

@@ -209,7 +209,7 @@ def _validate_removable_consistency(
 @cache
 def load_network_spec(name: str) -> NetworkSpec:
     """Load and validate one network spec from package YAML files."""
-    resource = files("ai_research_template.bn_edge_removal.network_specs").joinpath(
+    resource = files("bn_edge_removal.network_specs").joinpath(
         f"{name}.yaml"
     )
     if not resource.is_file():

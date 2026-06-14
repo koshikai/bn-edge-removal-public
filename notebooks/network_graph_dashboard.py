@@ -16,7 +16,7 @@ def __():
     from matplotlib.lines import Line2D
     from matplotlib.patches import FancyArrowPatch
 
-    from ai_research_template.bn_edge_removal.network_spec import (
+    from bn_edge_removal.network_spec import (
         NetworkEdge,
         load_network_spec,
     )

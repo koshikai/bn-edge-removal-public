@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-from ai_research_template.bn_edge_removal.cortical import CorticalModel
-from ai_research_template.bn_edge_removal.reachability import (
+from bn_edge_removal.cortical import CorticalModel
+from bn_edge_removal.reachability import (
     ReachabilityConfig,
     verify_all_initial_states,
     verify_all_models,
