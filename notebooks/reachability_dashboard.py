@@ -6,6 +6,23 @@ app = marimo.App()
 
 @app.cell
 def __():
+    import sys
+
+    if sys.platform in ("emscripten", "pyodide"):
+        import io
+        import urllib.request
+        import zipfile
+
+        zip_url = "./bn_edge_removal.zip"
+        try:
+            response = urllib.request.urlopen(zip_url)
+            zip_data = response.read()
+            with zipfile.ZipFile(io.BytesIO(zip_data)) as zip_ref:
+                zip_ref.extractall(".")
+            print("Loaded bn_edge_removal package successfully.")
+        except Exception as e:
+            print(f"Failed to load bn_edge_removal package: {e}")
+
     import json
     from pathlib import Path
 
@@ -51,9 +68,7 @@ def __():
                             entry.get("total_initial_states", 0)
                         ),
                         "success_rate": float(entry.get("success_rate", 0.0)),
-                        "global_reachable": bool(
-                            entry.get("global_reachable", False)
-                        ),
+                        "global_reachable": bool(entry.get("global_reachable", False)),
                         "failed_count": len(failed_ids),
                     }
                 )
@@ -480,8 +495,7 @@ def __(chosen_witness, get_model_dimensions, mo, np, pd, plt):
         )
         _state_ax.set_xticks(range(_state_matrix.shape[0]))
         _state_ax.set_title(
-            "Witness State Timeline "
-            f"(init={_initial_state_id}, goal_step={_goal_step})"
+            f"Witness State Timeline (init={_initial_state_id}, goal_step={_goal_step})"
         )
         state_timeline_fig.colorbar(_state_im, ax=_state_ax, fraction=0.03, pad=0.02)
         state_timeline_fig.tight_layout()

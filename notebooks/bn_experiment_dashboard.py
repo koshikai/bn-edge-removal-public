@@ -6,6 +6,23 @@ app = marimo.App()
 
 @app.cell
 def __():
+    import sys
+
+    if sys.platform in ("emscripten", "pyodide"):
+        import io
+        import urllib.request
+        import zipfile
+
+        zip_url = "./bn_edge_removal.zip"
+        try:
+            response = urllib.request.urlopen(zip_url)
+            zip_data = response.read()
+            with zipfile.ZipFile(io.BytesIO(zip_data)) as zip_ref:
+                zip_ref.extractall(".")
+            print("Loaded bn_edge_removal package successfully.")
+        except Exception as e:
+            print(f"Failed to load bn_edge_removal package: {e}")
+
     import json
     from pathlib import Path
 
@@ -203,9 +220,7 @@ def __(collect_runs, model_selector, pd):
 @app.cell
 def __(mo, model_selector, runs_df, summary_df):
     if runs_df.empty:
-        mo.md(
-            f"`outputs/{model_selector.value}` に有効なランが見つかりませんでした。"
-        )
+        mo.md(f"`outputs/{model_selector.value}` に有効なランが見つかりませんでした。")
     else:
         latest = runs_df.iloc[0]
         mo.md(
@@ -227,8 +242,8 @@ def __(mo, runs_df):
         run_options = {}
         for run_row in runs_df.itertuples(index=False):
             label = (
-                f'{run_row.timestamp} | success={run_row.success_rate:.3f} | '
-                f'violation={run_row.violation_rate:.3f}'
+                f"{run_row.timestamp} | success={run_row.success_rate:.3f} | "
+                f"violation={run_row.violation_rate:.3f}"
             )
             run_options[label] = run_row.path
         run_first_key = next(iter(run_options.keys()))
@@ -242,7 +257,11 @@ def __(mo, runs_df):
 def __(Path, model_selector, run_selector, runs_df):
     selected_run_dir = None
     selected_row = None
-    if run_selector is not None and run_selector.value is not None and not runs_df.empty:
+    if (
+        run_selector is not None
+        and run_selector.value is not None
+        and not runs_df.empty
+    ):
         selected_run_dir = Path(run_selector.value)
         selected_row = runs_df[runs_df["path"] == str(selected_run_dir)].iloc[0]
     model_name = model_selector.value
@@ -304,9 +323,7 @@ def __(plt, selected_run_dir):
 
         if saved_training_png_path_for_plot.exists():
             saved_training_png_img = plt.imread(saved_training_png_path_for_plot)
-            saved_training_png_fig, saved_training_png_ax = plt.subplots(
-                figsize=(8, 4)
-            )
+            saved_training_png_fig, saved_training_png_ax = plt.subplots(figsize=(8, 4))
             saved_training_png_ax.imshow(saved_training_png_img)
             saved_training_png_ax.set_title("Saved training_curves.png")
             saved_training_png_ax.axis("off")
@@ -381,9 +398,7 @@ def __(moving_average, np, plt, smooth_slider, training_df):
         train_axes[1].plot(episode_index, success_ma, color="#2ca02c", linewidth=1.2)
         train_axes[1].set_ylabel("success")
         train_axes[1].grid(alpha=0.3)
-        train_axes[2].plot(
-            episode_index, violation_ma, color="#d62728", linewidth=1.2
-        )
+        train_axes[2].plot(episode_index, violation_ma, color="#d62728", linewidth=1.2)
         train_axes[2].set_ylabel("violation")
         train_axes[2].grid(alpha=0.3)
         train_axes[3].plot(episode_index, eps, color="#7f7f7f", linewidth=1.2)
@@ -489,7 +504,9 @@ def __(int_to_bits, mo, selected_init_state_id, selected_row):
 
 
 @app.cell
-def __(bits_to_int, mo, plt, selected_init_state_id, selected_row, selected_trajectory_df):
+def __(
+    bits_to_int, mo, plt, selected_init_state_id, selected_row, selected_trajectory_df
+):
     trajectory_fig = None
     if (
         selected_row is not None
@@ -508,9 +525,7 @@ def __(bits_to_int, mo, plt, selected_init_state_id, selected_row, selected_traj
             color="#1f77b4",
         )
         for target_id in goal_state_ids:
-            trajectory_ax.axhline(
-                target_id, color="#9467bd", linestyle="--", alpha=0.5
-            )
+            trajectory_ax.axhline(target_id, color="#9467bd", linestyle="--", alpha=0.5)
         trajectory_ax.set_xlabel("time")
         trajectory_ax.set_ylabel("state_id")
         trajectory_ax.set_title(
@@ -547,9 +562,13 @@ def __(
         m_edges_for_timeline = int(selected_row["m_edges"])
         timeline_edge_labels = MODEL_INFO[model_name]["edge_labels"]
         max_time_step = int(selected_action_df["t"].max())
-        edge_timeline_matrix = np.zeros((m_edges_for_timeline, max_time_step + 1), dtype=int)
+        edge_timeline_matrix = np.zeros(
+            (m_edges_for_timeline, max_time_step + 1), dtype=int
+        )
         for edge_action_row in selected_action_df.itertuples(index=False):
-            edge_action_bits = int_to_bits(int(edge_action_row.action), m_edges_for_timeline)
+            edge_action_bits = int_to_bits(
+                int(edge_action_row.action), m_edges_for_timeline
+            )
             edge_timeline_matrix[:, int(edge_action_row.t)] = np.array(
                 edge_action_bits, dtype=int
             )
@@ -584,9 +603,7 @@ def __(np, plt, runs_df):
         plot_df = runs_df.sort_values("timestamp").reset_index(drop=True)
         run_index = np.arange(len(plot_df))
         compare_fig, ax = plt.subplots(figsize=(10, 3.5))
-        ax.plot(
-            run_index, plot_df["success_rate"], marker="o", label="success_rate"
-        )
+        ax.plot(run_index, plot_df["success_rate"], marker="o", label="success_rate")
         ax.plot(
             run_index, plot_df["violation_rate"], marker="o", label="violation_rate"
         )

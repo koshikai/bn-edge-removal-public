@@ -39,10 +39,15 @@ jobs:
           uv run marimo export html-wasm notebooks/bn_experiment_dashboard.py -o dist/bn_experiment -f
           uv run marimo export html-wasm notebooks/network_graph_dashboard.py -o dist/network_graph -f
           
-          # Copy local package source to each dashboard directory for Pyodide runtime loading
-          cp -r src/bn_edge_removal dist/reachability/
-          cp -r src/bn_edge_removal dist/bn_experiment/
-          cp -r src/bn_edge_removal dist/network_graph/
+          # Create a zip archive of the local package and place it in each dashboard directory for Pyodide runtime loading
+          cd src
+          zip -r ../bn_edge_removal.zip bn_edge_removal
+          cd ..
+          
+          cp bn_edge_removal.zip dist/reachability/
+          cp bn_edge_removal.zip dist/bn_experiment/
+          cp bn_edge_removal.zip dist/network_graph/
+          rm bn_edge_removal.zip
           
           cp scripts/portal_index.html dist/index.html
           touch dist/.nojekyll

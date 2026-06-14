@@ -7,6 +7,23 @@ app = marimo.App()
 
 @app.cell
 def __():
+    import sys
+
+    if sys.platform in ("emscripten", "pyodide"):
+        import io
+        import urllib.request
+        import zipfile
+
+        zip_url = "./bn_edge_removal.zip"
+        try:
+            response = urllib.request.urlopen(zip_url)
+            zip_data = response.read()
+            with zipfile.ZipFile(io.BytesIO(zip_data)) as zip_ref:
+                zip_ref.extractall(".")
+            print("Loaded bn_edge_removal package successfully.")
+        except Exception as e:
+            print(f"Failed to load bn_edge_removal package: {e}")
+
     import re
 
     import marimo as mo
@@ -178,9 +195,7 @@ def __():
         ]
         return (
             "$$\n"
-            "\\begin{aligned}\n"
-            + " \\\\\n".join(latex_lines)
-            + "\n\\end{aligned}\n"
+            "\\begin{aligned}\n" + " \\\\\n".join(latex_lines) + "\n\\end{aligned}\n"
             "$$"
         )
 
@@ -213,7 +228,9 @@ def __():
                 zorder=4,
             )
 
-        edge_keys = {(edge.source, edge.target) for edge in edges if edge.source != edge.target}
+        edge_keys = {
+            (edge.source, edge.target) for edge in edges if edge.source != edge.target
+        }
 
         for edge in edges:
             color, linestyle, linewidth, alpha = edge_style(edge)
@@ -459,7 +476,9 @@ def __(filtered_edges, mo, network_spec):
 @app.cell
 def __(control_mapping_table, mo, network_spec):
     mapping_title = mo.md("## Control input mapping")
-    mapping_description = mo.md("`u_k` がどのエッジに対応するかを固定表で確認できます。")
+    mapping_description = mo.md(
+        "`u_k` がどのエッジに対応するかを固定表で確認できます。"
+    )
     mapping_df = control_mapping_table(network_spec.all_edges)
     if mapping_df.empty:
         mapping_body = mo.md("このモデルには除去可能エッジがありません。")
