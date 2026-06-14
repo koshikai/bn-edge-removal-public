@@ -1,0 +1,33 @@
+seed: 11
+output_dir: outputs
+
+model:
+  name: cortical
+  n_nodes: 5
+  m_edges: 6
+  goal_states:
+    - [1, 0, 1, 0, 1]
+    - [0, 1, 0, 1, 0]
+
+horizon:
+  reach_horizon: 5
+  max_steps: 10
+
+learning:
+  alpha: 0.5
+  gamma: 0.99
+  episodes: 120000
+  epsilon:
+    start: 1.0
+    end: 0.01
+  initial_state_strategy: cycle_all
+
+reward:
+  step: 2.0
+  terminal: 80.0
+  edge_cost: 0.1
+  violation_penalty: 200.0
+
+constraint:
+  monotone: true
+  action_masking: false

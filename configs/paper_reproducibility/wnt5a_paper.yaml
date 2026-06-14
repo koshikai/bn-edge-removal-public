@@ -1,0 +1,37 @@
+seed: 11
+output_dir: outputs
+
+model:
+  name: wnt5a
+  n_nodes: 7
+  m_edges: 8
+  goal_states:
+    - [1, 0, 0, 0, 0, 0, 1]
+    - [0, 1, 0, 1, 1, 1, 1]
+
+horizon:
+  reach_horizon: 7
+  max_steps: 10
+
+learning:
+  alpha: 0.5
+  gamma: 0.99
+  episodes: 24000
+  epsilon:
+    start: 1.0
+    end: 0.01
+  initial_state_strategy: cycle_controllable
+
+reward:
+  step: 2.0
+  terminal: 80.0
+  edge_cost: 0.1
+  violation_penalty: 200.0
+
+constraint:
+  type: recovery
+  recovery_tau: 2
+  action_masking: true
+
+evaluation:
+  initial_states: controllable

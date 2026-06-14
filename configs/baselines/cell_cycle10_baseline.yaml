@@ -1,0 +1,33 @@
+seed: 11
+output_dir: outputs
+
+model:
+  name: cell_cycle10
+  n_nodes: 10
+  m_edges: 3
+  goal_states:
+    - [1, 0, 0, 0, 0, 1, 0, 0, 1, 0]
+
+horizon:
+  reach_horizon: 7
+  max_steps: 10
+
+learning:
+  alpha: 0.5
+  gamma: 0.99
+  episodes: 40960
+  epsilon:
+    start: 1.0
+    end: 0.01
+  initial_state_strategy: cycle_all
+
+reward:
+  step: 2.0
+  terminal: 80.0
+  edge_cost: 0.2
+  new_edge_cost: 0.3
+  violation_penalty: 200.0
+
+constraint:
+  monotone: true
+  action_masking: true

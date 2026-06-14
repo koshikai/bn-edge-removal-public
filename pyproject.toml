@@ -1,0 +1,90 @@
+[project]
+name = "bn-edge-removal-public"
+version = "0.1.0"
+description = "Boolean Network Edge Removal - Public Research Repository"
+readme = "README.md"
+authors = [{ name = "Koshi Kaito" }]
+requires-python = ">=3.13,<3.14"
+dependencies = [
+    "numpy>=2.0.0",
+    "pandas>=2.0.0",
+    "matplotlib>=3.9.0",
+    "pyyaml>=6.0.0",
+    "pydantic>=2.0.0",
+    "tqdm>=4.66.0",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.0.0",
+    "ipykernel>=6.29.0",
+    "ruff>=0.9.0",
+    "marimo>=0.10.0",
+    "ty>=0.0.17",
+    "poethepoet>=0.32.0",
+    "optuna>=4.0.0",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/ai_research_template"]
+
+[tool.uv]
+managed = true
+package = true
+environments = ["sys_platform == 'linux'", "sys_platform == 'darwin'"]
+
+[tool.ruff]
+line-length = 88
+target-version = "py313"
+
+[tool.ruff.lint]
+select = [
+    "E",    # pycodestyle errors
+    "W",    # pycodestyle warnings
+    "F",    # pyflakes
+    "I",    # isort
+    "B",    # flake8-bugbear
+    "UP",   # pyupgrade
+    "N",    # pep8-naming
+    "PL",   # pylint
+    "RUF",  # ruff-specific rules
+]
+ignore = []
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**/*.py" = ["PLR2004"]
+"notebooks/**/*.py" = ["N803", "N807", "B018", "PLR0913", "PLR0915", "PLR2004", "RUF001", "E501", "PLC0415", "N806"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+
+[tool.ty.environment]
+python-version = "3.13"
+
+[tool.ty.src]
+include = ["src", "scripts", "tests", "notebooks"]
+
+[tool.ty.terminal]
+error-on-warning = true
+
+[tool.poe.tasks]
+exp = "python scripts/run_cortical.py --config configs/cortical_optimal.yaml"
+exp-wnt5a = "python scripts/run_wnt5a.py --config configs/wnt5a_optimal.yaml"
+exp-cell-cycle10 = "python scripts/run_cell_cycle10.py --config configs/cell_cycle10_optimal.yaml"
+tune-cell-cycle10 = "python scripts/tune_cell_cycle10_optuna.py --config ${TUNE_CONFIG:-configs/cell_cycle10_optuna.yaml}"
+verify-reach = "python scripts/verify_reachability.py --model all --mode both"
+rea = "python -m marimo run notebooks/reachability_dashboard.py --headless"
+das = "python -m marimo run notebooks/bn_experiment_dashboard.py --headless"
+net = "python -m marimo run notebooks/network_graph_dashboard.py --headless"
+edit = "python -m marimo edit ${MARIMO_NOTEBOOK:-notebooks/reachability_dashboard.py}"
+app = "python -m marimo run ${MARIMO_NOTEBOOK:-notebooks/reachability_dashboard.py} --headless"
+check = "ruff check --fix src scripts tests notebooks"
+format = "ruff format src scripts tests notebooks"
+lint = ["format", "check"]
+typecheck = "ty check src scripts tests notebooks"
+test = "pytest"

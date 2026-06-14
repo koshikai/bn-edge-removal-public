@@ -1,0 +1,152 @@
+name: cell_cycle10
+n_nodes: 10
+m_edges: 3
+goal_states:
+  - [1, 0, 0, 0, 0, 1, 0, 0, 1, 0]
+node_labels:
+  - Rb
+  - E2F
+  - CycE
+  - CycA
+  - Cdc20
+  - Cdh1
+  - UbcH10
+  - CycB
+  - p27
+  - CycD
+removable_edges:
+  - index: 1
+    source: 10
+    target: 10
+    sign: activation
+  - index: 2
+    source: 3
+    target: 6
+    sign: inhibition
+  - index: 3
+    source: 5
+    target: 6
+    sign: inhibition
+all_edges:
+  - source: 10
+    target: 1
+    sign: inhibition
+    removable: false
+  - source: 3
+    target: 1
+    sign: inhibition
+    removable: false
+  - source: 4
+    target: 1
+    sign: inhibition
+    removable: false
+  - source: 8
+    target: 1
+    sign: inhibition
+    removable: false
+  - source: 1
+    target: 2
+    sign: inhibition
+    removable: false
+  - source: 4
+    target: 2
+    sign: inhibition
+    removable: false
+  - source: 8
+    target: 2
+    sign: inhibition
+    removable: false
+  - source: 2
+    target: 3
+    sign: activation
+    removable: false
+  - source: 1
+    target: 3
+    sign: inhibition
+    removable: false
+  - source: 2
+    target: 4
+    sign: activation
+    removable: false
+  - source: 1
+    target: 4
+    sign: inhibition
+    removable: false
+  - source: 5
+    target: 4
+    sign: inhibition
+    removable: false
+  - source: 6
+    target: 4
+    sign: inhibition
+    removable: false
+  - source: 7
+    target: 4
+    sign: inhibition
+    removable: false
+  - source: 8
+    target: 5
+    sign: activation
+    removable: false
+  - source: 4
+    target: 6
+    sign: inhibition
+    removable: false
+  - source: 8
+    target: 6
+    sign: inhibition
+    removable: false
+  - source: 3
+    target: 6
+    sign: inhibition
+    removable: true
+    removable_index: 2
+  - source: 5
+    target: 6
+    sign: inhibition
+    removable: true
+    removable_index: 3
+  - source: 6
+    target: 7
+    sign: inhibition
+    removable: false
+  - source: 5
+    target: 8
+    sign: inhibition
+    removable: false
+  - source: 6
+    target: 8
+    sign: inhibition
+    removable: false
+  - source: 10
+    target: 9
+    sign: inhibition
+    removable: false
+  - source: 3
+    target: 9
+    sign: inhibition
+    removable: false
+  - source: 4
+    target: 9
+    sign: inhibition
+    removable: false
+  - source: 8
+    target: 9
+    sign: inhibition
+    removable: false
+  - source: 10
+    target: 10
+    sign: activation
+    removable: true
+    removable_index: 1
+update_equations:
+  - "x01' = not x10 and not x03 and not x04 and not x08"
+  - "x02' = not x01 and not x04 and not x08"
+  - "x03' = x02 and not x01"
+  - "x04' = x02 and not x01 and not x05 and not x06 and not x07"
+  - "x05' = x08"
+  - "x06' = not x04 and not x08 and not(x03 and not u2) and not(x05 and not u3)"
+  - "x07' = not x06"
+  - "x08' = not x05 and not x06"
+  - "x09' = not x10 and not x03 and not x04 and not x08"
+  - "x10' = x10 and not u1"
