@@ -9,19 +9,34 @@ def __():
     import sys
 
     if sys.platform in ("emscripten", "pyodide"):
+        import importlib
         import io
         import urllib.request
         import zipfile
 
         zip_url = "./bn_edge_removal.zip"
         try:
-            response = urllib.request.urlopen(zip_url)
-            zip_data = response.read()
-            with zipfile.ZipFile(io.BytesIO(zip_data)) as zip_ref:
+            js = importlib.import_module("js")
+
+            href = str(js.window.location.href)
+            base_dir = href.split("?", maxsplit=1)[0].split("#", maxsplit=1)[0].rsplit("/", 1)[0]
+            zip_url = f"{base_dir}/bn_edge_removal.zip"
+        except Exception:
+            zip_url = "./bn_edge_removal.zip"
+
+        try:
+            req = urllib.request.Request(
+                zip_url,
+                headers={"User-Agent": "Mozilla/5.0 (MarimoWASM)"},
+            )
+            with urllib.request.urlopen(req) as response:
+                zip_bytes = response.read()
+
+            with zipfile.ZipFile(io.BytesIO(zip_bytes)) as zip_ref:
                 zip_ref.extractall(".")
-            print("Loaded bn_edge_removal package successfully.")
+            print(f"Loaded bn_edge_removal package successfully from {zip_url}.")
         except Exception as e:
-            print(f"Failed to load bn_edge_removal package: {e}")
+            print(f"Failed to load bn_edge_removal package from {zip_url}: {e}")
 
     import json
     from pathlib import Path
