@@ -14,29 +14,46 @@ def __():
         import urllib.request
         import zipfile
 
-        zip_url = "./bn_edge_removal.zip"
+        candidate_urls: list[str] = []
         try:
             js = importlib.import_module("js")
-
-            href = str(js.window.location.href)
-            base_dir = href.split("?", maxsplit=1)[0].split("#", maxsplit=1)[0].rsplit("/", 1)[0]
-            zip_url = f"{base_dir}/bn_edge_removal.zip"
+            href = str(js.window.location.href).split("?")[0].split("#")[0]
+            if href.endswith("/"):
+                base_dir = href.rstrip("/")
+            else:
+                base_dir = href.rsplit("/", 1)[0]
+            candidate_urls.append(f"{base_dir}/bn_edge_removal.zip")
         except Exception:
-            zip_url = "./bn_edge_removal.zip"
+            pass
 
-        try:
-            req = urllib.request.Request(
-                zip_url,
-                headers={"User-Agent": "Mozilla/5.0 (MarimoWASM)"},
-            )
-            with urllib.request.urlopen(req) as response:
-                zip_bytes = response.read()
+        candidate_urls.extend(["./bn_edge_removal.zip", "../bn_edge_removal.zip"])
 
-            with zipfile.ZipFile(io.BytesIO(zip_bytes)) as zip_ref:
-                zip_ref.extractall(".")
-            print(f"Loaded bn_edge_removal package successfully from {zip_url}.")
-        except Exception as e:
-            print(f"Failed to load bn_edge_removal package from {zip_url}: {e}")
+        loaded = False
+        last_error: Exception | None = None
+        for zip_url in candidate_urls:
+            try:
+                req = urllib.request.Request(
+                    zip_url,
+                    headers={"User-Agent": "Mozilla/5.0 (MarimoWASM)"},
+                )
+                with urllib.request.urlopen(req) as response:
+                    zip_bytes = response.read()
+
+                if not zip_bytes.startswith(b"PK\x03\x04"):
+                    raise ValueError(
+                        f"Content from {zip_url} is not a zip archive (magic header check failed)"
+                    )
+
+                with zipfile.ZipFile(io.BytesIO(zip_bytes)) as zip_ref:
+                    zip_ref.extractall(".")
+                print(f"Loaded bn_edge_removal package successfully from {zip_url}.")
+                loaded = True
+                break
+            except Exception as e:
+                last_error = e
+
+        if not loaded:
+            print(f"Failed to load bn_edge_removal package: {last_error}")
 
     import json
     from pathlib import Path
