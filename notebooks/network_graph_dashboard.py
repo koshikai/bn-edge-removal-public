@@ -28,6 +28,7 @@ def __():
 
     import marimo as mo
     import matplotlib.pyplot as plt
+    import networkx as nx
     import numpy as np
     import pandas as pd
     from matplotlib.lines import Line2D
@@ -47,6 +48,37 @@ def __():
             for node_id, theta in enumerate(angles, start=1)
         }
 
+    def networkx_node_positions(
+        n_nodes: int,
+        edges: list[NetworkEdge],
+        layout_type: str = "spring",
+        radius: float = 1.4,
+    ) -> dict[int, tuple[float, float]]:
+        G = nx.Graph()
+        for i in range(1, n_nodes + 1):
+            G.add_node(i)
+        for edge in edges:
+            if edge.source != edge.target:
+                G.add_edge(edge.source, edge.target)
+
+        raw_pos = None
+        if layout_type == "kamada_kawai":
+            try:
+                raw_pos = nx.kamada_kawai_layout(G)
+            except (ImportError, ModuleNotFoundError, Exception):
+                raw_pos = None
+
+        if raw_pos is None:
+            raw_pos = nx.spring_layout(G, seed=42, k=radius / np.sqrt(max(n_nodes, 1)))
+
+        coords = np.array([raw_pos[i] for i in range(1, n_nodes + 1)], dtype=float)
+        coords -= np.mean(coords, axis=0)
+        max_r = np.max(np.linalg.norm(coords, axis=1))
+        if max_r > 1e-4:
+            coords = coords * (radius / max_r)
+
+        return {i + 1: (float(coords[i, 0]), float(coords[i, 1])) for i in range(n_nodes)}
+
     def filter_edges(
         edges: tuple[NetworkEdge, ...], sign_filter: str, removable_filter: str
     ) -> list[NetworkEdge]:
@@ -61,12 +93,19 @@ def __():
             filtered.append(edge)
         return filtered
 
-    def edge_style(edge: NetworkEdge) -> tuple[str, str, float, float]:
+    def edge_style(edge: NetworkEdge) -> tuple[str, str, float, float, int]:
         color = "#1f77b4" if edge.sign == "activation" else "#d62728"
-        linestyle = "--" if edge.removable else "-"
-        linewidth = 2.0
-        alpha = 0.95
-        return color, linestyle, linewidth, alpha
+        if edge.removable:
+            linestyle = "--"
+            linewidth = 2.5
+            alpha = 0.95
+            zorder = 3
+        else:
+            linestyle = "-"
+            linewidth = 1.2
+            alpha = 0.35
+            zorder = 2
+        return color, linestyle, linewidth, alpha, zorder
 
     def edge_table(edges: list[NetworkEdge]) -> pd.DataFrame:
         rows: list[dict[str, str | int | bool]] = []
@@ -204,18 +243,25 @@ def __():
         n_nodes: int,
         edges: list[NetworkEdge],
         show_control_ids: bool,
+        layout_type: str = "circular",
+        label_pos_ratio: float = 0.30,
+        label_offset_dist: float = 0.14,
     ):
-        positions = circular_node_positions(n_nodes)
+        if layout_type in ("spring", "kamada_kawai"):
+            positions = networkx_node_positions(n_nodes, edges, layout_type=layout_type)
+        else:
+            positions = circular_node_positions(n_nodes)
+
         fig, ax = plt.subplots(figsize=(8.6, 7.2))
 
         for node_id, (x_pos, y_pos) in positions.items():
             node_circle = plt.Circle(
                 (x_pos, y_pos),
-                0.13,
-                facecolor="#f6f6f6",
-                edgecolor="#222222",
-                linewidth=1.2,
-                zorder=3,
+                0.14,
+                facecolor="#ffffff",
+                edgecolor="#1f2937",
+                linewidth=1.6,
+                zorder=4,
             )
             ax.add_patch(node_circle)
             ax.text(
@@ -224,16 +270,21 @@ def __():
                 f"x{node_id}",
                 ha="center",
                 va="center",
-                fontsize=11,
-                zorder=4,
+                fontsize=11.5,
+                fontweight="bold",
+                color="#111827",
+                zorder=5,
             )
 
         edge_keys = {
             (edge.source, edge.target) for edge in edges if edge.source != edge.target
         }
 
+        # Track placed label coordinates for collision avoidance
+        placed_label_coords: list[tuple[float, float]] = []
+
         for edge in edges:
-            color, linestyle, linewidth, alpha = edge_style(edge)
+            color, linestyle, linewidth, alpha, zorder = edge_style(edge)
             source_pos = positions[edge.source]
             target_pos = positions[edge.target]
 
@@ -246,7 +297,7 @@ def __():
                     mutation_scale=12.0,
                     shrinkA=4.0,
                     shrinkB=4.0,
-                    zorder=2,
+                    zorder=zorder,
                     color=color,
                     linestyle=linestyle,
                     linewidth=linewidth,
@@ -257,19 +308,17 @@ def __():
                 label_y = source_pos[1] + 0.23
             else:
                 is_bidirectional = (edge.target, edge.source) in edge_keys
-                # For bidirectional pairs, using the same rad sign for both
-                # directions yields opposite sides geometrically.
-                curve = 0.22 if is_bidirectional else 0.0
+                curve = 0.25 if is_bidirectional else 0.0
 
                 edge_patch = FancyArrowPatch(
                     posA=source_pos,
                     posB=target_pos,
                     connectionstyle=f"arc3,rad={curve}",
                     arrowstyle="-|>",
-                    mutation_scale=12.0,
-                    shrinkA=14.0,
-                    shrinkB=14.0,
-                    zorder=2,
+                    mutation_scale=13.0,
+                    shrinkA=15.0,
+                    shrinkB=15.0,
+                    zorder=zorder,
                     color=color,
                     linestyle=linestyle,
                     linewidth=linewidth,
@@ -278,56 +327,70 @@ def __():
                 ax.add_patch(edge_patch)
 
                 path_vertices = np.asarray(edge_patch.get_path().vertices, dtype=float)
-                mid_idx = int(path_vertices.shape[0] // 2)
-                midpoint_x = float(path_vertices[mid_idx, 0])
-                midpoint_y = float(path_vertices[mid_idx, 1])
+                # Compute sample index along edge path based on label_pos_ratio
+                clamped_ratio = max(0.1, min(0.9, label_pos_ratio))
+                sample_idx = int((path_vertices.shape[0] - 1) * clamped_ratio)
+                anchor_x = float(path_vertices[sample_idx, 0])
+                anchor_y = float(path_vertices[sample_idx, 1])
                 direction_x = target_pos[0] - source_pos[0]
                 direction_y = target_pos[1] - source_pos[1]
                 norm = max((direction_x**2 + direction_y**2) ** 0.5, 1e-9)
                 normal_x = -direction_y / norm
                 normal_y = direction_x / norm
-                offset = 0.05 + abs(curve) * 0.22
+                offset = label_offset_dist + abs(curve) * 0.20
                 signed = 1.0 if curve >= 0 else -1.0
-                label_x = midpoint_x + normal_x * offset * signed
-                label_y = midpoint_y + normal_y * offset * signed
+                label_x = anchor_x + normal_x * offset * signed
+                label_y = anchor_y + normal_y * offset * signed
 
             if show_control_ids and edge.removable and edge.removable_index is not None:
+                # Collision avoidance check with previously placed labels
+                for px, py in placed_label_coords:
+                    dist = ((label_x - px) ** 2 + (label_y - py) ** 2) ** 0.5
+                    if dist < 0.18:
+                        # Shift outward along normal vector
+                        label_x += normal_x * 0.16 * signed
+                        label_y += normal_y * 0.16 * signed
+
+                placed_label_coords.append((label_x, label_y))
+
                 ax.text(
                     label_x,
                     label_y,
                     f"u{edge.removable_index}",
-                    fontsize=8.8,
+                    fontsize=9.0,
+                    fontweight="bold",
                     ha="center",
                     va="center",
                     bbox={
-                        "boxstyle": "round,pad=0.18",
-                        "facecolor": "white",
+                        "boxstyle": "round,pad=0.22",
+                        "facecolor": "#ffffff",
                         "edgecolor": color,
-                        "alpha": 0.85,
+                        "linewidth": 1.4,
+                        "alpha": 0.95,
                     },
                     color=color,
-                    zorder=5,
+                    zorder=6,
                 )
 
         legend_handles = [
-            Line2D([0], [0], color="#1f77b4", lw=2.2, ls="-", label="Activation"),
-            Line2D([0], [0], color="#d62728", lw=2.2, ls="-", label="Inhibition"),
+            Line2D([0], [0], color="#1f77b4", lw=2.4, ls="-", label="Activation"),
+            Line2D([0], [0], color="#d62728", lw=2.4, ls="-", label="Inhibition"),
             Line2D(
                 [0],
                 [0],
-                color="#555555",
-                lw=2.0,
+                color="#374151",
+                lw=2.5,
                 ls="--",
                 alpha=0.95,
-                label="Removable edge",
+                label="Removable edge (u_k)",
             ),
             Line2D(
                 [0],
                 [0],
-                color="#555555",
-                lw=2.0,
+                color="#9ca3af",
+                lw=1.2,
                 ls="-",
-                alpha=0.95,
+                alpha=0.45,
                 label="Fixed edge",
             ),
         ]
@@ -335,17 +398,20 @@ def __():
             handles=legend_handles,
             loc="upper left",
             bbox_to_anchor=(1.02, 1.00),
-            frameon=False,
+            frameon=True,
+            facecolor="#ffffff",
+            edgecolor="#e5e7eb",
         )
-        ax.set_title(f"{model_name.upper()} network structure", fontsize=13)
+        ax.set_title(f"{model_name.upper()} network structure", fontsize=13.5, fontweight="bold")
         ax.set_aspect("equal")
-        ax.set_xlim(-2.0, 2.1)
-        ax.set_ylim(-1.9, 1.9)
+        ax.set_xlim(-2.1, 2.2)
+        ax.set_ylim(-2.0, 2.0)
         ax.axis("off")
         fig.tight_layout()
         return fig
 
     return (
+        circular_node_positions,
         control_mapping_table,
         draw_network_graph,
         edge_table,
@@ -353,6 +419,7 @@ def __():
         filter_edges,
         load_network_spec,
         mo,
+        networkx_node_positions,
     )
 
 
@@ -384,6 +451,15 @@ def __(mo):
         value="Cortical",
         label="Model",
     )
+    layout_selector = mo.ui.dropdown(
+        options={
+            "Circular": "circular",
+            "Spring (Force-directed)": "spring",
+            "Kamada-Kawai": "kamada_kawai",
+        },
+        value="Circular",
+        label="Layout",
+    )
     sign_filter_selector = mo.ui.dropdown(
         options={"All": "all", "Activation": "activation", "Inhibition": "inhibition"},
         value="All",
@@ -398,7 +474,24 @@ def __(mo):
         value=True,
         label="Show removable control IDs (u_k)",
     )
+    label_pos_slider = mo.ui.slider(
+        start=0.15,
+        stop=0.85,
+        step=0.05,
+        value=0.30,
+        label="Label Position Ratio (t)",
+    )
+    label_offset_slider = mo.ui.slider(
+        start=0.05,
+        stop=0.30,
+        step=0.01,
+        value=0.14,
+        label="Label Distance Offset",
+    )
     return (
+        label_offset_slider,
+        label_pos_slider,
+        layout_selector,
         model_selector,
         removable_filter_selector,
         show_control_id_checkbox,
@@ -408,6 +501,9 @@ def __(mo):
 
 @app.cell
 def __(
+    label_offset_slider,
+    label_pos_slider,
+    layout_selector,
     model_selector,
     mo,
     removable_filter_selector,
@@ -417,9 +513,14 @@ def __(
     controls = [
         mo.md("## Controls"),
         model_selector,
+        layout_selector,
         sign_filter_selector,
         removable_filter_selector,
         show_control_id_checkbox,
+        mo.md("---"),
+        mo.md("### Label Fine Tuning"),
+        label_pos_slider,
+        label_offset_slider,
     ]
     mo.sidebar(
         mo.vstack(controls, gap=1.0),
@@ -505,6 +606,9 @@ def __(equations_markdown, mo, network_spec):
 def __(
     draw_network_graph,
     filtered_edges,
+    label_offset_slider,
+    label_pos_slider,
+    layout_selector,
     model_name,
     network_spec,
     show_control_id_checkbox,
@@ -514,6 +618,9 @@ def __(
         n_nodes=network_spec.n_nodes,
         edges=filtered_edges,
         show_control_ids=bool(show_control_id_checkbox.value),
+        layout_type=str(layout_selector.value),
+        label_pos_ratio=float(label_pos_slider.value),
+        label_offset_dist=float(label_offset_slider.value),
     )
     network_fig
     return
