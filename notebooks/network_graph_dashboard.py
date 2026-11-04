@@ -6,55 +6,51 @@ app = marimo.App()
 
 
 @app.cell
-def __():
+async def __():
     import sys
 
     if sys.platform in ("emscripten", "pyodide"):
-        import importlib
         import io
-        import urllib.request
         import zipfile
 
-        candidate_urls: list[str] = []
-        try:
-            js = importlib.import_module("js")
-            href = str(js.window.location.href).split("?")[0].split("#")[0]
-            if href.endswith("/"):
-                base_dir = href.rstrip("/")
-            else:
-                base_dir = href.rsplit("/", 1)[0]
-            candidate_urls.append(f"{base_dir}/bn_edge_removal.zip")
-        except Exception:
-            pass
+        import js
+        from pyodide.http import pyfetch
 
-        candidate_urls.extend(["./bn_edge_removal.zip", "../bn_edge_removal.zip"])
+        # WASM ではセルは Worker の中で走るため、URL は
+        # <app root>/assets/worker-xxxx.js の形になる。上位へ順に辿って zip を探す。
+        current = str(js.location.href).split("?")[0].split("#")[0]
+        parts = current.split("/")
+        candidate_urls: list[str] = []
+        for cut in (2, 1, 3):
+            if len(parts) > cut:
+                url = "/".join(parts[:-cut]) + "/bn_edge_removal.zip"
+                if url not in candidate_urls:
+                    candidate_urls.append(url)
 
         loaded = False
         last_error: Exception | None = None
         for zip_url in candidate_urls:
             try:
-                req = urllib.request.Request(
-                    zip_url,
-                    headers={"User-Agent": "Mozilla/5.0 (MarimoWASM)"},
-                )
-                with urllib.request.urlopen(req) as response:
-                    zip_bytes = response.read()
-
+                response = await pyfetch(zip_url)
+                if response.status != 200:
+                    raise ValueError(f"{zip_url} returned HTTP {response.status}")
+                zip_bytes = await response.bytes()
                 if not zip_bytes.startswith(b"PK\x03\x04"):
                     raise ValueError(
-                        f"Content from {zip_url} is not a zip archive (magic header check failed)"
+                        f"Content from {zip_url} is not a zip archive "
+                        "(magic header check failed)"
                     )
-
                 with zipfile.ZipFile(io.BytesIO(zip_bytes)) as zip_ref:
                     zip_ref.extractall(".")
-                print(f"Loaded bn_edge_removal package successfully from {zip_url}.")
+                sys.path.insert(0, ".")
+                print(f"Loaded bn_edge_removal package from {zip_url}.")
                 loaded = True
                 break
             except Exception as e:
                 last_error = e
 
         if not loaded:
-            print(f"Failed to load bn_edge_removal package: {last_error}")
+            print(f"Failed to load bn_edge_removal package: {last_error!r}")
 
     import re
 
@@ -109,7 +105,9 @@ def __():
         if max_r > 1e-4:
             coords = coords * (radius / max_r)
 
-        return {i + 1: (float(coords[i, 0]), float(coords[i, 1])) for i in range(n_nodes)}
+        return {
+            i + 1: (float(coords[i, 0]), float(coords[i, 1])) for i in range(n_nodes)
+        }
 
     def filter_edges(
         edges: tuple[NetworkEdge, ...], sign_filter: str, removable_filter: str
@@ -434,7 +432,9 @@ def __():
             facecolor="#ffffff",
             edgecolor="#e5e7eb",
         )
-        ax.set_title(f"{model_name.upper()} network structure", fontsize=13.5, fontweight="bold")
+        ax.set_title(
+            f"{model_name.upper()} network structure", fontsize=13.5, fontweight="bold"
+        )
         ax.set_aspect("equal")
         ax.set_xlim(-2.1, 2.2)
         ax.set_ylim(-2.0, 2.0)
