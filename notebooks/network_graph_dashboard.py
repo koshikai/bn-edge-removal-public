@@ -10,11 +10,12 @@ async def __():
     import sys
 
     if sys.platform in ("emscripten", "pyodide"):
+        import importlib
         import io
         import zipfile
 
-        import js
-        from pyodide.http import pyfetch
+        js = importlib.import_module("js")
+        pyfetch = importlib.import_module("pyodide.http").pyfetch
 
         # WASM ではセルは Worker の中で走るため、URL は
         # <app root>/assets/worker-xxxx.js の形になる。上位へ順に辿って zip を探す。
