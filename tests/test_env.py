@@ -73,8 +73,9 @@ def test_env_monotone_constraint() -> None:
     _, r2, _, info2 = env.step(0)
     assert info2["violation"] is True
     assert env.violation_any is True
-    # 違反ペナルティ (-10.0) が引かれていることを確認
-    assert r2 <= -10.0
+    # 違反ペナルティ (-10.0) が反映されていることを確認する。
+    # その状態が goal なら step 報酬 (+1.0) も加算されるので、その分は許容する。
+    assert r2 <= -10.0 + reward.step
 
 
 def test_env_recovery_constraint() -> None:
