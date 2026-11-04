@@ -3,214 +3,269 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Boolean Network Edge Removal - Interactive Dashboards</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Outfit:wght@400;600;700&display=swap" rel="stylesheet">
+  <title>Boolean Network Edge Removal</title>
+  <meta name="description" content="ブーリアンネットワークの安定化制御における辺除去を、強化学習で最適化する研究のデモと公開コード。">
   <style>
     :root {
-      --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #020617 100%);
-      --card-bg: rgba(30, 41, 59, 0.5);
-      --card-border: rgba(255, 255, 255, 0.08);
-      --text-primary: #f8fafc;
-      --text-secondary: #94a3b8;
-      --accent-emerald: #10b981;
-      --accent-indigo: #6366f1;
-      --accent-blue: #06b6d4;
+      --bg: #fbfbfa;
+      --ink: #16181d;
+      --ink-soft: #4b5160;
+      --ink-mute: #7b8190;
+      --line: #dcdee3;
+      --accent: #1f4fd8;
+      --chip: #eef1f8;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0e1116;
+        --ink: #e8eaee;
+        --ink-soft: #a9aebb;
+        --ink-mute: #7d8493;
+        --line: #272c36;
+        --accent: #7aa2ff;
+        --chip: #171c26;
+      }
     }
 
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
+    * { box-sizing: border-box; }
+    html { -webkit-text-size-adjust: 100%; }
 
     body {
-      font-family: 'Inter', sans-serif;
-      background: var(--bg-gradient);
-      color: var(--text-primary);
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: 2rem 1rem;
-      overflow-x: hidden;
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: "Hiragino Sans", "Noto Sans JP", "Yu Gothic", system-ui, sans-serif;
+      font-size: 16px;
+      line-height: 1.85;
     }
 
-    .container {
-      max-width: 1100px;
-      width: 100%;
-      z-index: 1;
+    main {
+      max-width: 48rem;
+      margin: 0 auto;
+      padding: 72px 24px 56px;
     }
 
-    header {
-      text-align: center;
-      margin-bottom: 4rem;
+    .eyebrow {
+      margin: 0 0 14px;
+      color: var(--ink-mute);
+      font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+      font-size: 0.78rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
     }
 
     h1 {
-      font-family: 'Outfit', sans-serif;
-      font-size: 2.5rem;
+      margin: 0 0 18px;
+      font-family: "Hiragino Mincho ProN", "Noto Serif JP", "Yu Mincho", Georgia, serif;
+      font-size: clamp(1.9rem, 5vw, 2.6rem);
       font-weight: 700;
-      letter-spacing: -0.025em;
-      margin-bottom: 1rem;
-      background: linear-gradient(to right, #f8fafc, #94a3b8);
-      -webkit-background-clip: text;
-      background-clip: text;
-      -webkit-text-fill-color: transparent;
+      line-height: 1.3;
+      letter-spacing: -0.01em;
     }
 
-    .subtitle {
-      font-size: 1.1rem;
-      color: var(--text-secondary);
-      max-width: 650px;
-      margin: 0 auto;
-      line-height: 1.6;
+    .lead {
+      margin: 0;
+      color: var(--ink-soft);
+      font-size: 1.02rem;
     }
 
-    .grid {
+    .top-links { margin: 18px 0 0; font-size: 0.95rem; }
+
+    .rule {
+      height: 1px;
+      margin: 44px 0 8px;
+      background: var(--line);
+      border: 0;
+    }
+
+    h2 {
+      margin: 36px 0 6px;
+      color: var(--ink-mute);
+      font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+      font-size: 0.76rem;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+
+    ol.demos {
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .demo a {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-      gap: 2rem;
-      margin-bottom: 4rem;
-    }
-
-    .card {
-      background: var(--card-bg);
-      border: 1px solid var(--card-border);
-      border-radius: 16px;
-      padding: 2rem;
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      position: relative;
-      overflow: hidden;
-      cursor: pointer;
+      grid-template-columns: 2.4rem 1fr auto;
+      gap: 4px 12px;
+      align-items: baseline;
+      padding: 20px 4px;
+      border-bottom: 1px solid var(--line);
+      color: inherit;
       text-decoration: none;
+      transition: background-color 0.15s ease;
+    }
+    .demo a:hover,
+    .demo a:focus-visible {
+      background: var(--chip);
+      outline: none;
     }
 
-    .card::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 4px;
-      background: var(--accent-indigo);
-      opacity: 0;
-      transition: opacity 0.3s ease;
+    .num {
+      color: var(--ink-mute);
+      font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+      font-size: 0.82rem;
     }
 
-    .card.emerald::before { background: var(--accent-emerald); }
-    .card.blue::before { background: var(--accent-blue); }
-
-    .card:hover {
-      transform: translateY(-6px);
-      border-color: rgba(255, 255, 255, 0.15);
-      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 10px 10px -5px rgba(0, 0, 0, 0.3);
-    }
-
-    .card:hover::before {
-      opacity: 1;
-    }
-
-    .card-title {
-      font-family: 'Outfit', sans-serif;
-      font-size: 1.4rem;
+    .demo-title {
+      font-size: 1.08rem;
       font-weight: 600;
-      margin-bottom: 0.75rem;
-      color: var(--text-primary);
+    }
+    .demo a:hover .demo-title,
+    .demo a:focus-visible .demo-title { color: var(--accent); }
+
+    .arrow {
+      color: var(--ink-mute);
+      transition: transform 0.15s ease, color 0.15s ease;
+    }
+    .demo a:hover .arrow,
+    .demo a:focus-visible .arrow {
+      color: var(--accent);
+      transform: translateX(3px);
     }
 
-    .card-desc {
+    .demo-desc {
+      grid-column: 2 / 4;
+      margin: 0;
+      color: var(--ink-soft);
+      font-size: 0.93rem;
+      line-height: 1.75;
+    }
+
+    .models {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 10px 0 0;
+      padding: 0;
+      list-style: none;
+    }
+    .models li {
+      padding: 3px 12px;
+      background: var(--chip);
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      color: var(--ink-soft);
+      font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+      font-size: 0.8rem;
+    }
+
+    .note {
+      margin: 10px 0 0;
+      color: var(--ink-soft);
+      font-size: 0.93rem;
+    }
+
+    .links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px 24px;
+      margin: 10px 0 0;
+      padding: 0;
+      list-style: none;
       font-size: 0.95rem;
-      color: var(--text-secondary);
-      line-height: 1.5;
-      margin-bottom: 2rem;
     }
-
-    .card-link {
-      font-size: 0.9rem;
-      font-weight: 600;
-      display: inline-flex;
-      align-items: center;
-      color: var(--accent-indigo);
-      transition: color 0.2s ease;
-    }
-
-    .card.emerald .card-link { color: var(--accent-emerald); }
-    .card.blue .card-link { color: var(--accent-blue); }
-
-    .card-link span {
-      margin-left: 0.25rem;
-      transition: transform 0.2s ease;
-    }
-
-    .card:hover .card-link span {
-      transform: translateX(4px);
-    }
+    a.plain { color: var(--accent); text-decoration: none; }
+    a.plain:hover { text-decoration: underline; }
 
     footer {
-      text-align: center;
-      color: var(--text-secondary);
-      font-size: 0.85rem;
+      margin-top: 56px;
+      padding-top: 20px;
+      border-top: 1px solid var(--line);
+      color: var(--ink-mute);
+      font-size: 0.8rem;
+      line-height: 1.8;
     }
+    footer p { margin: 0; }
 
-    footer a {
-      color: var(--text-primary);
-      text-decoration: none;
-      font-weight: 500;
-      transition: color 0.2s ease;
-      display: inline-flex;
-      align-items: center;
-      gap: 0.25rem;
-    }
-
-    footer a:hover {
-      color: var(--accent-indigo);
+    @media (max-width: 520px) {
+      main { padding: 48px 20px 40px; }
+      .demo a { grid-template-columns: 2rem 1fr auto; }
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <header>
-      <h1>Boolean Network Edge Removal</h1>
-      <p class="subtitle">ブーリアンネットワークのエッジ除去戦略を最適化する研究のインタラクティブ・デモダッシュボード一覧です。WASM (WebAssembly) にてブラウザ上で直接動作します。</p>
-    </header>
+  <main>
+    <p class="eyebrow">Research demo</p>
+    <h1>Boolean Network Edge Removal</h1>
+    <p class="lead">
+      ブーリアンネットワークの安定化制御で、どの辺をいつ取り除くかを強化学習（Q-learning）で求める研究の、
+      ブラウザで動くデモと公開コードです。
+    </p>
 
-    <div class="grid">
-      <a href="./reachability/" class="card blue">
-        <div>
-          <h2 class="card-title">到達可能性検証</h2>
-          <p class="card-desc">すべての初期状態から目標状態への遷移可能性を、時間・順序制約（単調性、休薬制約）を考慮して厳密に検証した結果および状態遷移の証拠（Witness）を表示します。</p>
-        </div>
-        <div class="card-link">デモを開く <span>&rarr;</span></div>
-      </a>
+    <p class="top-links">
+      <a class="plain" href="https://github.com/koshikai/bn-edge-removal-public" target="_blank" rel="noopener noreferrer">GitHub &nearr;</a>
+    </p>
 
-      <a href="./bn_experiment/" class="card emerald">
-        <div>
-          <h2 class="card-title">強化学習実験結果</h2>
-          <p class="card-desc">Q-Learningを用いたエッジ除去ポリシーの学習曲線、状態軌道、および獲得したエッジ除去介入スケジュールの推移を視覚的に分析します。</p>
-        </div>
-        <div class="card-link">デモを開く <span>&rarr;</span></div>
-      </a>
+    <hr class="rule">
 
-      <a href="./network_graph/" class="card">
-        <div>
-          <h2 class="card-title">ネットワーク構造可視化</h2>
-          <p class="card-desc">対象としているブーリアンネットワークモデル（Cortical Development, Wnt5a, CellCycle10）の活性化・抑制エッジを含むグラフ構造を表示します。</p>
-        </div>
-        <div class="card-link">デモを開く <span>&rarr;</span></div>
-      </a>
-    </div>
+    <h2>Dashboards</h2>
+    <ol class="demos">
+      <li class="demo">
+        <a href="./reachability/">
+          <span class="num">01</span>
+          <span class="demo-title">到達可能性の検証</span>
+          <span class="arrow" aria-hidden="true">&rarr;</span>
+          <p class="demo-desc">
+            すべての初期状態から目標状態へ到達できるかを、単調性や休薬の制約のもとで厳密に検証し、
+            遷移の証拠（Witness）を表示します。
+          </p>
+        </a>
+      </li>
+      <li class="demo">
+        <a href="./bn_experiment/">
+          <span class="num">02</span>
+          <span class="demo-title">強化学習の実験結果</span>
+          <span class="arrow" aria-hidden="true">&rarr;</span>
+          <p class="demo-desc">
+            Q学習で得た辺除去方策の学習曲線、状態の軌道、辺を除去する時刻の推移を確かめられます。
+          </p>
+        </a>
+      </li>
+      <li class="demo">
+        <a href="./network_graph/">
+          <span class="num">03</span>
+          <span class="demo-title">ネットワーク構造の可視化</span>
+          <span class="arrow" aria-hidden="true">&rarr;</span>
+          <p class="demo-desc">
+            対象のネットワークについて、活性化と抑制の辺を含むグラフ構造を表示します。
+          </p>
+        </a>
+      </li>
+    </ol>
+
+    <h2>Models</h2>
+    <ul class="models">
+      <li>Cortical Development</li>
+      <li>Wnt5a</li>
+      <li>CellCycle10</li>
+    </ul>
+
+    <h2>About</h2>
+    <p class="note">
+      ダッシュボードは WebAssembly（Pyodide）でブラウザ内の Python を動かしています。
+      サーバー側の計算はありません。初回は Python の読み込みに時間がかかることがあります。
+    </p>
+
+    <h2>Code</h2>
+    <ul class="links">
+      <li><a class="plain" href="https://github.com/koshikai/bn-edge-removal-public" target="_blank" rel="noopener noreferrer">GitHub リポジトリ</a></li>
+      <li><a class="plain" href="https://github.com/koshikai/bn-edge-removal-public/blob/main/CITATION.cff" target="_blank" rel="noopener noreferrer">引用情報（CITATION.cff）</a></li>
+    </ul>
 
     <footer>
-      <p>Source code available on <a href="https://github.com/koshikai/bn-edge-removal-public" target="_blank" rel="noopener noreferrer">GitHub</a></p>
+      <p>Kaito Koshi &middot; bn-edge-removal-public v0.1.0</p>
     </footer>
-  </div>
+  </main>
 </body>
 </html>
