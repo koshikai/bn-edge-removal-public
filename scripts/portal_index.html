@@ -3,269 +3,1012 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Boolean Network Edge Removal</title>
-  <meta name="description" content="ブーリアンネットワークの安定化制御における辺除去を、強化学習で最適化する研究のデモと公開コード。">
+  <title>BN Edge Removal Control</title>
+  <meta name="description" content="遺伝子ネットワークのつながりを一時的に切って望ましい状態へ導く制御を、「一度切ったら戻せない」「切ったら休む」といった時間の制約を守りながら強化学習で学ばせる研究の解説とデモ。">
   <style>
     :root {
       --bg: #fbfbfa;
+      --panel: #ffffff;
       --ink: #16181d;
       --ink-soft: #4b5160;
       --ink-mute: #7b8190;
       --line: #dcdee3;
       --accent: #1f4fd8;
       --chip: #eef1f8;
+      --on: #1f4fd8;
+      --on-ink: #ffffff;
+      --goal: #1a7f4b;
+      --goal-soft: #e3f3ea;
+      --cut: #c2410c;
+      --cut-soft: #fbe7dc;
+      --fail: #b42318;
+      --edge-fixed: #9aa0ac;
     }
     @media (prefers-color-scheme: dark) {
-      :root {
+      :root:not([data-theme="light"]) {
         --bg: #0e1116;
+        --panel: #141821;
         --ink: #e8eaee;
         --ink-soft: #a9aebb;
         --ink-mute: #7d8493;
         --line: #272c36;
         --accent: #7aa2ff;
         --chip: #171c26;
+        --on: #5b86f5;
+        --on-ink: #0b0e14;
+        --goal: #4cc38a;
+        --goal-soft: #14281f;
+        --cut: #f08a4b;
+        --cut-soft: #2e1d14;
+        --fail: #f97066;
+        --edge-fixed: #5a6070;
       }
+    }
+    :root[data-theme="dark"] {
+      --bg: #0e1116;
+      --panel: #141821;
+      --ink: #e8eaee;
+      --ink-soft: #a9aebb;
+      --ink-mute: #7d8493;
+      --line: #272c36;
+      --accent: #7aa2ff;
+      --chip: #171c26;
+      --on: #5b86f5;
+      --on-ink: #0b0e14;
+      --goal: #4cc38a;
+      --goal-soft: #14281f;
+      --cut: #f08a4b;
+      --cut-soft: #2e1d14;
+      --fail: #f97066;
+      --edge-fixed: #5a6070;
     }
 
     * { box-sizing: border-box; }
+    [hidden] { display: none !important; }
     html { -webkit-text-size-adjust: 100%; }
-
     body {
       margin: 0;
       background: var(--bg);
       color: var(--ink);
       font-family: "Hiragino Sans", "Noto Sans JP", "Yu Gothic", system-ui, sans-serif;
       font-size: 16px;
-      line-height: 1.85;
+      line-height: 1.9;
     }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
 
-    main {
-      max-width: 48rem;
-      margin: 0 auto;
-      padding: 72px 24px 56px;
+    main { max-width: 46rem; margin: 0 auto; padding: 64px 16px 56px; }
+    .wide { max-width: 62rem; margin-left: auto; margin-right: auto; }
+
+    .mono {
+      font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
     }
-
     .eyebrow {
       margin: 0 0 14px;
       color: var(--ink-mute);
-      font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
       font-size: 0.78rem;
       letter-spacing: 0.08em;
       text-transform: uppercase;
     }
-
     h1 {
-      margin: 0 0 18px;
+      margin: 0 0 8px;
       font-family: "Hiragino Mincho ProN", "Noto Serif JP", "Yu Mincho", Georgia, serif;
-      font-size: clamp(1.9rem, 5vw, 2.6rem);
-      font-weight: 700;
-      line-height: 1.3;
+      font-size: clamp(1.7rem, 4.6vw, 2.35rem);
+      line-height: 1.4;
       letter-spacing: -0.01em;
     }
+    .subtitle { margin: 0 0 18px; color: var(--ink-mute); font-size: 0.95rem; line-height: 1.6; }
+    .byline { margin: 0; color: var(--ink-soft); font-size: 0.92rem; }
+    .top-links { display: flex; flex-wrap: wrap; gap: 4px 20px; margin: 10px 0 0; padding: 0; list-style: none; font-size: 0.92rem; }
 
-    .lead {
-      margin: 0;
-      color: var(--ink-soft);
-      font-size: 1.02rem;
+    .tldr {
+      margin: 36px 0 0;
+      padding: 20px 22px;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-left: 4px solid var(--accent);
+      border-radius: 6px;
     }
+    .tldr p { margin: 0; }
+    .tldr strong { font-weight: 700; }
 
-    .top-links { margin: 18px 0 0; font-size: 0.95rem; }
-
-    .rule {
-      height: 1px;
-      margin: 44px 0 8px;
-      background: var(--line);
-      border: 0;
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin: 20px 0 0;
+      padding: 0;
+      list-style: none;
     }
+    .card {
+      padding: 16px 16px 14px;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 6px;
+    }
+    .card .tag { color: var(--accent); font-size: 0.75rem; letter-spacing: 0.08em; }
+    .card h3 { margin: 2px 0 6px; font-size: 1.05rem; line-height: 1.5; }
+    .card p { margin: 0; color: var(--ink-soft); font-size: 0.88rem; line-height: 1.75; }
 
     h2 {
-      margin: 36px 0 6px;
-      color: var(--ink-mute);
-      font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
-      font-size: 0.76rem;
-      font-weight: 600;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
+      margin: 64px 0 14px;
+      font-family: "Hiragino Mincho ProN", "Noto Serif JP", "Yu Mincho", Georgia, serif;
+      font-size: clamp(1.3rem, 3.4vw, 1.6rem);
+      line-height: 1.5;
     }
+    h2 .no { display: block; color: var(--ink-mute); font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 0.75rem; letter-spacing: 0.1em; }
+    h3 { margin: 32px 0 6px; font-size: 1.08rem; }
+    p { margin: 0 0 14px; }
+    .result-line { font-weight: 700; }
+    .muted { color: var(--ink-soft); }
+    .small { font-size: 0.88rem; }
 
-    ol.demos {
-      margin: 0;
-      padding: 0;
-      list-style: none;
-    }
-
-    .demo a {
-      display: grid;
-      grid-template-columns: 2.4rem 1fr auto;
-      gap: 4px 12px;
-      align-items: baseline;
-      padding: 20px 4px;
-      border-bottom: 1px solid var(--line);
-      color: inherit;
-      text-decoration: none;
-      transition: background-color 0.15s ease;
-    }
-    .demo a:hover,
-    .demo a:focus-visible {
+    .m { font-family: "Times New Roman", "Noto Serif JP", serif; font-style: italic; white-space: nowrap; }
+    .m sub, .m sup { font-style: normal; font-size: 0.7em; }
+    .eq {
+      margin: 14px 0 18px;
+      padding: 12px 16px;
       background: var(--chip);
-      outline: none;
+      border-radius: 6px;
+      font-family: "Times New Roman", "Noto Serif JP", serif;
+      font-size: 1.05rem;
+      overflow-x: auto;
+      text-align: center;
     }
+    .eq i { font-style: italic; }
+    .eq sub { font-size: 0.7em; }
 
-    .num {
-      color: var(--ink-mute);
-      font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
-      font-size: 0.82rem;
-    }
+    ul.setup { margin: 8px 0 18px; padding-left: 1.2em; }
+    ul.setup li { margin: 2px 0; }
+    ul.setup b { font-weight: 600; }
 
-    .demo-title {
-      font-size: 1.08rem;
-      font-weight: 600;
+    table.t {
+      width: 100%;
+      margin: 12px 0 20px;
+      border-collapse: collapse;
+      font-size: 0.9rem;
+      line-height: 1.6;
     }
-    .demo a:hover .demo-title,
-    .demo a:focus-visible .demo-title { color: var(--accent); }
+    table.t th, table.t td { padding: 8px 10px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
+    table.t th { color: var(--ink-mute); font-weight: 600; font-size: 0.8rem; }
+    table.t td.num, table.t th.num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+    .table-wrap { overflow-x: auto; }
 
-    .arrow {
-      color: var(--ink-mute);
-      transition: transform 0.15s ease, color 0.15s ease;
+    /* mini timelines used in the explanation */
+    .strip { display: inline-flex; gap: 3px; vertical-align: middle; }
+    .strip span {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 26px; height: 26px; border-radius: 4px;
+      border: 1px solid var(--line); background: var(--panel);
+      font-size: 0.7rem; color: var(--ink-mute);
     }
-    .demo a:hover .arrow,
-    .demo a:focus-visible .arrow {
-      color: var(--accent);
-      transform: translateX(3px);
-    }
+    .strip span.cut { background: var(--cut); border-color: var(--cut); color: var(--on-ink); }
+    .strip span.rest { background: repeating-linear-gradient(45deg, var(--cut-soft), var(--cut-soft) 4px, transparent 4px, transparent 8px); color: var(--cut); }
+    .strip span.bad { outline: 2px solid var(--fail); outline-offset: 1px; }
+    .strip-row { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 14px; margin: 8px 0; font-size: 0.88rem; }
+    .strip-row .lab { min-width: 6.5em; color: var(--ink-soft); }
 
-    .demo-desc {
-      grid-column: 2 / 4;
-      margin: 0;
-      color: var(--ink-soft);
-      font-size: 0.93rem;
-      line-height: 1.75;
-    }
+    .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin: 18px 0 8px; }
+    .stat { padding: 14px 16px; background: var(--panel); border: 1px solid var(--line); border-radius: 6px; }
+    .stat .v { font-size: 1.7rem; font-weight: 700; line-height: 1.2; font-variant-numeric: tabular-nums; }
+    .stat .k { color: var(--ink-soft); font-size: 0.82rem; line-height: 1.6; }
 
-    .models {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin: 10px 0 0;
-      padding: 0;
-      list-style: none;
-    }
-    .models li {
-      padding: 3px 12px;
-      background: var(--chip);
+    figure { margin: 22px 0; }
+    figcaption { margin-top: 8px; color: var(--ink-mute); font-size: 0.82rem; line-height: 1.7; }
+
+    /* explorer */
+    .explorer {
+      margin: 26px 0 8px;
+      padding: 18px;
+      background: var(--panel);
       border: 1px solid var(--line);
-      border-radius: 999px;
-      color: var(--ink-soft);
-      font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
-      font-size: 0.8rem;
+      border-radius: 8px;
+    }
+    .ex-bar { display: flex; flex-wrap: wrap; gap: 10px 18px; align-items: center; margin-bottom: 14px; }
+    .seg { display: inline-flex; border: 1px solid var(--line); border-radius: 6px; overflow: hidden; }
+    .seg button {
+      padding: 6px 12px; border: 0; border-right: 1px solid var(--line);
+      background: transparent; color: var(--ink-soft); font: inherit; font-size: 0.86rem; cursor: pointer;
+    }
+    .seg button:last-child { border-right: 0; }
+    .seg button[aria-pressed="true"] { background: var(--accent); color: var(--on-ink); }
+    .seg button:focus-visible, .btn:focus-visible, .states button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+    .ex-label { color: var(--ink-mute); font-size: 0.78rem; margin-right: 6px; }
+
+    .states {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(34px, 1fr));
+      gap: 3px;
+      margin: 6px 0 4px;
+    }
+    .states button {
+      position: relative;
+      padding: 3px 0; border: 1px solid var(--line); border-radius: 4px;
+      background: transparent; color: var(--ink-soft);
+      font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 0.72rem; cursor: pointer;
+    }
+    .states button.goal { border-color: var(--goal); color: var(--goal); }
+    .states button.base-ok::after {
+      content: ""; position: absolute; top: 2px; right: 2px; width: 4px; height: 4px; border-radius: 50%; background: var(--ink-mute);
+    }
+    .states button[aria-pressed="true"] { background: var(--ink); border-color: var(--ink); color: var(--bg); }
+    .legend { display: flex; flex-wrap: wrap; gap: 4px 16px; margin: 6px 0 0; color: var(--ink-mute); font-size: 0.78rem; }
+    .legend i { display: inline-block; width: 10px; height: 10px; margin-right: 5px; border-radius: 2px; vertical-align: -1px; font-style: normal; }
+
+    .ex-main { display: grid; grid-template-columns: 300px 1fr; gap: 18px; margin-top: 16px; align-items: start; }
+    .graph svg { width: 100%; height: auto; display: block; }
+    .graph-cap { margin: 2px 0 0; color: var(--ink-mute); font-size: 0.78rem; text-align: center; }
+
+    .raster-wrap { overflow-x: auto; }
+    .raster { display: grid; gap: 2px; min-width: 300px; font-size: 0.72rem; }
+    .raster .rl { color: var(--ink-soft); padding-right: 6px; white-space: nowrap; display: flex; align-items: center; }
+    .raster .hd { color: var(--ink-mute); text-align: center; cursor: pointer; font-family: ui-monospace, Menlo, Consolas, monospace; }
+    .raster .c {
+      height: 20px; border-radius: 3px; background: var(--chip);
+      display: flex; align-items: center; justify-content: center;
+      color: var(--ink-mute); cursor: pointer; font-family: ui-monospace, Menlo, Consolas, monospace;
+    }
+    .raster .c.on { background: var(--on); color: var(--on-ink); }
+    .raster .c.in-goal { background: var(--goal); color: var(--on-ink); }
+    .raster .c.s0 { background: var(--chip); }
+    .raster .c.s1 { background: var(--goal-soft); color: var(--goal); font-weight: 700; }
+    .raster .c.s2 { background: var(--fail); color: var(--on-ink); font-weight: 700; }
+    .raster .c.cut { background: var(--cut); color: var(--on-ink); }
+    .raster .c.rest { background: repeating-linear-gradient(45deg, var(--cut-soft), var(--cut-soft) 3px, transparent 3px, transparent 6px); color: var(--cut); }
+    .raster .c.na { background: repeating-linear-gradient(45deg, var(--line), var(--line) 2px, transparent 2px, transparent 5px); cursor: default; }
+    .raster .c.future { opacity: 0.25; }
+    .raster .c.cur { box-shadow: inset 0 0 0 2px var(--ink); }
+    .raster .c.pick { cursor: pointer; border: 1px dashed var(--cut); background: transparent; }
+    .raster .c.pick.cut { background: var(--cut); border-style: solid; }
+    .raster .c.locked { cursor: not-allowed; }
+    .raster .sep { grid-column: 1 / -1; height: 6px; }
+
+    .ex-ctrl { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; margin-top: 12px; }
+    .btn {
+      padding: 6px 14px; border: 1px solid var(--line); border-radius: 6px;
+      background: var(--panel); color: var(--ink); font: inherit; font-size: 0.86rem; cursor: pointer;
+    }
+    .btn.primary { background: var(--accent); border-color: var(--accent); color: var(--on-ink); }
+    .btn:disabled { opacity: 0.4; cursor: default; }
+    input[type="range"] { flex: 1 1 140px; accent-color: var(--accent); }
+    .verdict { margin: 12px 0 0; padding: 10px 12px; border-radius: 6px; background: var(--chip); font-size: 0.9rem; line-height: 1.7; }
+    .verdict.ok { background: var(--goal-soft); }
+    .verdict.ng { background: var(--cut-soft); }
+    .hint { margin: 8px 0 0; color: var(--ink-mute); font-size: 0.8rem; line-height: 1.7; }
+
+    .curves { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .curves svg { width: 100%; height: auto; display: block; }
+    .curves .ct { margin: 0 0 2px; font-size: 0.85rem; font-weight: 600; }
+
+    .refs { padding-left: 1.4em; font-size: 0.85rem; line-height: 1.7; color: var(--ink-soft); }
+    .refs li { margin: 4px 0; }
+    pre.bib {
+      margin: 10px 0; padding: 14px 16px; overflow-x: auto;
+      background: var(--chip); border-radius: 6px;
+      font-size: 0.78rem; line-height: 1.6;
     }
 
-    .note {
-      margin: 10px 0 0;
-      color: var(--ink-soft);
-      font-size: 0.93rem;
-    }
-
-    .links {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px 24px;
-      margin: 10px 0 0;
-      padding: 0;
-      list-style: none;
-      font-size: 0.95rem;
-    }
-    a.plain { color: var(--accent); text-decoration: none; }
-    a.plain:hover { text-decoration: underline; }
-
-    footer {
-      margin-top: 56px;
-      padding-top: 20px;
-      border-top: 1px solid var(--line);
-      color: var(--ink-mute);
-      font-size: 0.8rem;
-      line-height: 1.8;
-    }
+    footer { margin-top: 64px; padding-top: 20px; border-top: 1px solid var(--line); color: var(--ink-mute); font-size: 0.8rem; line-height: 1.9; }
     footer p { margin: 0; }
 
-    @media (max-width: 520px) {
-      main { padding: 48px 20px 40px; }
-      .demo a { grid-template-columns: 2rem 1fr auto; }
+    @media (max-width: 720px) {
+      .cards, .stats { grid-template-columns: 1fr; }
+      .ex-main { grid-template-columns: 1fr; }
+      .graph { max-width: 300px; margin: 0 auto; width: 100%; }
+      .curves { grid-template-columns: 1fr; }
+      main { padding-top: 44px; }
+      .explorer { padding: 14px 12px; }
     }
   </style>
 </head>
 <body>
-  <main>
-    <p class="eyebrow">Research demo</p>
-    <h1>Boolean Network Edge Removal</h1>
-    <p class="lead">
-      ブーリアンネットワークの安定化制御で、どの辺をいつ取り除くかを強化学習（Q-learning）で求める研究について、
-      ブラウザで動くデモと公開コードを置いています。
-    </p>
+<main>
 
-    <p class="top-links">
-      <a class="plain" href="https://github.com/koshikai/bn-edge-removal-public" target="_blank" rel="noopener noreferrer">GitHub &nearr;</a>
-    </p>
+  <p class="eyebrow mono">Research note · 2026</p>
+  <h1>時間の制約を守りながら、遺伝子ネットワークのつながりを切って制御する</h1>
+  <p class="subtitle">時間入力制約下におけるブーリアンネットワークのエッジ除去制御 ／ Edge Removal Control of Boolean Networks under Temporal Input Constraints</p>
+  <p class="byline">越 海斗（Kaito Koshi）</p>
+  <ul class="top-links">
+    <li><a href="#demo">デモを触る ↓</a></li>
+    <li><a href="https://github.com/koshikai/bn-edge-removal-public" target="_blank" rel="noopener noreferrer">GitHub ↗</a></li>
+    <li><a href="#cite">引用</a></li>
+  </ul>
 
-    <hr class="rule">
+  <div class="tldr">
+    <p><strong>TL;DR</strong>　遺伝子同士の「つながり（エッジ）」を一時的に切ることで、細胞の状態を望ましい状態へ導き、そこに留める。この制御を、
+      <strong>「一度切ったら元に戻せない」「切ったら 2 ステップ休む」</strong>といった時間の制約を守りながら、強化学習（Q 学習）で学ばせました。
+      制約を破る行動は最初から選択肢に入れないので、<strong>学習中も含めて制約違反は 0</strong>。
+      2 つの遺伝子ネットワークのすべての初期状態で、期限内に目標へ到達し、その後も留まることに <strong>5 seed すべてで 100% 成功</strong>しました。</p>
+  </div>
 
-    <h2>Dashboards</h2>
-    <ol class="demos">
-      <li class="demo">
-        <a href="./reachability/">
-          <span class="num">01</span>
-          <span class="demo-title">到達可能性の検証</span>
-          <span class="arrow" aria-hidden="true">&rarr;</span>
-          <p class="demo-desc">
-            すべての初期状態から目標状態へ到達できるかを、単調性や休薬の制約のもとで厳密に検証し、
-            遷移の証拠（Witness）を表示します。
-          </p>
-        </a>
-      </li>
-      <li class="demo">
-        <a href="./bn_experiment/">
-          <span class="num">02</span>
-          <span class="demo-title">強化学習の実験結果</span>
-          <span class="arrow" aria-hidden="true">&rarr;</span>
-          <p class="demo-desc">
-            Q学習で得た辺除去方策の学習曲線、状態の軌道、辺を除去する時刻の推移を確かめられます。
-          </p>
-        </a>
-      </li>
-      <li class="demo">
-        <a href="./network_graph/">
-          <span class="num">03</span>
-          <span class="demo-title">ネットワーク構造の可視化</span>
-          <span class="arrow" aria-hidden="true">&rarr;</span>
-          <p class="demo-desc">
-            対象のネットワークについて、活性化と抑制の辺を含むグラフ構造を表示します。
-          </p>
-        </a>
-      </li>
-    </ol>
+  <ul class="cards">
+    <li class="card">
+      <span class="tag mono">01 · RECORD</span>
+      <h3>履歴を記録する</h3>
+      <p>どのエッジをいつ切ったかを、エッジごとの小さな「フラグ」に記録します。現在の遺伝子の状態だけでは分からない履歴を、学習に渡せます。</p>
+    </li>
+    <li class="card">
+      <span class="tag mono">02 · MASK</span>
+      <h3>違反する行動は選ばせない</h3>
+      <p>フラグを見れば、次に許される行動が分かります。違反する行動は候補から外すので、探索中でも制約は破られません。</p>
+    </li>
+    <li class="card">
+      <span class="tag mono">03 · MONITOR</span>
+      <h3>目標の進み具合を見張る</h3>
+      <p>「まだ到達していない」「到達して維持中」「失敗が確定」の 3 段階を記録し、到達前と離脱後を区別して学習させます。</p>
+    </li>
+  </ul>
 
-    <h2>Models</h2>
-    <ul class="models">
-      <li>Cortical Development</li>
-      <li>Wnt5a</li>
-      <li>CellCycle10</li>
-    </ul>
+  <!-- ===================================================== -->
+  <h2 id="what"><span class="no">01</span>何を、どうやって制御するのか</h2>
 
-    <h2>About</h2>
-    <p class="note">
-      ダッシュボードは WebAssembly（Pyodide）でブラウザ内の Python を動かしています。
-      サーバー側の計算はありません。初回は Python の読み込みに時間がかかることがあります。
-    </p>
+  <p>遺伝子の働きは、他の遺伝子に活性化されたり抑えられたりする関係でつながっています。このつながりを、遺伝子調節ネットワークと呼びます。
+    ここでは各遺伝子を ON（1）か OFF（0）だけで表す<b>ブーリアンネットワーク</b>（BN）を使います。
+    時刻 <span class="m">t</span> の状態 <span class="m">x<sub>t</sub></span> は 0/1 を <span class="m">n</span> 個並べたもので、全遺伝子が同時に更新されます。</p>
+  <div class="eq"><i>x</i><sub><i>t</i>+1</sub> = <i>f</i>(<i>x</i><sub><i>t</i></sub>)</div>
+  <p>状態の数は有限（<span class="m">2<sup>n</sup></span> 通り）なので、放っておけば軌道はいつか固定点か周期的な振る舞いに落ち着きます。問題は、<b>落ち着く先が望ましい状態とは限らない</b>ことです。</p>
 
-    <h2>Code</h2>
-    <ul class="links">
-      <li><a class="plain" href="https://github.com/koshikai/bn-edge-removal-public" target="_blank" rel="noopener noreferrer">GitHub リポジトリ</a></li>
-      <li><a class="plain" href="https://github.com/koshikai/bn-edge-removal-public/blob/main/CITATION.cff" target="_blank" rel="noopener noreferrer">引用情報（CITATION.cff）</a></li>
-    </ul>
+  <p>よくある制御は、遺伝子の ON/OFF を外から直接書き換えます。この研究で扱う<b>エッジ除去制御</b>はそうせず、<b>遺伝子同士のつながりを一時的に切ります</b>。
+    薬で信号の受け渡しを阻害するイメージで、遺伝子の状態そのものには触れません。</p>
+  <p>エッジ <span class="m">j → i</span> を切ると、遺伝子 <span class="m">i</span> の更新は遺伝子 <span class="m">j</span> の状態を見なくなります。
+    式の上では、活性化の入力 <span class="m">x<sup>(j)</sup></span> を 0 に、抑制の入力 <span class="m">¬x<sup>(j)</sup></span> を 1（抑制なし）に置き換えます。
+    切れるエッジは事前に決まっていて、時刻ごとに「どのエッジを切るか」を表す 0/1 のベクトル <span class="m">u<sub>t</sub></span> が制御入力です。</p>
+  <div class="eq"><i>x</i><sub><i>t</i>+1</sub> = <i>f̃</i>(<i>x</i><sub><i>t</i></sub>, <i>u</i><sub><i>t</i></sub>),　　<i>u</i><sub><i>k</i>,<i>t</i></sub> = 1 ⇔ 時刻 <i>t</i> にエッジ <i>k</i> を切る</div>
 
-    <footer>
-      <p>Kaito Koshi &middot; bn-edge-removal-public v0.1.0</p>
-    </footer>
-  </main>
+  <!-- ===================================================== -->
+  <h2 id="constraints"><span class="no">02</span>どんな「時間の制約」を守りたいのか</h2>
+
+  <p>実際の治療では、介入のタイミングに決まりがあります。この研究では、医療応用で重要になる 2 つの制約を扱います。
+    どちらも信号時相論理（STL）という、時間についての条件を書くための論理式で書けます。</p>
+
+  <h3>単調性：一度切ったら戻せない</h3>
+  <p>CRISPR-Cas9 によるゲノム編集のように、一度の操作が元に戻せない場合です。あるエッジを切ったら、以後ずっと切り続けなければなりません。</p>
+  <div class="strip-row"><span class="lab">許される</span><span class="strip"><span>0</span><span>0</span><span class="cut">1</span><span class="cut">1</span><span class="cut">1</span><span class="cut">1</span></span></div>
+  <div class="strip-row"><span class="lab">違反</span><span class="strip"><span>0</span><span class="cut">1</span><span class="cut">1</span><span class="bad">0</span><span>0</span><span>0</span></span><span class="small muted">切った後に戻している</span></div>
+
+  <h3>休薬期間：切ったら τ ステップ休む</h3>
+  <p>抗がん剤の投与スケジュールのように、介入の後に回復のための休みが必要な場合です。あるエッジを切ったら、その後 <span class="m">τ</span> ステップは同じエッジを切れません（ここでは <span class="m">τ</span> = 2）。</p>
+  <div class="strip-row"><span class="lab">許される</span><span class="strip"><span class="cut">1</span><span class="rest">休</span><span class="rest">休</span><span class="cut">1</span><span class="rest">休</span><span class="rest">休</span></span></div>
+  <div class="strip-row"><span class="lab">違反</span><span class="strip"><span class="cut">1</span><span class="rest">休</span><span class="cut bad">1</span><span>0</span><span>0</span><span>0</span></span><span class="small muted">休みの途中で切っている</span></div>
+
+  <!-- ===================================================== -->
+  <h2 id="goal"><span class="no">03</span>何ができたら「成功」なのか</h2>
+
+  <p>目標は 1 つの状態ではなく、望ましい状態の<b>集合</b> <span class="m">𝒳<sub>goal</sub></span> です。そのうえで、時間を区切って成功を定義します。</p>
+  <ul class="setup">
+    <li><b>到達期限 <span class="m">H</span>：</b>この時刻までに、目標集合へ初めて入る。</li>
+    <li><b>終了時刻 <span class="m">T</span>：</b>初めて入った時刻から、この時刻まで一度も目標集合を出ない。</li>
+    <li><b>入力の制約：</b>その間ずっと、単調性か休薬期間を守る。</li>
+  </ul>
+  <p>この 3 つをすべて満たしたうえで、切ったエッジの延べ本数（介入数）<span class="m">J = Σ<sub>t</sub> ‖u<sub>t</sub>‖<sub>1</sub></span> をできるだけ小さくする制御方策を求めます。
+    「一度入ったが途中で出てしまい、また戻ってきた」場合は失敗です。</p>
+
+  <!-- ===================================================== -->
+  <h2 id="why"><span class="no">04</span>なぜ難しいのか</h2>
+
+  <p>制約が<b>過去の入力に依存する</b>からです。いまの遺伝子の状態 <span class="m">x<sub>t</sub></span> が同じでも、
+    「2 ステップ前にこのエッジを切ったか」によって、いま切ってよいかが変わります。
+    状態だけを見て行動を決める Q 学習に <span class="m">x<sub>t</sub></span> だけを渡すと、制約を守るのに必要な情報が足りません。</p>
+  <p>目標の側にも同じ問題があります。目標集合の外にいるという点では同じでも、「まだ一度も入っていない」のか「入った後に出てしまった（もう失敗）」のかで、意味がまったく違います。</p>
+
+  <!-- ===================================================== -->
+  <h2 id="method"><span class="no">05</span>どう解いたのか</h2>
+
+  <h3>① フラグ状態：履歴を数個の数字に圧縮する</h3>
+  <p>制約の判定に必要な履歴だけを、エッジごとのフラグ <span class="m">h<sub>k,t</sub></span> に記録します。履歴全体を覚える必要はありません。</p>
+  <div class="table-wrap">
+  <table class="t">
+    <thead><tr><th></th><th>単調性</th><th>休薬期間（τ）</th></tr></thead>
+    <tbody>
+      <tr><td>フラグの意味</td><td>過去に切ったことがあるか（0/1）</td><td>再び切れるまでの残りステップ数（0〜τ）</td></tr>
+      <tr><td>更新</td><td><span class="m">h ← h ∨ u</span></td><td>切ったら <span class="m">τ</span>、切らなければ 1 減らす（下限 0）</td></tr>
+      <tr><td>違反になる行動</td><td><span class="m">h = 1</span> なのに切らない</td><td><span class="m">h &gt; 0</span> なのに切る</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h3>② 行動マスキング：違反する行動を候補から外す</h3>
+  <p>フラグを見れば、違反になる行動が分かります。単調性なら <span class="m">h<sub>k</sub> = 1</span> のエッジは「切る」に固定し、休薬期間なら <span class="m">h<sub>k</sub> &gt; 0</span> のエッジは「切らない」に固定します。
+    残ったエッジだけ自由に選べます。ランダムに探索するときも、Q 値が最大の行動を選ぶときも、この許される行動の中から選びます。
+    許される行動は必ず 1 つ以上あるので（単調性なら「今まで通り」、休薬期間なら「何もしない」）、行き詰まることもありません。</p>
+  <p class="result-line">その結果、違反は罰で減らすのではなく、そもそも起きません。学習の途中でも 0 です。</p>
+  <p class="muted small">前の研究 [1] では、違反に罰（負の報酬）を与えて制約を守るよう促していたため、違反しないことは保証されませんでした。</p>
+
+  <h3>③ 監視状態：目標の進み具合を 3 段階で記録する</h3>
+  <p>目標の進み具合を <span class="m">s<sub>t</sub> ∈ {0, 1, 2}</span> で記録します。</p>
+  <ul class="setup">
+    <li><b>0：</b>まだ目標集合に入っていない</li>
+    <li><b>1：</b>入った後、ずっと目標集合内にいる</li>
+    <li><b>2：</b>失敗が確定した（入った後に出た、または期限 <span class="m">H</span> までに入れなかった）。一度 2 になったら戻らない</li>
+  </ul>
+  <p>終了時に <span class="m">s<sub>T</sub> = 1</span> なら成功です。監視状態は離脱を禁止するものではなく、起きたことを記録するだけです。</p>
+
+  <h3>Q 学習と報酬</h3>
+  <p>Q 学習の状態として、遺伝子の状態・フラグ・監視状態の組 <span class="m">(x<sub>t</sub>, h<sub>t</sub>, s<sub>t</sub>)</span> を使います。報酬は次の 3 つの和です。</p>
+  <ul class="setup">
+    <li><b>目標集合内にいる各ステップ：</b><span class="m">+r<sub>step</sub></span></li>
+    <li><b>切ったエッジ 1 本ごと：</b><span class="m">−c<sub>edge</sub></span>（介入を減らすため）</li>
+    <li><b>成功して終了したとき（<span class="m">s<sub>T</sub> = 1</span>）だけ：</b><span class="m">+R<sub>goal</sub></span></li>
+  </ul>
+  <p>一度離脱すると <span class="m">s<sub>t</sub> = 2</span> のままなので、戻ってきても最後のボーナスはもらえません。こうして「入ったら出ない」ことを促します。</p>
+
+  <!-- ===================================================== -->
+  <h2 id="results"><span class="no">06</span>うまくいったのか</h2>
+
+  <p class="result-line">はい。2 つのモデルのすべての初期状態で、5 seed（11〜15）すべてが成功しました。制約違反も離脱も 0 です。</p>
+
+  <div class="stats">
+    <div class="stat"><div class="v">100%</div><div class="k">期限内に到達し、最後まで維持できた初期状態の割合（両モデル・全 seed）</div></div>
+    <div class="stat"><div class="v">0</div><div class="k">制約違反（学習中も評価中も）</div></div>
+    <div class="stat"><div class="v">0</div><div class="k">目標集合に入った後の離脱</div></div>
+  </div>
+
+  <h3>計算例 1：Cortical Development Model × 単調性</h3>
+  <p>大脳皮質の領野が分かれていく過程の、5 遺伝子のモデル [2] です。目標は、胎生 10.5 日の前極（Fgf8・Pax6・Sp8 が ON）と後極（Emx2・Coup-tfi が ON）の 2 つの発現パターンで、どちらも制御なしのネットワークの固定点です。</p>
+  <ul class="setup">
+    <li><b>切れるエッジ：</b>6 本</li>
+    <li><b>制約：</b>単調性（一度切ったら戻せない）</li>
+    <li><b>期限と長さ：</b><span class="m">H</span> = 5、<span class="m">T</span> = 10</li>
+    <li><b>学習：</b>15,000 エピソード。全 32 初期状態を順番に使う</li>
+    <li><b>報酬：</b><span class="m">r<sub>step</sub></span> = 2、<span class="m">R<sub>goal</sub></span> = 80、<span class="m">c<sub>edge</sub></span> = 1</li>
+    <li><b>介入なしの場合：</b>32 状態中 10 状態だけが成功</li>
+  </ul>
+
+  <h3>計算例 2：Wnt5a モデル × 休薬期間</h3>
+  <p>メラノーマの転移に関わる Wnt5a シグナル伝達経路の、7 遺伝子のモデル [3, 4] です。制御なしでは 4 つの固定点があり、そのうち <span class="m">x<sup>(7)</sup></span> = 1 の 2 つを目標とします。</p>
+  <ul class="setup">
+    <li><b>切れるエッジ：</b>8 本</li>
+    <li><b>制約：</b>休薬期間 <span class="m">τ</span> = 2</li>
+    <li><b>期限と長さ：</b><span class="m">H</span> = 7、<span class="m">T</span> = 10</li>
+    <li><b>学習：</b>24,000 エピソード。全 128 初期状態を順番に使う</li>
+    <li><b>報酬：</b><span class="m">c<sub>edge</sub></span> = 2（その他は計算例 1 と同じ）</li>
+    <li><b>介入なしの場合：</b>128 状態中 108 状態が成功。時刻を含めた全探索で、休薬を守ったまま 128 状態すべてが成功可能だと確認済み</li>
+  </ul>
+
+  <div class="table-wrap">
+  <table class="t">
+    <thead>
+      <tr><th>モデル</th><th class="num">初期状態数</th><th class="num">成功率（%）</th><th class="num">初到達時刻</th><th class="num">離脱</th><th class="num">介入数</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Cortical</td><td class="num">32</td><td class="num">100.0 ± 0.0</td><td class="num">2.43 ± 0.11</td><td class="num">0.00 ± 0.00</td><td class="num">46.3 ± 5.0</td></tr>
+      <tr><td>Wnt5a</td><td class="num">128</td><td class="num">100.0 ± 0.0</td><td class="num">2.83 ± 0.08</td><td class="num">0.00 ± 0.00</td><td class="num">1.8 ± 0.9</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p class="muted small">全初期状態の平均を、さらに 5 seed で平均 ± 標本標準偏差にまとめた値。介入数は 1 エピソード（10 ステップ）で切ったエッジの延べ本数。
+    Cortical の介入数が大きいのは単調性のためで、早い時刻に切ったエッジは最後まで切り続けるので、1 本切るだけで延べ数が最大 10 増えます。</p>
+</main>
+
+<!-- ===================================================== -->
+<section class="wide" id="demo" style="padding: 0 16px;">
+  <div class="explorer" id="explorer">
+    <div class="ex-bar">
+      <div><span class="ex-label">モデル</span>
+        <span class="seg" id="seg-model" role="group" aria-label="モデル">
+          <button type="button" data-v="cortical" aria-pressed="true">Cortical（単調性）</button>
+          <button type="button" data-v="wnt5a" aria-pressed="false">Wnt5a（休薬 τ=2）</button>
+        </span>
+      </div>
+      <div><span class="ex-label">制御</span>
+        <span class="seg" id="seg-mode" role="group" aria-label="制御の方法">
+          <button type="button" data-v="learned" aria-pressed="true">学習した方策</button>
+          <button type="button" data-v="none" aria-pressed="false">介入なし</button>
+          <button type="button" data-v="manual" aria-pressed="false">自分で切る</button>
+        </span>
+      </div>
+    </div>
+
+    <div class="ex-label">初期状態 <span class="mono">x₀</span>（状態 ID。<span class="mono">x⁽¹⁾</span> を最上位ビットとする 2 進数）</div>
+    <div class="states" id="states" role="group" aria-label="初期状態"></div>
+    <div class="legend">
+      <span><i style="border:1px solid var(--goal)"></i>目標集合の状態</span>
+      <span><i style="background:var(--ink-mute);width:5px;height:5px;border-radius:50%;vertical-align:1px"></i>介入なしでも成功する状態</span>
+    </div>
+
+    <div class="ex-main">
+      <div class="graph">
+        <svg id="graph" viewBox="0 0 300 290" role="img" aria-label="ネットワーク図"></svg>
+        <p class="graph-cap" id="graph-cap"></p>
+      </div>
+      <div>
+        <div class="raster-wrap"><div class="raster" id="raster"></div></div>
+        <div class="ex-ctrl" id="ctrl-play">
+          <button type="button" class="btn" id="btn-play">▶ 再生</button>
+          <input type="range" id="slider" min="0" max="10" value="0" aria-label="時刻">
+          <span class="mono small" id="tlabel">t = 0</span>
+        </div>
+        <div class="ex-ctrl" id="ctrl-manual" hidden>
+          <button type="button" class="btn primary" id="btn-step">このステップを実行 →</button>
+          <button type="button" class="btn" id="btn-undo">1 つ戻す</button>
+          <button type="button" class="btn" id="btn-reset">最初から</button>
+        </div>
+        <div class="verdict" id="verdict"></div>
+      </div>
+    </div>
+    <p class="hint" id="hint"></p>
+  </div>
+</section>
+
+<main style="padding-top: 0;">
+  <p class="muted small" style="margin-top:10px">デモの「学習した方策」は seed 11 で学習した方策の軌道を、実験で保存した記録からそのまま再生しています（Cortical 32 状態・Wnt5a 128 状態すべて）。
+    ページ内でブール関数を計算し直した結果と一致することも確認済みです。seed 11 の Wnt5a は介入数が平均 3.4 で、表の 5 seed 平均（1.8）より多めです。</p>
+
+  <h3>学習の進み方</h3>
+  <p>学習中のエピソードの成功率です（250 エピソードごとの平均）。探索の確率 <span class="m">ε</span> を 1.0 から 0.01 へ線形に下げているので、序盤はほぼランダムに行動します。それでもマスキングにより、制約違反は最初から 0 です。</p>
+  <div class="curves" id="curves"></div>
+
+  <!-- ===================================================== -->
+  <h2 id="limits"><span class="no">07</span>注意点</h2>
+  <ul class="setup">
+    <li><b>制約は保証、維持は保証しない。</b>入力の制約はマスキングで必ず守られます。一方、目標集合に留まることは報酬で促しているだけで、保証はありません。今回の計算例で離脱が 0 だったのは結果です。</li>
+    <li><b>Q 表に時刻を入れていない。</b>期限 <span class="m">H</span> と終了時刻 <span class="m">T</span> の判定には時刻を使いますが、Q 表の状態は <span class="m">(x, h, s)</span> だけです。同じ状態なら残り時間にかかわらず同じ行動を選ぶので、有限時間の問題としての最適性は一般には保証されません。</li>
+    <li><b>Wnt5a の介入コストは評価と同じ seed で選んだ。</b><span class="m">c<sub>edge</sub></span> = 2 の選定に評価と同じ 5 seed を使っているので、独立な検証ではありません。</li>
+    <li><b>介入の最小化は保証しない。</b>介入コストは介入を減らす方向に働きますが、介入数が最小であることや、到達後に介入が 0 になることは保証しません。</li>
+    <li><b>前の研究とは条件が複数違う。</b>[1] とは初期状態集合（Wnt5a で 96 → 128 状態）、介入コスト、一部の学習条件が異なるため、結果の差を 1 つの変更だけのおかげとは言えません。</li>
+    <li><b>ネットワークは小さい。</b>5 遺伝子と 7 遺伝子で、Q 表で扱える規模です。</li>
+  </ul>
+
+  <!-- ===================================================== -->
+  <h2 id="next"><span class="no">08</span>これから</h2>
+  <ul class="setup">
+    <li>深層強化学習を使って、Q 表に収まらない大きなネットワークへ広げる。</li>
+    <li>単調性と休薬期間を同時に課すなど、より多様な時相論理の仕様を扱う。</li>
+    <li>更新に確率を含む確率的ブーリアンネットワークへ拡張する。</li>
+  </ul>
+
+  <!-- ===================================================== -->
+  <h2 id="related"><span class="no">09</span>背景と関連研究</h2>
+  <p>BN は遺伝子調節ネットワークのモデルとして古くから使われ [5]、セミテンソル積による代数的な解析 [6] で、到達可能性や安定化の研究が進んできました。
+    制御の方法としては、ノードを直接操作するピン留め制御 [7] や強化学習による手法 [8] があります。
+    エッジ除去制御と Q 学習による安定化は Li と Li [9] が提案しましたが、入力の履歴に対する制約は扱っていませんでした。
+    STL のような時間的な仕様を強化学習に組み込む研究はロボティクスを中心に進んでいます [10–12] が、主に実数値の信号を対象としていて、BN のような離散システムにはあまり適用されていません。
+    この研究は、筆者らの [1] を、マスキングによる制約の厳密な充足と、初到達後の維持を求める目標へ発展させたものです。</p>
+  <ol class="refs">
+    <li>K. Koshi, K. Kobayashi, Y. Yamashita, K. Sawada, “Edge Removal Control of Boolean Networks with STL Specifications Using Reinforcement Learning,” <i>Proc. ITC-CSCC 2026</i>, 2026.</li>
+    <li>C. E. Giacomantonio, G. J. Goodhill, “A Boolean model of the gene regulatory network underlying mammalian cortical area development,” <i>PLoS Comput. Biol.</i>, 6(9), e1000936, 2010. <a href="https://doi.org/10.1371/journal.pcbi.1000936" target="_blank" rel="noopener noreferrer">doi</a></li>
+    <li>Y. Xiao, E. R. Dougherty, “The impact of function perturbations in Boolean networks,” <i>Bioinformatics</i>, 23(10), 1265–1273, 2007. <a href="https://doi.org/10.1093/bioinformatics/btm093" target="_blank" rel="noopener noreferrer">doi</a></li>
+    <li>A. T. Weeraratna et al., “Wnt5a signaling directly affects cell motility and invasion of metastatic melanoma,” <i>Cancer Cell</i>, 1(3), 279–288, 2002. <a href="https://doi.org/10.1016/S1535-6108(02)00045-4" target="_blank" rel="noopener noreferrer">doi</a></li>
+    <li>S. A. Kauffman, “Metabolic stability and epigenesis in randomly constructed genetic nets,” <i>J. Theor. Biol.</i>, 22(3), 437–467, 1969. <a href="https://doi.org/10.1016/0022-5193(69)90015-0" target="_blank" rel="noopener noreferrer">doi</a></li>
+    <li>D. Cheng, H. Qi, Z. Li, <i>Analysis and Control of Boolean Networks: A Semi-tensor Product Approach</i>, Springer, 2011.</li>
+    <li>L. Lin, J. Cao, J. Lu, J. Zhong, S. Zhu, “Stabilizing large-scale probabilistic Boolean networks by pinning control,” <i>IEEE Trans. Cybern.</i>, 52(12), 12929–12941, 2022. <a href="https://doi.org/10.1109/TCYB.2021.3092374" target="_blank" rel="noopener noreferrer">doi</a></li>
+    <li>M. Takizawa, K. Kobayashi, Y. Yamashita, “Design of reduced-order and pinning controllers for probabilistic Boolean networks using reinforcement learning,” <i>Appl. Math. Comput.</i>, 457, 128211, 2023. <a href="https://doi.org/10.1016/j.amc.2023.128211" target="_blank" rel="noopener noreferrer">doi</a></li>
+    <li>W. Li, H. Li, “Edge removal and Q-learning for stabilizability of Boolean networks,” <i>IEEE Trans. Neural Netw. Learn. Syst.</i>, 35(12), 18212–18221, 2024. <a href="https://doi.org/10.1109/TNNLS.2023.3312942" target="_blank" rel="noopener noreferrer">doi</a></li>
+    <li>D. Aksaray, A. M. Jones, Z. Kong, M. Schwager, C. Belta, “Q-learning for robust satisfaction of signal temporal logic specifications,” <i>Proc. IEEE CDC</i>, 6565–6570, 2016. <a href="https://doi.org/10.1109/CDC.2016.7799279" target="_blank" rel="noopener noreferrer">doi</a></li>
+    <li>X. Li, C. I. Vasile, C. Belta, “Reinforcement learning with temporal logic rewards,” <i>Proc. IEEE/RSJ IROS</i>, 3834–3839, 2017. <a href="https://doi.org/10.1109/IROS.2017.8206234" target="_blank" rel="noopener noreferrer">doi</a></li>
+    <li>R. T. Icarte, T. Klassen, R. Valenzano, S. McIlraith, “Using reward machines for high-level task specification and decomposition in reinforcement learning,” <i>Proc. ICML</i>, 2107–2116, 2018.</li>
+  </ol>
+
+  <!-- ===================================================== -->
+  <h2 id="cite"><span class="no">10</span>コードと引用</h2>
+  <p>実装（ネットワーク定義、環境、行動マスキング付き Q 学習、実験設定）は <a href="https://github.com/koshikai/bn-edge-removal-public" target="_blank" rel="noopener noreferrer">GitHub</a> で公開しています。
+    本文の設定は <span class="mono small">configs/papers/zemi2/reward_1step/</span> にあります。手法を参照する場合は、次の論文を引用してください。</p>
+  <pre class="bib mono">@inproceedings{Koshi2026itccscc,
+  author    = {K. Koshi and K. Kobayashi and Y. Yamashita and K. Sawada},
+  title     = {Edge Removal Control of {B}oolean Networks with {STL}
+               Specifications Using Reinforcement Learning},
+  booktitle = {Proc. ITC-CSCC 2026},
+  year      = {2026}
+}</pre>
+
+  <footer>
+    <p>越 海斗 · bn-edge-removal-public</p>
+    <p>旧版の対話型ツール（marimo）：<a href="./reachability/">到達可能性の検証</a> · <a href="./bn_experiment/">実験結果</a> · <a href="./network_graph/">ネットワーク図</a></p>
+  </footer>
+</main>
+
+<script type="application/json" id="run-data">{"cortical":{"episodes":[{"x":[0,11,10,10,10,10,10,10,10,10,10],"u":[0,9,25,63,63,63,63,63,63,63]},{"x":[1,17,21,21,21,21,21,21,21,21,21],"u":[0,63,63,63,63,63,63,63,63,63]},{"x":[2,10,10,10,10,10,10,10,10,10,10],"u":[0,0,0,0,0,0,0,0,0,0]},{"x":[3,10,10,10,10,10,10,10,10,10,10],"u":[41,63,63,63,63,63,63,63,63,63]},{"x":[4,1,17,21,21,21,21,21,21,21,21],"u":[0,0,63,63,63,63,63,63,63,63]},{"x":[5,17,21,21,21,21,21,21,21,21,21],"u":[54,63,63,63,63,63,63,63,63,63]},{"x":[6,0,11,10,10,10,10,10,10,10,10],"u":[0,0,9,25,63,63,63,63,63,63]},{"x":[7,0,11,10,10,10,10,10,10,10,10],"u":[11,11,27,63,63,63,63,63,63,63]},{"x":[8,10,10,10,10,10,10,10,10,10,10],"u":[63,63,63,63,63,63,63,63,63,63]},{"x":[9,10,10,10,10,10,10,10,10,10,10],"u":[13,63,63,63,63,63,63,63,63,63]},{"x":[10,10,10,10,10,10,10,10,10,10,10],"u":[0,0,0,0,0,0,0,0,0,0]},{"x":[11,10,10,10,10,10,10,10,10,10,10],"u":[9,25,63,63,63,63,63,63,63,63]},{"x":[12,0,11,10,10,10,10,10,10,10,10],"u":[0,0,9,25,63,63,63,63,63,63]},{"x":[13,0,11,10,10,10,10,10,10,10,10],"u":[0,0,9,25,63,63,63,63,63,63]},{"x":[14,0,11,10,10,10,10,10,10,10,10],"u":[0,0,9,25,63,63,63,63,63,63]},{"x":[15,0,11,10,10,10,10,10,10,10,10],"u":[0,0,9,25,63,63,63,63,63,63]},{"x":[16,5,17,21,21,21,21,21,21,21,21],"u":[34,58,63,63,63,63,63,63,63,63]},{"x":[17,21,21,21,21,21,21,21,21,21,21],"u":[63,63,63,63,63,63,63,63,63,63]},{"x":[18,0,11,10,10,10,10,10,10,10,10],"u":[13,13,45,63,63,63,63,63,63,63]},{"x":[19,0,11,10,10,10,10,10,10,10,10],"u":[0,0,9,25,63,63,63,63,63,63]},{"x":[20,5,17,21,21,21,21,21,21,21,21],"u":[4,31,63,63,63,63,63,63,63,63]},{"x":[21,21,21,21,21,21,21,21,21,21,21],"u":[63,63,63,63,63,63,63,63,63,63]},{"x":[22,0,11,10,10,10,10,10,10,10,10],"u":[0,0,9,25,63,63,63,63,63,63]},{"x":[23,0,11,10,10,10,10,10,10,10,10],"u":[0,0,9,25,63,63,63,63,63,63]},{"x":[24,0,11,10,10,10,10,10,10,10,10],"u":[0,0,9,25,63,63,63,63,63,63]},{"x":[25,0,11,10,10,10,10,10,10,10,10],"u":[0,0,9,25,63,63,63,63,63,63]},{"x":[26,0,11,10,10,10,10,10,10,10,10],"u":[0,0,9,25,63,63,63,63,63,63]},{"x":[27,0,11,10,10,10,10,10,10,10,10],"u":[11,11,27,63,63,63,63,63,63,63]},{"x":[28,0,11,10,10,10,10,10,10,10,10],"u":[17,19,31,63,63,63,63,63,63,63]},{"x":[29,0,11,10,10,10,10,10,10,10,10],"u":[9,29,31,63,63,63,63,63,63,63]},{"x":[30,0,11,10,10,10,10,10,10,10,10],"u":[13,13,45,63,63,63,63,63,63,63]},{"x":[31,0,11,8,10,10,10,10,10,10,10],"u":[20,28,28,63,63,63,63,63,63,63]}],"curve":[0.568,0.504,0.56,0.616,0.576,0.608,0.616,0.556,0.58,0.552,0.592,0.628,0.588,0.556,0.58,0.656,0.644,0.676,0.648,0.656,0.684,0.668,0.64,0.628,0.68,0.704,0.752,0.752,0.724,0.752,0.748,0.744,0.768,0.788,0.76,0.792,0.776,0.804,0.848,0.784,0.848,0.848,0.82,0.856,0.868,0.848,0.864,0.872,0.892,0.88,0.912,0.912,0.924,0.94,0.936,0.976,0.96,0.988,1.0,0.98],"curveWindow":250,"baselineOk":10},"wnt5a":{"episodes":[{"x":[0,85,65,65,65,65,65,65,65,65,65],"u":[0,71,16,0,0,128,0,0,128,0]},{"x":[1,65,65,65,65,65,65,65,65,65,65],"u":[0,128,0,0,128,0,0,128,0,0]},{"x":[2,21,65,65,65,65,65,65,65,65,65],"u":[0,68,0,0,128,0,0,128,0,0]},{"x":[3,1,65,65,65,65,65,65,65,65,65],"u":[0,0,128,0,0,128,0,0,128,0]},{"x":[4,85,65,65,65,65,65,65,65,65,65],"u":[0,71,16,0,0,128,0,0,128,0]},{"x":[5,65,65,65,65,65,65,65,65,65,65],"u":[86,0,0,128,0,0,128,0,0,128]},{"x":[6,21,65,65,65,65,65,65,65,65,65],"u":[0,68,0,0,128,0,0,128,0,0]},{"x":[7,1,65,65,65,65,65,65,65,65,65],"u":[0,0,128,0,0,128,0,0,128,0]},{"x":[8,95,43,47,47,47,47,47,47,47,47],"u":[0,0,32,0,0,0,0,0,0,0]},{"x":[9,75,43,47,47,47,47,47,47,47,47],"u":[0,0,32,0,0,0,0,0,0,0]},{"x":[10,63,47,47,47,47,47,47,47,47,47],"u":[0,0,0,0,0,0,0,0,0,0]},{"x":[11,43,47,47,47,47,47,47,47,47,47],"u":[0,32,0,0,0,0,0,0,0,0]},{"x":[12,95,43,47,47,47,47,47,47,47,47],"u":[0,0,32,0,0,0,0,0,0,0]},{"x":[13,75,43,47,47,47,47,47,47,47,47],"u":[0,0,32,0,0,0,0,0,0,0]},{"x":[14,63,47,47,47,47,47,47,47,47,47],"u":[0,0,0,0,0,0,0,0,0,0]},{"x":[15,43,47,47,47,47,47,47,47,47,47],"u":[0,32,0,0,0,0,0,0,0,0]},{"x":[16,87,3,1,65,65,65,65,65,65,65],"u":[0,0,0,0,128,0,0,128,0,0]},{"x":[17,67,1,65,65,65,65,65,65,65,65],"u":[0,0,0,128,0,0,128,0,0,128]},{"x":[18,23,3,1,65,65,65,65,65,65,65],"u":[0,0,0,0,128,0,0,128,0,0]},{"x":[19,3,1,65,65,65,65,65,65,65,65],"u":[0,0,0,128,0,0,128,0,0,128]},{"x":[20,87,3,1,65,65,65,65,65,65,65],"u":[0,0,0,0,128,0,0,128,0,0]},{"x":[21,65,65,65,65,65,65,65,65,65,65],"u":[68,0,0,128,0,0,128,0,0,128]},{"x":[22,23,3,1,65,65,65,65,65,65,65],"u":[0,0,0,0,128,0,0,128,0,0]},{"x":[23,3,1,65,65,65,65,65,65,65,65],"u":[0,0,0,128,0,0,128,0,0,128]},{"x":[24,95,43,47,47,47,47,47,47,47,47],"u":[0,0,32,0,0,0,0,0,0,0]},{"x":[25,75,43,47,47,47,47,47,47,47,47],"u":[0,0,32,0,0,0,0,0,0,0]},{"x":[26,63,47,47,47,47,47,47,47,47,47],"u":[0,0,0,0,0,0,0,0,0,0]},{"x":[27,43,47,47,47,47,47,47,47,47,47],"u":[0,32,0,0,0,0,0,0,0,0]},{"x":[28,95,43,47,47,47,47,47,47,47,47],"u":[0,0,32,0,0,0,0,0,0,0]},{"x":[29,75,43,47,47,47,47,47,47,47,47],"u":[0,0,32,0,0,0,0,0,0,0]},{"x":[30,63,47,47,47,47,47,47,47,47,47],"u":[0,0,0,0,0,0,0,0,0,0]},{"x":[31,43,47,47,47,47,47,47,47,47,47],"u":[0,32,0,0,0,0,0,0,0,0]},{"x":[32,84,87,3,1,65,65,65,65,65,65],"u":[0,0,0,0,0,128,0,0,128,0]},{"x":[33,65,65,65,65,65,65,65,65,65,65],"u":[180,64,0,18,0,4,0,1,0,194]},{"x":[34,52,86,23,3,1,65,65,65,65,65],"u":[0,0,0,0,0,0,128,0,0,128]},{"x":[35,37,69,65,65,65,65,65,65,65,65],"u":[0,0,86,0,0,128,0,0,128,0]},{"x":[36,84,87,3,1,65,65,65,65,65,65],"u":[0,0,0,0,0,128,0,0,128,0]},{"x":[37,69,65,65,65,65,65,65,65,65,65],"u":[0,86,0,0,128,0,0,128,0,0]},{"x":[38,52,86,23,3,1,65,65,65,65,65],"u":[0,0,0,0,0,0,128,0,0,128]},{"x":[39,37,69,65,65,65,65,65,65,65,65],"u":[0,0,86,0,0,128,0,0,128,0]},{"x":[40,127,47,47,47,47,47,47,47,47,47],"u":[37,0,0,0,0,0,0,0,0,0]},{"x":[41,111,47,47,47,47,47,47,47,47,47],"u":[0,0,0,0,0,0,0,0,0,0]},{"x":[42,31,43,47,47,47,47,47,47,47,47],"u":[125,0,0,0,0,0,0,0,0,0]},{"x":[43,47,47,47,47,47,47,47,47,47,47],"u":[32,0,0,0,0,0,0,0,0,0]},{"x":[44,93,75,43,47,47,47,47,47,47,47],"u":[255,0,0,32,0,0,0,0,0,0]},{"x":[45,111,47,47,47,47,47,47,47,47,47],"u":[0,0,0,0,0,0,0,0,0,0]},{"x":[46,61,111,47,47,47,47,47,47,47,47],"u":[143,0,0,0,0,0,0,0,0,0]},{"x":[47,47,47,47,47,47,47,47,47,47,47],"u":[0,0,0,0,0,0,0,0,0,0]},{"x":[48,86,23,3,1,65,65,65,65,65,65],"u":[0,0,0,0,0,128,0,0,128,0]},{"x":[49,65,65,65,65,65,65,65,65,65,65],"u":[86,0,0,128,0,0,128,0,0,128]},{"x":[50,54,23,1,65,65,65,65,65,65,65],"u":[0,123,132,0,0,128,0,0,128,0]},{"x":[51,39,37,69,65,65,65,65,65,65,65],"u":[0,0,0,86,0,0,128,0,0,128]},{"x":[52,86,23,3,1,65,65,65,65,65,65],"u":[0,0,0,0,0,128,0,0,128,0]},{"x":[53,65,65,65,65,65,65,65,65,65,65],"u":[148,0,0,128,0,0,128,0,0,128]},{"x":[54,23,1,65,65,65,65,65,65,65,65],"u":[123,132,0,0,128,0,0,128,0,0]},{"x":[55,39,37,69,65,65,65,65,65,65,65],"u":[0,0,0,86,0,0,128,0,0,128]},{"x":[56,95,43,47,47,47,47,47,47,47,47],"u":[235,0,0,0,0,0,0,0,0,0]},{"x":[57,111,47,47,47,47,47,47,47,47,47],"u":[0,0,0,0,0,0,0,0,0,0]},{"x":[58,31,43,47,47,47,47,47,47,47,47],"u":[125,0,0,0,0,0,0,0,0,0]},{"x":[59,47,47,47,47,47,47,47,47,47,47],"u":[0,0,0,0,0,0,0,0,0,0]},{"x":[60,93,75,43,47,47,47,47,47,47,47],"u":[255,0,0,32,0,0,0,0,0,0]},{"x":[61,111,47,47,47,47,47,47,47,47,47],"u":[0,0,0,0,0,0,0,0,0,0]},{"x":[62,63,47,47,47,47,47,47,47,47,47],"u":[33,0,0,0,0,0,0,0,0,0]},{"x":[63,47,47,47,47,47,47,47,47,47,47],"u":[0,0,0,0,0,0,0,0,0,0]},{"x":[64,85,65,65,65,65,65,65,65,65,65],"u":[0,71,16,0,0,128,0,0,128,0]},{"x":[65,65,65,65,65,65,65,65,65,65,65],"u":[128,0,0,128,0,0,128,0,0,128]},{"x":[66,21,65,65,65,65,65,65,65,65,65],"u":[0,68,0,0,128,0,0,128,0,0]},{"x":[67,1,65,65,65,65,65,65,65,65,65],"u":[0,0,128,0,0,128,0,0,128,0]},{"x":[68,85,65,65,65,65,65,65,65,65,65],"u":[0,71,16,0,0,128,0,0,128,0]},{"x":[69,65,65,65,65,65,65,65,65,65,65],"u":[86,0,0,128,0,0,128,0,0,128]},{"x":[70,21,65,65,65,65,65,65,65,65,65],"u":[0,68,0,0,128,0,0,128,0,0]},{"x":[71,1,65,65,65,65,65,65,65,65,65],"u":[0,0,128,0,0,128,0,0,128,0]},{"x":[72,95,43,47,47,47,47,47,47,47,47],"u":[0,0,32,0,0,0,0,0,0,0]},{"x":[73,75,43,47,47,47,47,47,47,47,47],"u":[0,0,32,0,0,0,0,0,0,0]},{"x":[74,63,47,47,47,47,47,47,47,47,47],"u":[0,0,0,0,0,0,0,0,0,0]},{"x":[75,43,47,47,47,47,47,47,47,47,47],"u":[0,32,0,0,0,0,0,0,0,0]},{"x":[76,95,43,47,47,47,47,47,47,47,47],"u":[0,0,32,0,0,0,0,0,0,0]},{"x":[77,75,43,47,47,47,47,47,47,47,47],"u":[0,0,32,0,0,0,0,0,0,0]},{"x":[78,63,47,47,47,47,47,47,47,47,47],"u":[0,0,0,0,0,0,0,0,0,0]},{"x":[79,43,47,47,47,47,47,47,47,47,47],"u":[0,32,0,0,0,0,0,0,0,0]},{"x":[80,87,3,1,65,65,65,65,65,65,65],"u":[0,0,0,0,128,0,0,128,0,0]},{"x":[81,67,1,65,65,65,65,65,65,65,65],"u":[0,0,0,128,0,0,128,0,0,128]},{"x":[82,23,3,1,65,65,65,65,65,65,65],"u":[0,0,0,0,128,0,0,128,0,0]},{"x":[83,3,1,65,65,65,65,65,65,65,65],"u":[0,0,0,128,0,0,128,0,0,128]},{"x":[84,87,3,1,65,65,65,65,65,65,65],"u":[0,0,0,0,128,0,0,128,0,0]},{"x":[85,65,65,65,65,65,65,65,65,65,65],"u":[71,16,0,0,128,0,0,128,0,0]},{"x":[86,23,3,1,65,65,65,65,65,65,65],"u":[0,0,0,0,128,0,0,128,0,0]},{"x":[87,3,1,65,65,65,65,65,65,65,65],"u":[0,0,0,128,0,0,128,0,0,128]},{"x":[88,95,43,47,47,47,47,47,47,47,47],"u":[0,0,32,0,0,0,0,0,0,0]},{"x":[89,75,43,47,47,47,47,47,47,47,47],"u":[0,0,32,0,0,0,0,0,0,0]},{"x":[90,63,47,47,47,47,47,47,47,47,47],"u":[0,0,0,0,0,0,0,0,0,0]},{"x":[91,11,43,47,47,47,47,47,47,47,47],"u":[229,0,0,0,0,0,0,0,0,0]},{"x":[92,95,43,47,47,47,47,47,47,47,47],"u":[0,0,32,0,0,0,0,0,0,0]},{"x":[93,75,43,47,47,47,47,47,47,47,47],"u":[0,0,32,0,0,0,0,0,0,0]},{"x":[94,63,47,47,47,47,47,47,47,47,47],"u":[0,0,0,0,0,0,0,0,0,0]},{"x":[95,43,47,47,47,47,47,47,47,47,47],"u":[0,32,0,0,0,0,0,0,0,0]},{"x":[96,84,87,3,1,65,65,65,65,65,65],"u":[0,0,0,0,0,128,0,0,128,0]},{"x":[97,69,65,65,65,65,65,65,65,65,65],"u":[0,86,0,0,128,0,0,128,0,0]},{"x":[98,52,86,23,3,1,65,65,65,65,65],"u":[0,0,0,0,0,0,128,0,0,128]},{"x":[99,37,69,65,65,65,65,65,65,65,65],"u":[0,0,86,0,0,128,0,0,128,0]},{"x":[100,84,87,3,1,65,65,65,65,65,65],"u":[0,0,0,0,0,128,0,0,128,0]},{"x":[101,65,65,65,65,65,65,65,65,65,65],"u":[179,64,0,18,0,4,0,1,0,194]},{"x":[102,52,86,23,3,1,65,65,65,65,65],"u":[0,0,0,0,0,0,128,0,0,128]},{"x":[103,37,69,65,65,65,65,65,65,65,65],"u":[0,0,86,0,0,128,0,0,128,0]},{"x":[104,126,29,75,43,47,47,47,47,47,47],"u":[0,223,0,0,32,0,0,0,0,0]},{"x":[105,111,47,47,47,47,47,47,47,47,47],"u":[0,0,0,0,0,0,0,0,0,0]},{"x":[106,61,111,47,47,47,47,47,47,47,47],"u":[143,0,0,0,0,0,0,0,0,0]},{"x":[107,47,47,47,47,47,47,47,47,47,47],"u":[0,0,0,0,0,0,0,0,0,0]},{"x":[108,126,29,75,43,47,47,47,47,47,47],"u":[0,223,0,0,32,0,0,0,0,0]},{"x":[109,111,47,47,47,47,47,47,47,47,47],"u":[0,0,0,0,0,0,0,0,0,0]},{"x":[110,31,43,47,47,47,47,47,47,47,47],"u":[125,0,0,0,0,0,0,0,0,0]},{"x":[111,47,47,47,47,47,47,47,47,47,47],"u":[0,0,0,0,0,0,0,0,0,0]},{"x":[112,86,23,3,1,65,65,65,65,65,65],"u":[0,0,0,0,0,128,0,0,128,0]},{"x":[113,65,65,65,65,65,65,65,65,65,65],"u":[21,32,0,64,0,18,0,4,0,1]},{"x":[114,54,23,1,65,65,65,65,65,65,65],"u":[0,123,132,0,0,128,0,0,128,0]},{"x":[115,39,37,69,65,65,65,65,65,65,65],"u":[0,0,0,86,0,0,128,0,0,128]},{"x":[116,86,23,3,1,65,65,65,65,65,65],"u":[0,0,0,0,0,128,0,0,128,0]},{"x":[117,65,65,65,65,65,65,65,65,65,65],"u":[20,2,0,0,128,0,0,128,0,0]},{"x":[118,54,23,1,65,65,65,65,65,65,65],"u":[0,123,132,0,0,128,0,0,128,0]},{"x":[119,39,37,69,65,65,65,65,65,65,65],"u":[0,0,0,86,0,0,128,0,0,128]},{"x":[120,126,29,75,43,47,47,47,47,47,47],"u":[0,223,0,0,32,0,0,0,0,0]},{"x":[121,111,47,47,47,47,47,47,47,47,47],"u":[0,0,0,0,0,0,0,0,0,0]},{"x":[122,62,63,47,47,47,47,47,47,47,47],"u":[0,33,0,0,0,0,0,0,0,0]},{"x":[123,47,47,47,47,47,47,47,47,47,47],"u":[0,0,0,0,0,0,0,0,0,0]},{"x":[124,126,29,75,43,47,47,47,47,47,47],"u":[0,223,0,0,32,0,0,0,0,0]},{"x":[125,111,47,47,47,47,47,47,47,47,47],"u":[0,0,0,0,0,0,0,0,0,0]},{"x":[126,29,75,43,47,47,47,47,47,47,47],"u":[223,0,0,32,0,0,0,0,0,0]},{"x":[127,47,47,47,47,47,47,47,47,47,47],"u":[60,0,0,0,0,0,0,0,0,0]}],"curve":[0.016,0.02,0.02,0.012,0.02,0.024,0.02,0.02,0.012,0.02,0.028,0.032,0.012,0.012,0.016,0.052,0.024,0.024,0.056,0.04,0.04,0.052,0.052,0.052,0.028,0.048,0.044,0.032,0.052,0.056,0.08,0.044,0.04,0.068,0.052,0.044,0.064,0.068,0.1,0.06,0.048,0.092,0.1,0.108,0.092,0.092,0.124,0.116,0.136,0.084,0.116,0.128,0.12,0.14,0.108,0.164,0.168,0.192,0.164,0.204,0.184,0.168,0.224,0.216,0.256,0.28,0.276,0.216,0.22,0.276,0.272,0.324,0.324,0.312,0.34,0.344,0.348,0.384,0.4,0.42,0.496,0.436,0.532,0.504,0.548,0.536,0.64,0.608,0.624,0.652,0.704,0.74,0.8,0.84,0.884,0.94],"curveWindow":250,"baselineOk":108}}</script>
+<script>
+(function () {
+  "use strict";
+  var DATA = JSON.parse(document.getElementById("run-data").textContent);
+  var NOT = function (v) { return 1 - v; };
+
+  // Update rules and graphs follow the zemi2 manuscript (section 6).
+  // edges: [source, target, sign (+ activation / - inhibition), removable index (0 = fixed)]
+  var MODELS = {
+    cortical: {
+      n: 5, m: 6, H: 5, T: 10, spec: "mono", tau: 0, goal: [21, 10],
+      edges: [[5,1,"+",0],[2,1,"-",1],[4,1,"-",2],[5,2,"-",3],[1,2,"-",0],[3,2,"-",0],
+              [2,3,"-",4],[4,3,"-",5],[1,3,"+",0],[5,4,"-",6],[1,4,"-",0],[3,4,"-",0],
+              [2,5,"-",0],[4,5,"-",0]],
+      f: function (x, u) {
+        var x1=x[0],x2=x[1],x3=x[2],x4=x[3],x5=x[4];
+        return [
+          x5 & NOT(x2 & NOT(u[0])) & NOT(x4 & NOT(u[1])),
+          NOT(x5 & NOT(u[2])) & NOT(x1) & NOT(x3),
+          x1 & NOT(x2 & NOT(u[3])) & NOT(x4 & NOT(u[4])),
+          NOT(x5 & NOT(u[5])) & NOT(x1) & NOT(x3),
+          NOT(x2) & NOT(x4)
+        ];
+      }
+    },
+    wnt5a: {
+      n: 7, m: 8, H: 7, T: 10, spec: "rest", tau: 2, goal: [65, 47],
+      edges: [[6,1,"-",0],[2,2,"+",1],[4,2,"+",2],[6,2,"+",3],[7,3,"-",0],[4,4,"+",0],
+              [2,5,"+",4],[7,5,"-",5],[3,6,"+",6],[4,6,"+",7],[2,7,"-",8],[7,7,"+",0]],
+      f: function (x, u) {
+        var x2=x[1],x3=x[2],x4=x[3],x6=x[5],x7=x[6];
+        var a = x2 & NOT(u[0]), b = x4 & NOT(u[1]), c = x6 & NOT(u[2]);
+        return [
+          NOT(x6),
+          (a & b) | (b & c) | (c & a),
+          NOT(x7),
+          x4,
+          (x2 & NOT(u[3])) | NOT(x7 & NOT(u[4])),
+          (x3 & NOT(u[5])) | (x4 & NOT(u[6])),
+          NOT(x2 & NOT(u[7])) | x7
+        ];
+      }
+    }
+  };
+
+  function toBits(v, w) { var b = []; for (var i = 0; i < w; i++) b.push((v >> (w - 1 - i)) & 1); return b; }
+  function toId(b) { var v = 0; for (var i = 0; i < b.length; i++) v = (v << 1) | b[i]; return v; }
+  function count(b) { var c = 0; for (var i = 0; i < b.length; i++) c += b[i]; return c; }
+  function inGoal(M, id) { return M.goal.indexOf(id) >= 0; }
+
+  function simulate(M, x0, us) {
+    var xs = [x0], x = toBits(x0, M.n);
+    for (var t = 0; t < us.length; t++) { x = M.f(x, us[t]); xs.push(toId(x)); }
+    return xs;
+  }
+  function flagsOf(M, us) {
+    var h = [], cur = []; for (var k = 0; k < M.m; k++) cur.push(0);
+    h.push(cur.slice());
+    for (var t = 0; t < us.length; t++) {
+      for (var j = 0; j < M.m; j++) {
+        if (M.spec === "mono") cur[j] = cur[j] | us[t][j];
+        else cur[j] = us[t][j] ? M.tau : Math.max(0, cur[j] - 1);
+      }
+      h.push(cur.slice());
+    }
+    return h;
+  }
+  function monitorOf(M, xs) {
+    var s = [inGoal(M, xs[0]) ? 1 : 0];
+    for (var t = 0; t + 1 < xs.length; t++) {
+      var p = s[t], g = inGoal(M, xs[t + 1]), nx;
+      if (p === 2) nx = 2;
+      else if (g) nx = 1;
+      else if (p === 1) nx = 2;
+      else if (t + 1 >= M.H) nx = 2;
+      else nx = 0;
+      s.push(nx);
+    }
+    return s;
+  }
+  function baselineOk(M, x0) {
+    var us = []; for (var t = 0; t < M.T; t++) us.push(toBits(0, M.m));
+    var s = monitorOf(M, simulate(M, x0, us));
+    return s[s.length - 1] === 1;
+  }
+
+  // ---------------- state ----------------
+  var st = { model: "cortical", mode: "learned", x0: 28, t: 0, manual: [], pick: null, timer: null };
+  var defaults = { cortical: 28, wnt5a: 54 };
+
+  function episode() {
+    var M = MODELS[st.model], us = [];
+    if (st.mode === "learned") {
+      var e = DATA[st.model].episodes[st.x0];
+      for (var i = 0; i < e.u.length; i++) us.push(toBits(e.u[i], M.m));
+    } else if (st.mode === "none") {
+      for (var j = 0; j < M.T; j++) us.push(toBits(0, M.m));
+    } else {
+      us = st.manual.slice();
+    }
+    var xs = simulate(M, st.x0, us);
+    return { us: us, xs: xs, h: flagsOf(M, us), s: monitorOf(M, xs) };
+  }
+
+  // mask for the next manual step: returns per edge "free" | "forced-on" | "forced-off"
+  function maskFor(M, h) {
+    var r = [];
+    for (var k = 0; k < M.m; k++) {
+      if (M.spec === "mono") r.push(h[k] === 1 ? "forced-on" : "free");
+      else r.push(h[k] > 0 ? "forced-off" : "free");
+    }
+    return r;
+  }
+  function resetPick(M, ep) {
+    var h = ep.h[ep.us.length], mk = maskFor(M, h), p = [];
+    for (var k = 0; k < M.m; k++) p.push(mk[k] === "forced-on" ? 1 : 0);
+    st.pick = p;
+  }
+
+  // ---------------- graph ----------------
+  var SVGNS = "http://www.w3.org/2000/svg";
+  function el(name, attrs, parent) {
+    var e = document.createElementNS(SVGNS, name);
+    for (var a in attrs) e.setAttribute(a, attrs[a]);
+    if (parent) parent.appendChild(e);
+    return e;
+  }
+  var R = 17, CX = 150, CY = 142, RAD = 104;
+  function nodePos(M, i) {
+    var a = -Math.PI / 2 + (2 * Math.PI * (i - 1)) / M.n;
+    return { x: CX + RAD * Math.cos(a), y: CY + RAD * Math.sin(a), a: a };
+  }
+  function unit(dx, dy) { var l = Math.hypot(dx, dy) || 1; return [dx / l, dy / l]; }
+
+  function drawGraph(M, xbits, ubits, t) {
+    var svg = document.getElementById("graph");
+    while (svg.firstChild) svg.removeChild(svg.firstChild);
+    var defs = el("defs", {}, svg);
+    ["fixed", "rem", "cut"].forEach(function (c) {
+      var ma = el("marker", { id: "a-" + c, viewBox: "0 0 10 10", refX: "9", refY: "5", markerWidth: "7", markerHeight: "7", orient: "auto-start-reverse" }, defs);
+      el("path", { d: "M0,1 L10,5 L0,9 z", "class": "mk-" + c }, ma);
+      var mi = el("marker", { id: "i-" + c, viewBox: "0 0 10 10", refX: "6", refY: "5", markerWidth: "7", markerHeight: "7", orient: "auto" }, defs);
+      el("rect", { x: "4", y: "0", width: "2.6", height: "10", "class": "mk-" + c }, mi);
+    });
+    var style = el("style", {}, svg);
+    style.textContent =
+      ".mk-fixed{fill:var(--edge-fixed)}.mk-rem{fill:var(--accent)}.mk-cut{fill:var(--cut)}" +
+      ".e{fill:none;stroke-width:1.6}.e-fixed{stroke:var(--edge-fixed)}.e-rem{stroke:var(--accent)}" +
+      ".e-cut{stroke:var(--cut);stroke-dasharray:4 3;opacity:.55}" +
+      ".nd{stroke:var(--ink-soft);stroke-width:1.4}.nd-on{fill:var(--on);stroke:var(--on)}.nd-off{fill:var(--panel)}" +
+      ".nt{font:600 12px ui-monospace,Menlo,Consolas,monospace;text-anchor:middle;dominant-baseline:central}" +
+      ".nt-on{fill:var(--on-ink)}.nt-off{fill:var(--ink)}" +
+      ".el{font:10px ui-monospace,Menlo,Consolas,monospace;text-anchor:middle;dominant-baseline:central}" +
+      ".el-rem{fill:var(--accent)}.el-cut{fill:var(--cut);font-weight:700}" +
+      ".elb{fill:var(--panel)}";
+
+    var has = {};
+    M.edges.forEach(function (e) { has[e[0] + "-" + e[1]] = true; });
+    var labels = [];
+    M.edges.forEach(function (e) {
+      var s = e[0], tg = e[1], sign = e[2], k = e[3];
+      var cut = k > 0 && ubits && ubits[k - 1] === 1;
+      var cls = k === 0 ? "fixed" : (cut ? "cut" : "rem");
+      var mk = "url(#" + (sign === "+" ? "a-" : "i-") + cls + ")";
+      var P = nodePos(M, s), Q = nodePos(M, tg), d, mid;
+      if (s === tg) {
+        var o = unit(P.x - CX, P.y - CY), rot = function (v, th) { return [v[0] * Math.cos(th) - v[1] * Math.sin(th), v[0] * Math.sin(th) + v[1] * Math.cos(th)]; };
+        var a1 = rot(o, -0.55), a2 = rot(o, 0.55), c1 = rot(o, -0.5), c2 = rot(o, 0.5);
+        var sx = P.x + a1[0] * R, sy = P.y + a1[1] * R, ex = P.x + a2[0] * (R + 2), ey = P.y + a2[1] * (R + 2);
+        d = "M" + sx + "," + sy + " C" + (P.x + c1[0] * 58) + "," + (P.y + c1[1] * 58) + " " + (P.x + c2[0] * 58) + "," + (P.y + c2[1] * 58) + " " + ex + "," + ey;
+        mid = { x: P.x + o[0] * 46, y: P.y + o[1] * 46 };
+      } else {
+        var dir = unit(Q.x - P.x, Q.y - P.y), nrm = [-dir[1], dir[0]];
+        var off = has[tg + "-" + s] ? 16 : 9;
+        var mx = (P.x + Q.x) / 2 + nrm[0] * off, my = (P.y + Q.y) / 2 + nrm[1] * off;
+        var u1 = unit(mx - P.x, my - P.y), u2 = unit(mx - Q.x, my - Q.y);
+        var sx2 = P.x + u1[0] * R, sy2 = P.y + u1[1] * R, ex2 = Q.x + u2[0] * (R + 2), ey2 = Q.y + u2[1] * (R + 2);
+        d = "M" + sx2 + "," + sy2 + " Q" + mx + "," + my + " " + ex2 + "," + ey2;
+        mid = { x: 0.25 * sx2 + 0.5 * mx + 0.25 * ex2, y: 0.25 * sy2 + 0.5 * my + 0.25 * ey2 };
+      }
+      el("path", { d: d, "class": "e e-" + cls, "marker-end": mk }, svg);
+      if (k > 0) labels.push({ mid: mid, k: k, cut: cut });
+    });
+    labels.forEach(function (L) {
+      el("circle", { cx: L.mid.x, cy: L.mid.y, r: 7, "class": "elb" }, svg);
+      var tx = el("text", { x: L.mid.x, y: L.mid.y, "class": "el " + (L.cut ? "el-cut" : "el-rem") }, svg);
+      tx.textContent = L.cut ? "×" : String(L.k);
+    });
+    for (var i = 1; i <= M.n; i++) {
+      var p = nodePos(M, i), on = xbits[i - 1] === 1;
+      el("circle", { cx: p.x, cy: p.y, r: R, "class": "nd " + (on ? "nd-on" : "nd-off") }, svg);
+      var tt = el("text", { x: p.x, y: p.y, "class": "nt " + (on ? "nt-on" : "nt-off") }, svg);
+      tt.textContent = "x" + i;
+    }
+    var cap = document.getElementById("graph-cap");
+    var g = inGoal(M, toId(xbits));
+    cap.textContent = "t = " + t + "　状態 ID " + toId(xbits) + (g ? "（目標集合）" : "") +
+      (ubits ? "　切るエッジ " + (count(ubits) ? ubits.map(function (v, j) { return v ? j + 1 : null; }).filter(Boolean).join(", ") : "なし") : "　（入力なし）");
+  }
+
+  // ---------------- raster ----------------
+  function cell(cls, text, onClick, title) {
+    var d = document.createElement("div");
+    d.className = "c " + cls;
+    if (text != null) d.textContent = text;
+    if (title) d.title = title;
+    if (onClick) d.addEventListener("click", onClick);
+    return d;
+  }
+  function label(text) { var d = document.createElement("div"); d.className = "rl"; d.textContent = text; return d; }
+
+  function render() {
+    var M = MODELS[st.model], ep = episode();
+    var manual = st.mode === "manual";
+    var done = ep.us.length;                // number of executed steps
+    if (manual) { st.t = done; if (!st.pick) resetPick(M, ep); }
+    var T = M.T, t = st.t;
+
+    // graph
+    var ub = null;
+    if (manual) ub = done < T ? st.pick : null;
+    else ub = t < T ? ep.us[t] : null;
+    drawGraph(M, toBits(ep.xs[Math.min(t, ep.xs.length - 1)], M.n), ub, t);
+
+    // raster
+    var R_ = document.getElementById("raster");
+    R_.innerHTML = "";
+    R_.style.gridTemplateColumns = "auto repeat(" + (T + 1) + ", minmax(20px, 1fr))";
+    R_.appendChild(label("t"));
+    for (var c = 0; c <= T; c++) {
+      var hd = document.createElement("div");
+      hd.className = "hd"; hd.textContent = c;
+      if (!manual) (function (cc) { hd.addEventListener("click", function () { setT(cc); }); })(c);
+      R_.appendChild(hd);
+    }
+    function colClick(cc) { return manual ? null : function () { setT(cc); }; }
+    for (var i = 0; i < M.n; i++) {
+      R_.appendChild(label("x" + (i + 1)));
+      for (var c2 = 0; c2 <= T; c2++) {
+        if (c2 >= ep.xs.length) { R_.appendChild(cell("future", "")); continue; }
+        var on = toBits(ep.xs[c2], M.n)[i] === 1;
+        R_.appendChild(cell((on ? "on" : "") + (c2 === t ? " cur" : "") + (c2 > t && !manual ? " future" : ""), on ? "1" : "0", colClick(c2)));
+      }
+    }
+    R_.appendChild(label("目標集合"));
+    for (var c3 = 0; c3 <= T; c3++) {
+      if (c3 >= ep.xs.length) { R_.appendChild(cell("future", "")); continue; }
+      var g = inGoal(M, ep.xs[c3]);
+      R_.appendChild(cell((g ? "in-goal" : "") + (c3 === t ? " cur" : "") + (c3 > t && !manual ? " future" : ""), g ? "✓" : "", colClick(c3)));
+    }
+    R_.appendChild(label("監視 s"));
+    for (var c4 = 0; c4 <= T; c4++) {
+      if (c4 >= ep.s.length) { R_.appendChild(cell("future", "")); continue; }
+      var sv = ep.s[c4];
+      R_.appendChild(cell("s" + sv + (c4 === t ? " cur" : "") + (c4 > t && !manual ? " future" : ""), String(sv), colClick(c4),
+        ["0：未到達", "1：到達・維持中", "2：失敗確定"][sv]));
+    }
+    var sep = document.createElement("div"); sep.className = "sep"; R_.appendChild(sep);
+
+    var mk = manual && done < T ? maskFor(M, ep.h[done]) : null;
+    for (var k = 0; k < M.m; k++) {
+      var e = M.edges.filter(function (E) { return E[3] === k + 1; })[0];
+      R_.appendChild(label("e" + (k + 1) + "  " + e[0] + "→" + e[1]));
+      for (var c5 = 0; c5 <= T; c5++) {
+        if (c5 === T) { R_.appendChild(cell("na", "")); continue; }
+        if (manual && c5 === done) {
+          var lock = mk[k] !== "free", isCut = st.pick[k] === 1;
+          var title = mk[k] === "forced-on" ? "単調性：一度切ったので切り続ける" : mk[k] === "forced-off" ? "休薬中：あと " + ep.h[done][k] + " ステップ" : "クリックで切る／戻す";
+          (function (kk, lk) {
+            R_.appendChild(cell("pick cur" + (isCut ? " cut" : "") + (lk ? " locked" : ""), lk ? (mk[kk] === "forced-off" ? "休" : "🔒") : (isCut ? "切" : ""),
+              lk ? null : function () { st.pick[kk] = 1 - st.pick[kk]; render(); }, title));
+          })(k, lock);
+          continue;
+        }
+        if (c5 >= ep.us.length) { R_.appendChild(cell("future", "")); continue; }
+        var cutNow = ep.us[c5][k] === 1;
+        var resting = !cutNow && M.spec === "rest" && ep.h[c5][k] > 0;
+        R_.appendChild(cell((cutNow ? "cut" : resting ? "rest" : "") + (c5 === t ? " cur" : "") + (c5 > t && !manual ? " future" : ""),
+          cutNow ? "切" : resting ? "休" : "", colClick(c5)));
+      }
+    }
+
+    // controls
+    document.getElementById("ctrl-play").hidden = manual;
+    document.getElementById("ctrl-manual").hidden = !manual;
+    document.getElementById("slider").value = t;
+    document.getElementById("tlabel").textContent = "t = " + t;
+    document.getElementById("btn-step").disabled = done >= T;
+    document.getElementById("btn-undo").disabled = done === 0;
+
+    // verdict
+    var V = document.getElementById("verdict");
+    var total = 0; ep.us.forEach(function (u) { total += count(u); });
+    var first = -1; for (var q = 0; q < ep.xs.length; q++) if (inGoal(M, ep.xs[q])) { first = q; break; }
+    var sEnd = ep.s[ep.s.length - 1], finished = ep.xs.length === T + 1;
+    V.className = "verdict";
+    if (sEnd === 2) {
+      V.className = "verdict ng";
+      V.textContent = first >= 0 && first <= M.H
+        ? "失敗：t = " + first + " で目標集合に入りましたが、その後に出てしまいました。"
+        : "失敗：期限 H = " + M.H + " までに目標集合へ入れませんでした。";
+    } else if (finished && sEnd === 1) {
+      V.className = "verdict ok";
+      V.textContent = "成功：t = " + first + " で目標集合に初めて入り、t = " + T + " まで留まりました。切ったエッジの延べ本数は " + total + "。";
+    } else if (sEnd === 1) {
+      V.textContent = "途中：t = " + first + " で目標集合に入り、維持中です。t = " + T + " まで出なければ成功。";
+    } else {
+      V.textContent = "途中：まだ目標集合に入っていません（期限は t = " + M.H + "）。";
+    }
+    if (!finished && st.mode !== "manual") V.textContent = "";
+
+    document.getElementById("hint").textContent = manual
+      ? (M.spec === "mono"
+        ? "点線の枠をクリックすると、このステップで切るエッジを選べます。単調性のため、一度切ったエッジは 🔒 になり、戻せません（行動マスキング）。"
+        : "点線の枠をクリックすると、このステップで切るエッジを選べます。切ったエッジは 2 ステップ「休」になり、その間は選べません（行動マスキング）。")
+      : "列をクリックするかスライダーを動かすと、その時刻のネットワークを左に表示します。左の図で × が付いた点線のエッジが、その時刻に切っているエッジです。";
+
+    // state buttons
+    var btns = document.querySelectorAll("#states button");
+    for (var b = 0; b < btns.length; b++) btns[b].setAttribute("aria-pressed", String(Number(btns[b].dataset.v) === st.x0));
+  }
+
+  function setT(t) { st.t = t; render(); }
+
+  function buildStates() {
+    var M = MODELS[st.model], box = document.getElementById("states");
+    box.innerHTML = "";
+    for (var i = 0; i < Math.pow(2, M.n); i++) {
+      var b = document.createElement("button");
+      b.type = "button"; b.dataset.v = i; b.textContent = i;
+      var cls = [];
+      if (inGoal(M, i)) cls.push("goal");
+      if (baselineOk(M, i)) cls.push("base-ok");
+      b.className = cls.join(" ");
+      b.title = "x₀ = (" + toBits(i, M.n).join(",") + ")";
+      b.addEventListener("click", function () { st.x0 = Number(this.dataset.v); restart(); });
+      box.appendChild(b);
+    }
+  }
+
+  function stop() { if (st.timer) { clearInterval(st.timer); st.timer = null; } document.getElementById("btn-play").textContent = "▶ 再生"; }
+  function restart() { stop(); st.t = 0; st.manual = []; st.pick = null; render(); }
+
+  function seg(id, key, after) {
+    var g = document.getElementById(id);
+    g.addEventListener("click", function (ev) {
+      var b = ev.target.closest("button"); if (!b) return;
+      st[key] = b.dataset.v;
+      var all = g.querySelectorAll("button");
+      for (var i = 0; i < all.length; i++) all[i].setAttribute("aria-pressed", String(all[i] === b));
+      if (after) after();
+      restart();
+    });
+  }
+  seg("seg-model", "model", function () { st.x0 = defaults[st.model]; buildStates(); });
+  seg("seg-mode", "mode");
+
+  document.getElementById("slider").addEventListener("input", function () { stop(); setT(Number(this.value)); });
+  document.getElementById("btn-play").addEventListener("click", function () {
+    var btn = this;
+    if (st.timer) { stop(); return; }
+    if (st.t >= MODELS[st.model].T) st.t = 0;
+    btn.textContent = "❚❚ 停止";
+    render();
+    st.timer = setInterval(function () {
+      if (st.t >= MODELS[st.model].T) { stop(); return; }
+      st.t += 1; render();
+    }, 750);
+  });
+  document.getElementById("btn-step").addEventListener("click", function () {
+    var M = MODELS[st.model];
+    if (st.manual.length >= M.T) return;
+    st.manual.push(st.pick.slice()); st.pick = null; render();
+  });
+  document.getElementById("btn-undo").addEventListener("click", function () { st.manual.pop(); st.pick = null; render(); });
+  document.getElementById("btn-reset").addEventListener("click", restart);
+
+  // ---------------- training curves ----------------
+  function drawCurves() {
+    var box = document.getElementById("curves");
+    [["cortical", "Cortical（15,000 エピソード）"], ["wnt5a", "Wnt5a（24,000 エピソード）"]].forEach(function (p) {
+      var d = DATA[p[0]], ys = d.curve, W = 300, H = 130, L = 30, B = 22, Rr = 8, Tt = 8;
+      var wrap = document.createElement("div");
+      var ttl = document.createElement("p"); ttl.className = "ct"; ttl.textContent = p[1]; wrap.appendChild(ttl);
+      var svg = el("svg", { viewBox: "0 0 " + W + " " + H, role: "img", "aria-label": p[1] + " の学習中の成功率" }, wrap);
+      var st_ = el("style", {}, svg);
+      st_.textContent = ".ax{stroke:var(--line)}.lb{font:10px ui-monospace,Menlo,Consolas,monospace;fill:var(--ink-mute)}.ln{fill:none;stroke:var(--accent);stroke-width:1.8}";
+      var X = function (i) { return L + (W - L - Rr) * i / (ys.length - 1); };
+      var Y = function (v) { return Tt + (H - Tt - B) * (1 - v); };
+      [0, 0.5, 1].forEach(function (v) {
+        el("line", { x1: L, x2: W - Rr, y1: Y(v), y2: Y(v), "class": "ax" }, svg);
+        var t = el("text", { x: L - 4, y: Y(v) + 3, "class": "lb", "text-anchor": "end" }, svg); t.textContent = (v * 100) + "%";
+      });
+      var total = ys.length * d.curveWindow;
+      [0, 0.5, 1].forEach(function (f) {
+        var t = el("text", { x: L + (W - L - Rr) * f, y: H - 6, "class": "lb", "text-anchor": f === 0 ? "start" : f === 1 ? "end" : "middle" }, svg);
+        t.textContent = Math.round(total * f).toLocaleString();
+      });
+      el("polyline", { points: ys.map(function (v, i) { return X(i).toFixed(1) + "," + Y(v).toFixed(1); }).join(" "), "class": "ln" }, svg);
+      box.appendChild(wrap);
+    });
+    var cap = document.createElement("p");
+    cap.className = "muted small"; cap.style.gridColumn = "1 / -1"; cap.style.margin = "0";
+    cap.textContent = "seed 11。縦軸は学習中のエピソードが成功した割合、横軸はエピソード数。学習中の制約違反は両モデルとも全エピソードで 0。";
+    box.appendChild(cap);
+  }
+
+  buildStates();
+  drawCurves();
+  render();
+})();
+</script>
 </body>
 </html>
