@@ -41,7 +41,7 @@ jobs:
           
           # Create a zip archive of the local package and place it in each dashboard directory for Pyodide runtime loading
           cd src
-          zip -r ../bn_edge_removal.zip bn_edge_removal
+          zip -r ../bn_edge_removal.zip bn_edge_removal -x "*/__pycache__/*" "*.pyc"
           cd ..
           
           cp bn_edge_removal.zip dist/reachability/

@@ -13,19 +13,13 @@ import numpy as np
 import optuna
 import yaml
 
-from bn_edge_removal.cell_cycle10 import CellCycle10Model
-from bn_edge_removal.env import (
+from bn_edge_removal.control.env import (
     EdgeRemovalEnv,
     HorizonConfig,
     RewardConfig,
+    resolve_constraint_type,
 )
-from bn_edge_removal.evaluation import evaluate_policy
-from bn_edge_removal.q_learning import (
-    EpsilonSchedule,
-    QLearningConfig,
-    train_q_learning,
-)
-from bn_edge_removal.utils import (
+from bn_edge_removal.experiment.utils import (
     current_timestamp,
     load_config,
     prepare_output_dir,
@@ -33,9 +27,15 @@ from bn_edge_removal.utils import (
     save_results,
     setup_logger,
     update_experiment_summary,
-    write_daily_report_request,
     write_report,
 )
+from bn_edge_removal.learning.evaluation import evaluate_policy
+from bn_edge_removal.learning.q_learning import (
+    EpsilonSchedule,
+    QLearningConfig,
+    train_q_learning,
+)
+from bn_edge_removal.models.cell_cycle10 import CellCycle10Model
 
 
 def _parse_args() -> argparse.Namespace:
@@ -156,11 +156,14 @@ def _run_one(config: dict[str, Any]) -> dict[str, float]:
         reach_horizon=int(config["horizon"]["reach_horizon"]),
         max_steps=int(config["horizon"]["max_steps"]),
     )
+    constraint_cfg = config.get("constraint", {})
     env = EdgeRemovalEnv(
         model=model,
         reward=reward,
         horizon=horizon,
-        action_masking=bool(config["constraint"].get("action_masking", False)),
+        action_masking=bool(constraint_cfg.get("action_masking", False)),
+        constraint_type=resolve_constraint_type(constraint_cfg, default="monotone"),
+        recovery_tau=int(constraint_cfg.get("recovery_tau", 2)),
         rng=rng,
     )
 
@@ -410,20 +413,11 @@ def main() -> None:
         },
     )
 
-    request_path = write_daily_report_request(
-        output_dir=output_dir,
-        experiment_name=experiment_name,
-        timestamp=timestamp,
-        config_path=args.config,
-        metrics=metrics,
-    )
-
     logger.info("Tuning complete")
     logger.info(f"Best score: {metrics['best_score']:.6f}")
     logger.info(f"Best success rate: {metrics['best_success_rate']:.6f}")
     logger.info(f"Best config: {best_config_path}")
     logger.info(f"Trials CSV: {trials_csv_path}")
-    logger.info(f"Run: uv run poe daily-report --request {request_path}")
 
 
 if __name__ == "__main__":

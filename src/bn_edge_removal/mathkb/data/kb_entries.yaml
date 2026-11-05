@@ -1,0 +1,1124 @@
+# Knowledge entries (kb_entries table). updated_from_source_at is derived
+# from the linked repo sources when the seed is built.
+- canonical_slug: boolean-network-definition
+  title_ja: ブーリアンネットワークの定義
+  title_en: Boolean Network Definition
+  entry_type: definition
+  domain_area: bn_foundation
+  scope: global
+  canonical_statement: A Boolean network is a directed graph whose nodes take binary states
+    and evolve under Boolean update rules.
+  formal_expression: G=(V,E), x_i(t) ∈ {0,1}, x(t+1)=f(x(t))
+  plain_explanation: ブーリアンネットワークは、有向グラフ上の各ノードが 0/1 の状態を持ち、論理関数で次時刻に更新される離散力学系である。
+  applicability: Use for BN basics across all models in this project.
+  exception_note: Does not encode asynchronous-update variants in v1.
+  status: canonical
+  confidence: 0.99
+  aliases:
+  - BN
+  - Boolean network
+  tags:
+  - foundation
+  - definition
+  - discrete_dynamics
+  source_keys:
+  - repo:boolean_network_theory
+  network_keys: []
+  constraint_keys: []
+  prerequisite_slugs: []
+  related_slugs:
+  - boolean-network-state-space
+  - synchronous-update-rule
+  contradict_slugs: []
+- canonical_slug: boolean-network-state-space
+  title_ja: 状態空間の有限性
+  title_en: Boolean Network State Space
+  entry_type: definition
+  domain_area: bn_foundation
+  scope: global
+  canonical_statement: The state space of an N-node Boolean network has size 2^N.
+  formal_expression: x(t) ∈ {0,1}^N, |X| = 2^N
+  plain_explanation: N ノードのブーリアンネットワークでは、全状態数は 2^N で有限になる。
+  applicability: Use when reasoning about exhaustive verification or search.
+  exception_note: None in the current synchronous finite-state setting.
+  status: canonical
+  confidence: 0.99
+  aliases:
+  - state space
+  - binary state vector
+  tags:
+  - foundation
+  - state_space
+  source_keys:
+  - repo:boolean_network_theory
+  network_keys: []
+  constraint_keys: []
+  prerequisite_slugs:
+  - boolean-network-definition
+  related_slugs:
+  - attractor-in-finite-deterministic-bn
+  contradict_slugs: []
+- canonical_slug: synchronous-update-rule
+  title_ja: 同期更新規則
+  title_en: Synchronous Update Rule
+  entry_type: definition
+  domain_area: bn_foundation
+  scope: global
+  canonical_statement: This project models Boolean-network dynamics with synchronous updates.
+  formal_expression: x(t+1)=f(x(t))
+  plain_explanation: 各ノードは同じ時刻に同時更新される同期更新を採用している。
+  applicability: Applies to all shipped network models and theory notes.
+  exception_note: Asynchronous semantics are out of scope for v1.
+  status: canonical
+  confidence: 0.98
+  aliases:
+  - synchronous update
+  tags:
+  - foundation
+  - update_rule
+  source_keys:
+  - repo:boolean_network_theory
+  network_keys: []
+  constraint_keys: []
+  prerequisite_slugs:
+  - boolean-network-definition
+  related_slugs:
+  - attractor-in-finite-deterministic-bn
+  contradict_slugs: []
+- canonical_slug: attractor-in-finite-deterministic-bn
+  title_ja: 有限決定論的BNにおけるアトラクタ
+  title_en: Attractor in Finite Deterministic Boolean Networks
+  entry_type: theorem_like_fact
+  domain_area: bn_foundation
+  scope: global
+  canonical_statement: A finite deterministic Boolean network eventually reaches a fixed point
+    or a limit cycle.
+  formal_expression: finite deterministic dynamics -> eventual fixed point or cycle
+  plain_explanation: 状態空間が有限で更新規則が決定論的なので、軌道は最終的に固定点またはリミットサイクルに入る。
+  applicability: Use to justify attractor-based target definitions.
+  exception_note: Does not classify attractor basin size or stability margins.
+  status: canonical
+  confidence: 0.97
+  aliases:
+  - attractor
+  - fixed point
+  - limit cycle
+  tags:
+  - foundation
+  - attractor
+  source_keys:
+  - repo:boolean_network_theory
+  network_keys: []
+  constraint_keys: []
+  prerequisite_slugs:
+  - boolean-network-definition
+  - boolean-network-state-space
+  - synchronous-update-rule
+  related_slugs:
+  - goal-states-as-control-targets
+  contradict_slugs: []
+- canonical_slug: goal-states-as-control-targets
+  title_ja: ゴール状態は制御目標である
+  title_en: Goal States as Control Targets
+  entry_type: definition
+  domain_area: bn_foundation
+  scope: project_specific
+  canonical_statement: In this project, target states are specified as goal attractor states
+    to be reached and maintained.
+  formal_expression: goal_states ⊂ X
+  plain_explanation: 本研究では、制御目標は goal_states として明示されたアトラクタ状態への到達・維持として扱う。
+  applicability: Applies to environment success and reachability logic.
+  exception_note: Goal semantics differ by network and may include multiple targets.
+  status: canonical
+  confidence: 0.96
+  aliases:
+  - goal states
+  - targets
+  tags:
+  - goal
+  - control_target
+  source_keys:
+  - repo:boolean_network_theory
+  - repo:network_specs_readme
+  - code:env_py
+  network_keys:
+  - cell_cycle10
+  - cortical
+  - s_pombe
+  - wnt5a
+  constraint_keys: []
+  prerequisite_slugs:
+  - attractor-in-finite-deterministic-bn
+  related_slugs:
+  - exact-reachability-verification
+  contradict_slugs: []
+- canonical_slug: edge-removal-control-input
+  title_ja: エッジ除去制御入力
+  title_en: Edge Removal Control Input
+  entry_type: definition
+  domain_area: edge_removal_control
+  scope: project_specific
+  canonical_statement: Control actions are binary edge-removal vectors over the removable
+    edge set.
+  formal_expression: u(t) ∈ {0,1}^M
+  plain_explanation: 制御入力 u(t) は、削除可能エッジ集合に対する 0/1 ベクトルで表される。
+  applicability: Applies to all BN control models in this repository.
+  exception_note: The action meaning is edge cancellation, not node perturbation.
+  status: canonical
+  confidence: 0.99
+  aliases:
+  - edge removal
+  - control input
+  tags:
+  - control
+  - action_space
+  source_keys:
+  - repo:boolean_network_theory
+  - repo:network_specs_readme
+  network_keys:
+  - cell_cycle10
+  - cortical
+  - s_pombe
+  - wnt5a
+  constraint_keys: []
+  prerequisite_slugs:
+  - boolean-network-definition
+  related_slugs:
+  - edge-removal-cancels-edge-effect
+  - mdp-action-space
+  contradict_slugs: []
+- canonical_slug: edge-removal-cancels-edge-effect
+  title_ja: エッジ除去は論理式中の相互作用を無効化する
+  title_en: Edge Removal Cancels Edge Effect
+  entry_type: implementation_note
+  domain_area: edge_removal_control
+  scope: project_specific
+  canonical_statement: A removed edge is modeled by canceling its logical contribution in
+    the update equation.
+  formal_expression: not(x_j and not u_k)
+  plain_explanation: 除去可能エッジは update equation 内で u_k により無効化され、u_k=1 のとき元の相互作用が働かない。
+  applicability: Applies to network YAML update equations and model code.
+  exception_note: The concrete Boolean expression depends on edge sign and context.
+  status: canonical
+  confidence: 0.95
+  aliases:
+  - intervention semantics
+  tags:
+  - control
+  - update_equation
+  source_keys:
+  - repo:boolean_network_theory
+  - repo:network_specs_readme
+  network_keys:
+  - cell_cycle10
+  - cortical
+  - s_pombe
+  - wnt5a
+  constraint_keys: []
+  prerequisite_slugs:
+  - edge-removal-control-input
+  related_slugs:
+  - network-spec-yaml-is-source-of-truth
+  contradict_slugs: []
+- canonical_slug: extended-state-space
+  title_ja: 拡張状態空間
+  title_en: Extended State Space
+  entry_type: definition
+  domain_area: mdp_rl
+  scope: project_specific
+  canonical_statement: The environment state combines the network state x and constraint history
+    flags h.
+  formal_expression: S = X x H
+  plain_explanation: 環境状態はネットワーク状態 x と、制約履歴を表すフラグ h の直積で表す。
+  applicability: Applies to environment indexing and reachability analysis.
+  exception_note: Flag-state cardinality depends on constraint type.
+  status: canonical
+  confidence: 0.97
+  aliases:
+  - extended state
+  tags:
+  - mdp
+  - state_space
+  - flags
+  source_keys:
+  - repo:boolean_network_theory
+  - code:env_py
+  network_keys: []
+  constraint_keys:
+  - monotone
+  - recovery
+  prerequisite_slugs:
+  - edge-removal-control-input
+  related_slugs:
+  - monotone-constraint
+  - recovery-constraint
+  contradict_slugs: []
+- canonical_slug: mdp-action-space
+  title_ja: MDP の行動空間
+  title_en: MDP Action Space
+  entry_type: definition
+  domain_area: mdp_rl
+  scope: project_specific
+  canonical_statement: The unconstrained action space enumerates all 2^M edge-removal combinations.
+  formal_expression: A = {0,1}^M, |A| = 2^M
+  plain_explanation: 制約を考えない行動空間は、M 本の削除可能エッジに対する全 2^M 通りの組み合わせである。
+  applicability: Applies to Q-table indexing and action enumeration.
+  exception_note: Action masking may prune the admissible subset at runtime.
+  status: canonical
+  confidence: 0.97
+  aliases:
+  - action set
+  tags:
+  - mdp
+  - actions
+  source_keys:
+  - repo:boolean_network_theory
+  - code:env_py
+  network_keys: []
+  constraint_keys: []
+  prerequisite_slugs:
+  - edge-removal-control-input
+  related_slugs:
+  - action-masking-prunes-illegal-actions
+  contradict_slugs: []
+- canonical_slug: reward-control-cost
+  title_ja: 制御コスト報酬
+  title_en: 'Reward: Control Cost'
+  entry_type: metric
+  domain_area: reward_design
+  scope: project_specific
+  canonical_statement: The control-cost term penalizes the total number of active interventions
+    at each step.
+  formal_expression: r_control = -edge_cost · Σ_i u_i
+  plain_explanation: edge_cost は、その時点で除去しているエッジ本数に比例した負報酬を与える。
+  applicability: Applies to per-step reward computation in EdgeRemovalEnv.
+  exception_note: None in the current implementation.
+  status: canonical
+  confidence: 0.98
+  aliases:
+  - edge_cost
+  tags:
+  - reward
+  - cost
+  source_keys:
+  - repo:boolean_network_theory
+  - code:env_py
+  network_keys: []
+  constraint_keys: []
+  prerequisite_slugs:
+  - edge-removal-control-input
+  related_slugs:
+  - reward-new-edge-cost
+  - reward-violation-penalty
+  contradict_slugs: []
+- canonical_slug: reward-new-edge-cost
+  title_ja: 新規介入エッジコスト
+  title_en: 'Reward: New Edge Cost'
+  entry_type: metric
+  domain_area: reward_design
+  scope: project_specific
+  canonical_statement: 'The new-edge-cost term penalizes each intervention onset: an edge
+    with h_i=0 that is intervened at the current step.'
+  formal_expression: r_new_edge = -new_edge_cost · Σ_i 1[h_i=0 ∧ u_i=1]
+  plain_explanation: new_edge_cost は、h_i=0 のエッジに介入したステップ、すなわち介入の開始時にだけ追加コストを与える。monotone では
+    h_i=0 は「未除去」を意味するので各エッジの初回除去のみ、recovery では h_i=0 は「休薬中でない」を意味するので休薬明けの再介入のたびに課される。
+  applicability: Applies to reward shaping in monotone and recovery settings.
+  exception_note: In recovery mode h_i=0 means 'not cooling down', so the cost re-applies
+    at every non-violating intervention, not only at the first removal.
+  status: canonical
+  confidence: 0.98
+  aliases:
+  - new_edge_cost
+  tags:
+  - reward
+  - intervention_history
+  source_keys:
+  - code:env_py
+  - test:env_reward
+  network_keys: []
+  constraint_keys:
+  - monotone
+  - recovery
+  prerequisite_slugs:
+  - extended-state-space
+  - reward-control-cost
+  related_slugs:
+  - reward-violation-penalty
+  contradict_slugs: []
+- canonical_slug: reward-goal-onset-cost
+  title_ja: 目標集合内の新規介入コスト
+  title_en: 'Reward: Goal Onset Cost'
+  entry_type: metric
+  domain_area: reward_design
+  scope: project_specific
+  canonical_statement: 'The goal-onset-cost term penalizes each intervention onset made
+    while the pre-transition state is in the goal set.'
+  formal_expression: r_goal_onset = -goal_onset_cost · 1[x_t ∈ X_goal] · Σ_i 1[h_i=0 ∧ u_i=1]
+  plain_explanation: goal_onset_cost は、目標集合に入ってから新しく除去したエッジにだけ追加コストを与える。除去済みエッジを u=1 で保持するだけのステップには課金されないため、単調性制約で制御が崩れない。
+  applicability: Applies to reward shaping when unnecessary interventions at the target
+    should be priced more heavily than interventions elsewhere.
+  exception_note: Under recovery, h_i=0 means 'not cooling down', so every admissible
+    re-intervention is an onset and the term reduces to a goal-conditional edge cost.
+  status: canonical
+  confidence: 0.95
+  aliases:
+  - goal_onset_cost
+  tags:
+  - reward
+  - intervention_history
+  - goal_set
+  source_keys:
+  - code:env_py
+  - test:env_reward
+  network_keys: []
+  constraint_keys:
+  - monotone
+  - recovery
+  prerequisite_slugs:
+  - reward-new-edge-cost
+  related_slugs:
+  - reward-control-cost
+  contradict_slugs: []
+- canonical_slug: reward-violation-penalty
+  title_ja: 制約違反ペナルティ
+  title_en: 'Reward: Violation Penalty'
+  entry_type: metric
+  domain_area: reward_design
+  scope: project_specific
+  canonical_statement: Constraint violations incur an additional negative reward.
+  formal_expression: r_violation = -violation_penalty if violation else 0
+  plain_explanation: 制約違反が起きたステップでは violation_penalty 分の負報酬が追加される。
+  applicability: Applies to both monotone and recovery constraints.
+  exception_note: Penalty is zero when the chosen action is admissible.
+  status: canonical
+  confidence: 0.98
+  aliases:
+  - violation_penalty
+  tags:
+  - reward
+  - constraint_violation
+  source_keys:
+  - repo:boolean_network_theory
+  - code:env_py
+  network_keys: []
+  constraint_keys:
+  - monotone
+  - recovery
+  prerequisite_slugs:
+  - monotone-violation-condition
+  - recovery-violation-condition
+  related_slugs:
+  - reward-terminal-bonus
+  contradict_slugs: []
+- canonical_slug: reward-terminal-bonus
+  title_ja: 終端到達報酬
+  title_en: 'Reward: Terminal Bonus'
+  entry_type: metric
+  domain_area: reward_design
+  scope: project_specific
+  canonical_statement: A terminal bonus is added when the completed trajectory satisfies the
+    goal condition over the configured horizon.
+  formal_expression: reward += terminal if success else 0
+  plain_explanation: max_steps 到達時に軌道が goal 条件を満たしていれば terminal 報酬が加算される。
+  applicability: Applies to episode-level success in EdgeRemovalEnv.
+  exception_note: Success depends on trajectory_satisfies_goal, not on one-step goal hits.
+  status: canonical
+  confidence: 0.96
+  aliases:
+  - terminal reward
+  tags:
+  - reward
+  - terminal
+  - success
+  source_keys:
+  - repo:boolean_network_theory
+  - code:env_py
+  network_keys: []
+  constraint_keys: []
+  prerequisite_slugs:
+  - goal-states-as-control-targets
+  related_slugs:
+  - trajectory-goal-satisfaction-window
+  contradict_slugs: []
+- canonical_slug: trajectory-goal-satisfaction-window
+  title_ja: 軌道成功判定の窓条件
+  title_en: Trajectory Goal Satisfaction Window
+  entry_type: rule
+  domain_area: reward_design
+  scope: project_specific
+  canonical_statement: Success requires a contiguous goal-state window whose length is derived
+    from reach_horizon and max_steps.
+  formal_expression: ∃k ∈ [0, reach_horizon] s.t. trajectory[k+j] ∈ goal_set for all j ∈ [0,
+    max_steps-reach_horizon]
+  plain_explanation: 成功判定は、一定区間の軌道が連続して goal set に入ることを要求する。
+  applicability: Applies to terminal success calculation in EdgeRemovalEnv.
+  exception_note: This is stricter than checking only the last state.
+  status: reviewed
+  confidence: 0.9
+  aliases:
+  - trajectory_satisfies_goal
+  tags:
+  - reward
+  - success_condition
+  - trajectory
+  source_keys:
+  - code:env_py
+  network_keys: []
+  constraint_keys: []
+  prerequisite_slugs:
+  - goal-states-as-control-targets
+  related_slugs:
+  - reward-terminal-bonus
+  contradict_slugs: []
+- canonical_slug: monotone-constraint
+  title_ja: 単調エッジ除去制約
+  title_en: Monotone Constraint
+  entry_type: condition
+  domain_area: constraint_semantics
+  scope: constraint_specific
+  canonical_statement: Under the monotone constraint, once an edge is removed it cannot be
+    restored.
+  formal_expression: h(t+1)=h(t) or u(t)
+  plain_explanation: monotone 制約では、一度除去したエッジは以降ずっと除去状態を維持しなければならない。
+  applicability: Use for cortical and cell_cycle10 monotone experiments.
+  exception_note: Restoration actions are illegal unless constraints are ignored.
+  status: canonical
+  confidence: 0.99
+  aliases:
+  - monotone edge removal
+  tags:
+  - constraint
+  - monotone
+  source_keys:
+  - repo:boolean_network_theory
+  - code:stl_monotone_py
+  network_keys: []
+  constraint_keys:
+  - monotone
+  prerequisite_slugs:
+  - extended-state-space
+  related_slugs:
+  - monotone-violation-condition
+  - action-masking-prunes-illegal-actions
+  contradict_slugs: []
+- canonical_slug: monotone-flag-update-rule
+  title_ja: monotone フラグ更新規則
+  title_en: Monotone Flag Update Rule
+  entry_type: rule
+  domain_area: constraint_semantics
+  scope: constraint_specific
+  canonical_statement: Monotone flags update by bitwise OR of the previous flags and action
+    bits.
+  formal_expression: h_i(t+1)=h_i(t) or u_i(t)
+  plain_explanation: monotone の履歴フラグは、以前に除去済みか今回除去したかの OR で更新される。
+  applicability: Applies to monotone flag-state transitions.
+  exception_note: Flag and action vectors must have equal length.
+  status: canonical
+  confidence: 0.99
+  aliases:
+  - update_flags monotone
+  tags:
+  - constraint
+  - flags
+  source_keys:
+  - code:stl_monotone_py
+  - test:stl_monotone
+  network_keys: []
+  constraint_keys:
+  - monotone
+  prerequisite_slugs:
+  - monotone-constraint
+  related_slugs:
+  - monotone-violation-condition
+  contradict_slugs: []
+- canonical_slug: monotone-violation-condition
+  title_ja: monotone 制約の違反条件
+  title_en: Monotone Violation Condition
+  entry_type: condition
+  domain_area: constraint_semantics
+  scope: constraint_specific
+  canonical_statement: A monotone violation occurs when an already-removed edge is set to
+    inactive in the next action.
+  formal_expression: h_i(t)=1 ∧ u_i(t)=0
+  plain_explanation: 既に除去済みのエッジを 0 に戻す行動を選ぶと monotone 違反になる。
+  applicability: Use for admissibility checks and violation penalties.
+  exception_note: Only relevant when the constraint type is monotone.
+  status: canonical
+  confidence: 0.99
+  aliases:
+  - check_violation monotone
+  tags:
+  - constraint
+  - violation
+  source_keys:
+  - repo:boolean_network_theory
+  - code:stl_monotone_py
+  - test:stl_monotone
+  network_keys: []
+  constraint_keys:
+  - monotone
+  prerequisite_slugs:
+  - monotone-constraint
+  related_slugs:
+  - action-masking-prunes-illegal-actions
+  - reward-violation-penalty
+  contradict_slugs: []
+- canonical_slug: action-masking-prunes-illegal-actions
+  title_ja: Action Masking による不正行動の除外
+  title_en: Action Masking Prunes Illegal Actions
+  entry_type: rule
+  domain_area: constraint_semantics
+  scope: constraint_specific
+  canonical_statement: Action masking restricts the candidate action set to admissible actions
+    under the active constraint.
+  formal_expression: allowed_actions(h) = {u ∈ {0,1}^M | admissible under current flags}
+  plain_explanation: action_masking を有効にすると、現在のフラグ状態で許可される行動だけが探索候補に残る。
+  applicability: Applies to monotone and recovery constraint handling.
+  exception_note: When action_masking=False, the full action space remains available.
+  status: canonical
+  confidence: 0.96
+  aliases:
+  - allowed_actions
+  tags:
+  - constraint
+  - masking
+  - safe_exploration
+  source_keys:
+  - repo:boolean_network_theory
+  - code:env_py
+  - code:stl_monotone_py
+  - code:stl_recovery_py
+  network_keys: []
+  constraint_keys:
+  - monotone
+  - recovery
+  prerequisite_slugs:
+  - mdp-action-space
+  related_slugs:
+  - monotone-violation-condition
+  - recovery-violation-condition
+  contradict_slugs: []
+- canonical_slug: recovery-constraint
+  title_ja: 回復待ち制約
+  title_en: Recovery Constraint
+  entry_type: condition
+  domain_area: constraint_semantics
+  scope: constraint_specific
+  canonical_statement: Under the recovery constraint, an intervened edge cannot be re-intervened
+    until its cooldown counter reaches zero.
+  formal_expression: h_i ∈ {0,…,τ}
+  plain_explanation: recovery 制約では、介入したエッジは tau ステップのクールダウンが終わるまで再介入できない。
+  applicability: Use for wnt5a recovery experiments.
+  exception_note: tau must be at least 1.
+  status: canonical
+  confidence: 0.98
+  aliases:
+  - recovery horizon
+  tags:
+  - constraint
+  - recovery
+  source_keys:
+  - repo:boolean_network_theory
+  - code:stl_recovery_py
+  network_keys: []
+  constraint_keys:
+  - recovery
+  prerequisite_slugs:
+  - extended-state-space
+  related_slugs:
+  - recovery-flag-update-rule
+  - recovery-violation-condition
+  contradict_slugs: []
+- canonical_slug: recovery-flag-update-rule
+  title_ja: recovery フラグ更新規則
+  title_en: Recovery Flag Update Rule
+  entry_type: rule
+  domain_area: constraint_semantics
+  scope: constraint_specific
+  canonical_statement: Recovery flags reset to tau on intervention and otherwise decay by
+    one.
+  formal_expression: u_i=1 -> h_i'=tau, else h_i'=max(0, h_i-1)
+  plain_explanation: recovery の履歴フラグは、介入時に tau へ戻り、非介入時は 1 ずつ減衰する。
+  applicability: Applies to recovery flag-state transitions.
+  exception_note: Flag values must stay within [0, tau].
+  status: canonical
+  confidence: 0.99
+  aliases:
+  - update_flags recovery
+  tags:
+  - constraint
+  - flags
+  - cooldown
+  source_keys:
+  - code:stl_recovery_py
+  - test:stl_recovery
+  network_keys: []
+  constraint_keys:
+  - recovery
+  prerequisite_slugs:
+  - recovery-constraint
+  related_slugs:
+  - recovery-violation-condition
+  contradict_slugs: []
+- canonical_slug: recovery-violation-condition
+  title_ja: recovery 制約の違反条件
+  title_en: Recovery Violation Condition
+  entry_type: condition
+  domain_area: constraint_semantics
+  scope: constraint_specific
+  canonical_statement: A recovery violation occurs when an edge is intervened while its cooldown
+    counter is still positive.
+  formal_expression: h_i(t)>0 ∧ u_i(t)=1
+  plain_explanation: クールダウン中のエッジに再び介入すると recovery 違反になる。
+  applicability: Use for recovery admissibility checks and penalties.
+  exception_note: Only relevant when the constraint type is recovery.
+  status: canonical
+  confidence: 0.99
+  aliases:
+  - check_violation recovery
+  tags:
+  - constraint
+  - violation
+  - cooldown
+  source_keys:
+  - repo:boolean_network_theory
+  - code:stl_recovery_py
+  - test:stl_recovery
+  network_keys: []
+  constraint_keys:
+  - recovery
+  prerequisite_slugs:
+  - recovery-constraint
+  related_slugs:
+  - action-masking-prunes-illegal-actions
+  - reward-violation-penalty
+  contradict_slugs: []
+- canonical_slug: q-learning-only-strategy
+  title_ja: Q-Learning Only 方針
+  title_en: Q-Learning Only Strategy
+  entry_type: research_policy
+  domain_area: research_positioning
+  scope: project_specific
+  canonical_statement: The core research loop evaluates model-free tabular Q-learning without
+    STP-based algebraic guarantees.
+  formal_expression: train_q_learning → evaluate_policy → compare configs
+  plain_explanation: 本研究の中心ループは、STP による厳密保証ではなく、tabular Q-learning の経験的性能評価に置かれている。
+  applicability: Use when distinguishing project policy from mathematical fact.
+  exception_note: STL-style constraints remain part of the environment semantics.
+  status: canonical
+  confidence: 0.97
+  aliases:
+  - Q-learning only
+  - no STP
+  tags:
+  - policy
+  - research_scope
+  - rl
+  source_keys:
+  - repo:q_learning_only_strategy
+  network_keys: []
+  constraint_keys:
+  - monotone
+  prerequisite_slugs: []
+  related_slugs:
+  - extended-state-space
+  - exact-reachability-verification
+  contradict_slugs: []
+- canonical_slug: network-spec-yaml-is-source-of-truth
+  title_ja: ネットワーク YAML は仕様の正本である
+  title_en: Network Spec YAML Is the Source of Truth
+  entry_type: implementation_note
+  domain_area: network_spec
+  scope: project_specific
+  canonical_statement: Each network YAML file is the machine-readable source of truth for
+    goal states, removable edges, and update equations.
+  formal_expression: load_network_spec(name) ← network_specs/<name>.yaml
+  plain_explanation: 各ネットワークの goal_states・removable_edges・update_equations は、対応する YAML ファイルを正本として扱う。
+  applicability: Applies to `cell_cycle10`, `cortical`, `s_pombe`, and `wnt5a`.
+  exception_note: README supplements human-readable semantics but is not the parser input.
+  status: canonical
+  confidence: 0.98
+  aliases:
+  - network spec
+  - YAML spec
+  tags:
+  - network
+  - source_of_truth
+  - yaml
+  source_keys:
+  - code:cell_cycle10_yaml
+  - code:cortical_yaml
+  - code:s_pombe_yaml
+  - code:wnt5a_yaml
+  network_keys:
+  - cell_cycle10
+  - cortical
+  - s_pombe
+  - wnt5a
+  constraint_keys: []
+  prerequisite_slugs: []
+  related_slugs:
+  - edge-removal-cancels-edge-effect
+  contradict_slugs: []
+- canonical_slug: wnt5a-controllable-initial-states
+  title_ja: Wnt5a の controllable 初期状態条件
+  title_en: Wnt5a Controllable Initial States Condition
+  entry_type: condition
+  domain_area: network_spec
+  scope: network_specific
+  canonical_statement: The wnt5a model restricts controllable initial states to those satisfying
+    x2 == 0 or x7 == 0.
+  formal_expression: x2 == 0 or x7 == 0
+  plain_explanation: Wnt5a モデルでは、controllable initial states は x2==0 または x7==0 を満たす状態に限定される。
+  applicability: Applies only to the `wnt5a` network.
+  exception_note: Not a global BN rule; it is a network-specific condition.
+  status: canonical
+  confidence: 0.99
+  aliases:
+  - controllable initial states
+  tags:
+  - network
+  - wnt5a
+  - initial_state
+  source_keys:
+  - code:wnt5a_yaml
+  - repo:network_specs_readme
+  network_keys:
+  - wnt5a
+  constraint_keys: []
+  prerequisite_slugs:
+  - goal-states-as-control-targets
+  related_slugs:
+  - wnt5a-strict-reachability-max-steps-2
+  contradict_slugs: []
+- canonical_slug: cortical-monotone-network-characteristics
+  title_ja: cortical ネットワークの単調的特徴
+  title_en: Cortical Monotone Network Characteristics
+  entry_type: implementation_note
+  domain_area: network_spec
+  scope: network_specific
+  canonical_statement: The project-designed cortical network uses only inhibitory removable
+    edges and has two alternating target states.
+  formal_expression: all removable edges are inhibition
+  plain_explanation: cortical ネットワークは、全削除可能エッジが inhibition であり、2つの交互パターンを目標状態として持つ。
+  applicability: Applies only to the `cortical` network.
+  exception_note: This is a network property, not a general monotone-constraint rule.
+  status: reviewed
+  confidence: 0.93
+  aliases:
+  - cortical monotone network
+  tags:
+  - network
+  - cortical
+  - monotone
+  source_keys:
+  - repo:network_specs_readme
+  - code:cortical_yaml
+  network_keys:
+  - cortical
+  constraint_keys:
+  - monotone
+  prerequisite_slugs:
+  - monotone-constraint
+  related_slugs:
+  - cortical-strict-reachability-max-steps-3
+  contradict_slugs: []
+- canonical_slug: exact-reachability-verification
+  title_ja: 厳密可到達性検証
+  title_en: Exact Reachability Verification
+  entry_type: algorithm
+  domain_area: reachability
+  scope: project_specific
+  canonical_statement: The project includes an exact verifier that checks whether each initial
+    state can reach a goal within a bounded number of steps.
+  formal_expression: reachable(initial_state, max_steps, constraint_mode)
+  plain_explanation: 全初期状態について、制約付きまたは制約無視の条件下で goal set に到達可能かを厳密に探索する検証器が実装されている。
+  applicability: Applies to bounded reachability studies for shipped models.
+  exception_note: Results depend on max_steps, constraint_type, and mode.
+  status: canonical
+  confidence: 0.97
+  aliases:
+  - verify_all_initial_states
+  tags:
+  - reachability
+  - verification
+  source_keys:
+  - code:reachability_py
+  - test:reachability
+  network_keys:
+  - cell_cycle10
+  - cortical
+  - wnt5a
+  constraint_keys:
+  - monotone
+  - recovery
+  prerequisite_slugs:
+  - goal-states-as-control-targets
+  - extended-state-space
+  related_slugs:
+  - reachability-strict-mode
+  - reachability-ignore-mode
+  - cortical-strict-reachability-max-steps-3
+  contradict_slugs: []
+- canonical_slug: reachability-strict-mode
+  title_ja: 厳密可到達性の strict モード
+  title_en: Reachability Strict Mode
+  entry_type: rule
+  domain_area: reachability
+  scope: project_specific
+  canonical_statement: Strict reachability mode disallows actions that violate the active
+    constraint.
+  formal_expression: enforce_constraints = True
+  plain_explanation: strict モードでは、制約違反を起こす行動は探索対象から除外される。
+  applicability: Applies to monotone and recovery reachability checks.
+  exception_note: The ignore mode is needed to compare unconstrained reachability.
+  status: canonical
+  confidence: 0.96
+  aliases:
+  - strict mode
+  tags:
+  - reachability
+  - constraint_enforcement
+  source_keys:
+  - code:reachability_py
+  - test:reachability
+  network_keys: []
+  constraint_keys:
+  - monotone
+  - recovery
+  prerequisite_slugs:
+  - exact-reachability-verification
+  related_slugs:
+  - reachability-ignore-mode
+  contradict_slugs: []
+- canonical_slug: reachability-ignore-mode
+  title_ja: 厳密可到達性の ignore モード
+  title_en: Reachability Ignore Mode
+  entry_type: rule
+  domain_area: reachability
+  scope: project_specific
+  canonical_statement: Ignore reachability mode explores reachability without enforcing the
+    active constraint.
+  formal_expression: enforce_constraints = False
+  plain_explanation: ignore モードでは、制約違反を許した場合の到達可能性を比較用に確認できる。
+  applicability: Applies to monotone and recovery reachability checks.
+  exception_note: This mode is not admissible for safety-compliant execution.
+  status: canonical
+  confidence: 0.96
+  aliases:
+  - ignore mode
+  tags:
+  - reachability
+  - baseline
+  source_keys:
+  - code:reachability_py
+  - test:reachability
+  network_keys: []
+  constraint_keys:
+  - monotone
+  - recovery
+  prerequisite_slugs:
+  - exact-reachability-verification
+  related_slugs:
+  - reachability-strict-mode
+  contradict_slugs: []
+- canonical_slug: cortical-strict-reachability-max-steps-3
+  title_ja: cortical は strict / max_steps=3 で全初期状態到達可能
+  title_en: Cortical Strict Reachability at max_steps=3
+  entry_type: validation_evidence
+  domain_area: reachability
+  scope: network_specific
+  canonical_statement: The cortical model is globally reachable for all 32 initial states
+    under strict monotone enforcement with max_steps=3.
+  formal_expression: success_count = total_initial_states = 32
+  plain_explanation: cortical モデルは、strict monotone 条件かつ max_steps=3 で 32 個すべての初期状態から goal
+    へ到達可能であることがテストで確認されている。
+  applicability: Applies only to `cortical` under the stated verification setup.
+  exception_note: Changing max_steps or constraint mode can change the result.
+  status: reviewed
+  confidence: 0.95
+  aliases:
+  - cortical reachability
+  tags:
+  - reachability
+  - evidence
+  - cortical
+  source_keys:
+  - test:reachability
+  network_keys:
+  - cortical
+  constraint_keys:
+  - monotone
+  prerequisite_slugs:
+  - exact-reachability-verification
+  - reachability-strict-mode
+  related_slugs:
+  - cortical-monotone-network-characteristics
+  contradict_slugs: []
+- canonical_slug: wnt5a-strict-reachability-max-steps-2
+  title_ja: Wnt5a は strict / max_steps=2 で全初期状態到達可能ではない
+  title_en: Wnt5a Strict Reachability at max_steps=2
+  entry_type: validation_evidence
+  domain_area: reachability
+  scope: network_specific
+  canonical_statement: The wnt5a model is not globally reachable under strict recovery enforcement
+    with max_steps=2.
+  formal_expression: success_count = 112 < total_initial_states = 128
+  plain_explanation: Wnt5a モデルは、strict recovery 条件かつ max_steps=2 では 128 状態中 112 状態のみ到達可能で、全初期状態可到達ではない。
+  applicability: Applies only to `wnt5a` under the stated verification setup.
+  exception_note: The ignore mode reaches all states under the same horizon.
+  status: reviewed
+  confidence: 0.95
+  aliases:
+  - wnt5a strict reachability
+  tags:
+  - reachability
+  - evidence
+  - wnt5a
+  source_keys:
+  - test:reachability
+  network_keys:
+  - wnt5a
+  constraint_keys:
+  - recovery
+  prerequisite_slugs:
+  - exact-reachability-verification
+  - reachability-strict-mode
+  - wnt5a-controllable-initial-states
+  related_slugs:
+  - wnt5a-ignore-reachability-max-steps-2
+  contradict_slugs: []
+- canonical_slug: wnt5a-ignore-reachability-max-steps-2
+  title_ja: Wnt5a は ignore / max_steps=2 で全初期状態到達可能
+  title_en: Wnt5a Ignore Reachability at max_steps=2
+  entry_type: validation_evidence
+  domain_area: reachability
+  scope: network_specific
+  canonical_statement: The wnt5a model is globally reachable when recovery constraints are
+    ignored at max_steps=2.
+  formal_expression: success_count = total_initial_states = 128
+  plain_explanation: Wnt5a モデルは、ignore モードかつ max_steps=2 では 128 個すべての初期状態が到達可能である。
+  applicability: Applies only to `wnt5a` under the stated verification setup.
+  exception_note: This is an unconstrained comparison baseline, not a safe policy result.
+  status: reviewed
+  confidence: 0.95
+  aliases:
+  - wnt5a ignore reachability
+  tags:
+  - reachability
+  - evidence
+  - wnt5a
+  - baseline
+  source_keys:
+  - test:reachability
+  network_keys:
+  - wnt5a
+  constraint_keys:
+  - recovery
+  prerequisite_slugs:
+  - exact-reachability-verification
+  - reachability-ignore-mode
+  related_slugs:
+  - wnt5a-strict-reachability-max-steps-2
+  contradict_slugs: []
+- canonical_slug: cell-cycle10-strict-reachability-max-steps-7
+  title_ja: CellCycle10 は strict / max_steps=7 で全初期状態到達可能
+  title_en: CellCycle10 Strict Reachability at max_steps=7
+  entry_type: validation_evidence
+  domain_area: reachability
+  scope: network_specific
+  canonical_statement: The cell_cycle10 model is globally reachable for all 1024 initial states
+    under strict monotone enforcement with max_steps=7.
+  formal_expression: success_count = total_initial_states = 1024
+  plain_explanation: CellCycle10 モデルは、strict monotone 条件かつ max_steps=7 で 1024 個すべての初期状態から到達可能である。
+  applicability: Applies only to `cell_cycle10` under the stated verification setup.
+  exception_note: Changing the horizon or constraints may change the reachability count.
+  status: reviewed
+  confidence: 0.95
+  aliases:
+  - cell_cycle10 reachability
+  tags:
+  - reachability
+  - evidence
+  - cell_cycle10
+  source_keys:
+  - test:reachability
+  network_keys:
+  - cell_cycle10
+  constraint_keys:
+  - monotone
+  prerequisite_slugs:
+  - exact-reachability-verification
+  - reachability-strict-mode
+  related_slugs: []
+  contradict_slugs: []
+- canonical_slug: boolean-network-hamming-distance-limitations
+  title_ja: ブーリアンネットワークにおけるハミング距離の限界と動的距離の設計意義
+  title_en: Hamming Distance Limitations in Boolean Network Control
+  entry_type: implementation_note
+  domain_area: edge_removal_control
+  scope: global
+  canonical_statement: Hamming distance between binary states does not correlate with dynamic
+    reachability in Boolean networks. The Q-value function V(s) = max_a Q(s,a) serves as the
+    true dynamic control distance.
+  formal_expression: d_Hamming(x,y) uncorrelated with min-step distance; V(s) = max_a Q(s,a)
+    ≈ dynamic control distance
+  plain_explanation: ハミング距離が小さくても目標到達しやすいとは限らない(カスケード効果・アトラクタ流域のセパラトリックス)。報酬設計で「ハミング距離に比例したステップ報酬」を使うとローカルミニマムにトラップされる。推奨設計は目標到達の二値フラグ報酬
+    + 終端報酬の組み合わせ。
+  applicability: Applies to reward function design and result visualization in all BN control
+    experiments.
+  exception_note: Hamming distance is still useful as a visual aid in convergence trajectory
+    plots, but must not be interpreted as a control proximity metric.
+  status: reviewed
+  confidence: 0.95
+  aliases:
+  - hamming distance limitation
+  - dynamic control distance
+  tags:
+  - reward_shaping
+  - control_distance
+  - hamming
+  source_keys:
+  - repo:boolean_network_theory
+  network_keys: []
+  constraint_keys: []
+  prerequisite_slugs:
+  - attractor-in-finite-deterministic-bn
+  related_slugs:
+  - reward-shaping-edge-cost
+  - goal-states-as-control-targets
+  contradict_slugs: []
+- canonical_slug: pdca-execution-protocol
+  title_ja: 自律型PDCAサイクルと実行プロトコル
+  title_en: Autonomous PDCA Execution Protocol for AI Agents
+  entry_type: implementation_note
+  domain_area: research_methodology
+  scope: project_specific
+  canonical_statement: AI agents follow a Plan-Do-Check-Act cycle with quantified success
+    criteria, CLI-based execution via uv run, metric-driven evaluation, and structured failure
+    analysis.
+  formal_expression: 'PDCA: Plan(success_criteria) -> Do(uv run) -> Check(metrics) -> Act(iterate)'
+  plain_explanation: 'AIエージェントが自律的にPDCAサイクルを回す手順。Plan では成功条件を定量化(例: accuracy >= 0.85)し、Do
+    では CLI 経由で実行、Check では outputs/ に保存されたメトリクスと日次ログで評価、Act では失敗原因を明文化して次の実験へ繋げる。Log everything
+    / Standardized paths / Fail-fast の3原則を設計ルールとする。'
+  applicability: Applies to all experiment runs and agent-driven research workflows in this
+    project.
+  exception_note: Human review is still required for major architectural decisions.
+  status: reviewed
+  confidence: 0.93
+  aliases:
+  - PDCA
+  - research protocol
+  - AI agent workflow
+  tags:
+  - research_methodology
+  - experiment_management
+  - ai_agent
+  source_keys:
+  - repo:boolean_network_theory
+  network_keys: []
+  constraint_keys: []
+  prerequisite_slugs: []
+  related_slugs:
+  - goal-states-as-control-targets
+  contradict_slugs: []

@@ -1,0 +1,32 @@
+# ゼミ資料 2（tex/zemi2/）: 成功判定（goal_spec）の比較。c_edge=0.1
+#
+# 現行の成功判定（[H,T] で目標集合内）。状態は (x, h)。
+# 報酬・学習条件は jcmsi_hard_all128.yaml と同じで，成功判定と状態だけを変える。
+seeds: [11, 12, 13, 14, 15]
+output_dir: outputs/papers/zemi2_goal_spec
+learning:
+  alpha: 0.5
+  gamma: 0.99
+  epsilon:
+    start: 1.0
+    end: 0.01
+reward:
+  step: 2.0
+  terminal: 80.0
+  edge_cost: 0.1
+  violation_penalty: 0.0
+horizon:
+  max_steps: 10
+  goal_spec: window
+  time_in_state: false
+models:
+  cortical:
+    episodes: 15000
+    reach_horizon: 5
+    constraint_type: monotone
+  wnt5a:
+    episodes: 24000
+    reach_horizon: 7
+    constraint_type: recovery
+    recovery_tau: 2
+    initial_states: all

@@ -1,0 +1,201 @@
+# Fission yeast cell cycle (Davidich & Bornholdt 2008).
+#
+# Source of truth for the dynamics: the original paper, PLoS ONE 3(2): e1672
+# (Table 1 links, Figure 1 self-degradation loops, thresholds read as +-0.5; see
+# docs/experiments/2026-10-05_s_pombe_source_check.md).  With u = 0, s_pombe.py and
+# update_equations below equal the paper's threshold network for all 10 nodes and
+# all 1024 states (tests/bn_edge_removal/test_s_pombe_source_paper.py).
+#
+# all_edges lists every dependency of those rules: the 23 links of Table 1 plus the
+# 4 self-dependencies of Ste9, Rum1, Cdc25 and Wee1_Mik1 (the "keep the value when
+# the sum equals the threshold" case of the paper's equation (1)).
+#
+# Start: in the paper Start has no incoming link and a self-degradation loop
+# (a_ii = -1), so it is off after one step (Table 2, step 1 -> 2): x1' = 0.  Its
+# next value does not depend on any node, so Start has no entry in all_edges.
+# Difference from biodivine-boolean-models id-095 FISSION-YEAST-2008 (model.bnet,
+# repository commit 314b2fe, from GINsim): there Start is an input that keeps its
+# value (x1' = x1).  The other 9 rules are identical to biodivine.  Until 2026-10-05
+# this file followed biodivine; see
+# docs/experiments/2026-10-05_s_pombe_source_conformance.md.
+#
+# Project-defined (not in the source): which edges are removable, and the goal.
+# - Removable edges: 4 inhibitions, one control bit per edge.  u_k only changes the
+#   update of its edge's target.
+# - Goal: the G1 stationary state (Ste9, Rum1, Wee1_Mik1 on), a fixed point of the
+#   u = 0 dynamics (Table 2 step 10, Table 3 attractor 1; basin 762 / 1024).
+#
+# History (see docs/experiments/2026-10-05_implementation_audit.md): until 2026-10-05 this file listed
+# 19 schematic edges that did not match the implementation, declared PP -|
+# Cdc2_Cdc13_star as removable edge u4 (no such regulation exists in the source),
+# and used the goal [0, 0, 1, 0, 0, 1, 0, 0, 1, 0], which is not a fixed point.
+#
+# update_equations use x1..x10 / u1..u4 and are evaluated against s_pombe.py for
+# every state and every control input in tests/bn_edge_removal/test_edge_semantics.py.
+# NOTE: this network is not used by any run script.
+name: s_pombe
+n_nodes: 10
+m_edges: 4
+goal_states:
+  - [0, 0, 0, 0, 1, 1, 0, 0, 0, 1]
+node_labels:
+  - Start
+  - SK
+  - Cdc2_Cdc13
+  - Cdc2_Cdc13_star
+  - Ste9
+  - Rum1
+  - Slp1
+  - PP
+  - Cdc25
+  - Wee1_Mik1
+removable_edges:
+  - index: 1
+    source: 5
+    target: 3
+    sign: inhibition
+  - index: 2
+    source: 6
+    target: 3
+    sign: inhibition
+  - index: 3
+    source: 7
+    target: 3
+    sign: inhibition
+  - index: 4
+    source: 10
+    target: 4
+    sign: inhibition
+all_edges:
+  - source: 1
+    target: 2
+    sign: activation
+    removable: false
+  - source: 2
+    target: 5
+    sign: inhibition
+    removable: false
+  - source: 2
+    target: 6
+    sign: inhibition
+    removable: false
+  - source: 3
+    target: 5
+    sign: inhibition
+    removable: false
+  - source: 3
+    target: 6
+    sign: inhibition
+    removable: false
+  - source: 3
+    target: 9
+    sign: activation
+    removable: false
+  - source: 3
+    target: 10
+    sign: inhibition
+    removable: false
+  - source: 4
+    target: 5
+    sign: inhibition
+    removable: false
+  - source: 4
+    target: 6
+    sign: inhibition
+    removable: false
+  - source: 4
+    target: 7
+    sign: activation
+    removable: false
+  - source: 5
+    target: 3
+    sign: inhibition
+    removable: true
+    removable_index: 1
+  - source: 5
+    target: 4
+    sign: inhibition
+    removable: false
+  - source: 5
+    target: 5
+    sign: activation
+    removable: false
+  - source: 6
+    target: 3
+    sign: inhibition
+    removable: true
+    removable_index: 2
+  - source: 6
+    target: 4
+    sign: inhibition
+    removable: false
+  - source: 6
+    target: 6
+    sign: activation
+    removable: false
+  - source: 7
+    target: 3
+    sign: inhibition
+    removable: true
+    removable_index: 3
+  - source: 7
+    target: 4
+    sign: inhibition
+    removable: false
+  - source: 7
+    target: 8
+    sign: activation
+    removable: false
+  - source: 8
+    target: 5
+    sign: activation
+    removable: false
+  - source: 8
+    target: 6
+    sign: activation
+    removable: false
+  - source: 8
+    target: 9
+    sign: inhibition
+    removable: false
+  - source: 8
+    target: 10
+    sign: activation
+    removable: false
+  - source: 9
+    target: 4
+    sign: activation
+    removable: false
+  - source: 9
+    target: 9
+    sign: activation
+    removable: false
+  - source: 10
+    target: 4
+    sign: inhibition
+    removable: true
+    removable_index: 4
+  - source: 10
+    target: 10
+    sign: activation
+    removable: false
+update_equations:
+  - "x1' = 0"
+  - "x2' = x1"
+  - "x3' = not(x5 and not u1) and not(x6 and not u2) and not(x7 and not u3)"
+  - "x4' = not x5 and not x6 and not x7 and not(x10 and not u4) and x9"
+  - >-
+    x5' = (not x2 and not x3 and not x5 and not x4 and x8) or (not x2 and not x3 and
+    x5 and not x4) or (not x2 and not x3 and x5 and x4 and x8) or (not x2 and x3 and
+    x5 and not x4 and x8) or (x2 and not x3 and x5 and not x4 and x8)
+  - >-
+    x6' = (not x2 and not x3 and not x6 and not x4 and x8) or (not x2 and not x3 and
+    x6 and not x4) or (not x2 and not x3 and x6 and x4 and x8) or (not x2 and x3 and
+    x6 and not x4 and x8) or (x2 and not x3 and x6 and not x4 and x8)
+  - "x7' = x4"
+  - "x8' = x7"
+  - "x9' = (not x3 and x9 and not x8) or (x3 and not x9 and not x8) or (x3 and x9)"
+  - "x10' = (not x3 and not x10 and x8) or (not x3 and x10) or (x3 and x10 and x8)"
+reference: "Davidich & Bornholdt (2008) PLoS ONE 3(2): e1672"
+# No controllable_initial_states_note: the goal is reachable from all 1024 states
+# (until 2026-10-05, with Start held constant, only from the 512 states with x1 == 0).

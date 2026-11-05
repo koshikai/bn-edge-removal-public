@@ -1,0 +1,98 @@
+{
+  "cell_cycle10_dense_monotone": {
+    "actions": "11db262463a6fbad4dc4056a9aaa9428d55f81ff0daeed3d70d813e61def418e",
+    "history": "fb8dcfe958903cc858147099e044e2f7305bc7fb861b421e885c26c4f7f8ce4e",
+    "metrics": {
+      "avg_first_goal_step": 5.4772727272727275,
+      "avg_first_goal_time": 5.476284584980237,
+      "num_goal_reached": 1012.0,
+      "num_initial_states": 1024.0,
+      "success_rate": 0.0,
+      "violation_rate": 1.0
+    },
+    "q_table": "c56f8fd980a9007fbb508f5d97e74cbf7b97c830dc58c3fc49df47a8bb4b2786",
+    "trajectories": "64de4da805199b14d4289ba8b55fcb1cd3d61f416e1b53c5354195f88bed2122"
+  },
+  "cortical_dense_monotone": {
+    "actions": "18799bd2a68fd1d90539028b12e2cf62a01f2118d84d24e245e97dd748848e2b",
+    "history": "566ae8411242931c0d076387c257d21e7bd5341bbff1214e459fd924f799dbf5",
+    "metrics": {
+      "avg_first_goal_step": 2.59375,
+      "avg_first_goal_time": 2.53125,
+      "num_goal_reached": 32.0,
+      "num_initial_states": 32.0,
+      "success_rate": 0.0,
+      "violation_rate": 1.0
+    },
+    "q_table": "4785fffdd5d08f40d255f62ee57245d8ff18691bb1754d38a59f1c43ab565540",
+    "trajectories": "c35293a7502041e98b2fc941e8b9fa5d88b0a5fb83c374903192be8337d1418f"
+  },
+  "cortical_dense_monotone_masked_cycle": {
+    "actions": "c60c7cb812d14dde29d79f1465d5a2f3b0529980eb3573de0ee1707758dc9386",
+    "history": "cb1e995d8d63523598f87c32d6575355f78bb36a43257270184ab396fae560e0",
+    "metrics": {
+      "avg_first_goal_step": 3.21875,
+      "avg_first_goal_time": 3.15625,
+      "num_goal_reached": 32.0,
+      "num_initial_states": 32.0,
+      "success_rate": 1.0,
+      "violation_rate": 0.0
+    },
+    "q_table": "b8dcd9fa6eaaff2042f78dd59b650e26c12ca3b5f358c9112efcd2d1e18808d7",
+    "trajectories": "05682d6ed057260910c5e482f4383fa46f8778550f54b48e66a6490e2e90ffe6"
+  },
+  "mathkb": {
+    "constraint_types": "9bd3acbbc37937daddd24c2f5f2d8995ee6a7ba070fd3adb92b06226df917432",
+    "kb_entries": "41975a045fed129319b877fda826cc8c4aa9a23b15a3cc456f87facb8c93ac1f",
+    "network_edges": "ed2f64d23bce2a223b486843da2239b9cf38fbe581d62243563bbc7301c23171",
+    "network_goal_states": "547a8da1a3769ed9d15d36d5c99751cb1fc4e3bccd5cb226f383da0821177a5d",
+    "network_nodes": "ddfa0622d08b67d1eca77bc708b72b0f375fd6f2d039d8742e437fe14c0c0528",
+    "networks": "0e690ba234568b11252e9a00a730e9bc028833c5b585a0a0d8ff586cc0859259",
+    "sources": "2cae1913290de6546241e340af048013e5e0fe414e813a309ea77386117b65e3"
+  },
+  "reachability": {
+    "result": "95bbc053f6aa15970bb6e319e10eaf72c8e67d90e1bebb74e91b99a22913ca10"
+  },
+  "s_pombe_sparse_monotone_masked": {
+    "actions": "63eeadeeb94a0b39eeb547b5fe7a1c39f6b1ff5e7d89985d599f00dfd02bd9c5",
+    "history": "7db53204bdde41ddfea867c7b276a08b11e7cedc0a96edec95726313e58400ee",
+    "metrics": {
+      "avg_first_goal_step": 6.181102362204724,
+      "avg_first_goal_time": 6.179790026246719,
+      "num_goal_reached": 762.0,
+      "num_initial_states": 1024.0,
+      "success_rate": 0.271484375,
+      "violation_rate": 0.0
+    },
+    "q_table": "39b0bc94e92af472ae247dd9033217edc50e5fe4c4754e0b66f36d98b480adb7",
+    "trajectories": "97235ddecec86c45286014be375a1ce35546620e81afc8ff137bf6df2ae0f878"
+  },
+  "wnt5a_dense_recovery": {
+    "actions": "fe542bc0d4f4d12cd82a9f089bf2ef24ff7f2876b04613d9150705ddcc3dbbce",
+    "history": "637262fb1291a97659dacc87d0c60c5b2da585e819daa3aba05af03761300f47",
+    "metrics": {
+      "avg_first_goal_step": 2.9444444444444446,
+      "avg_first_goal_time": 2.9074074074074074,
+      "num_goal_reached": 108.0,
+      "num_initial_states": 128.0,
+      "success_rate": 0.0,
+      "violation_rate": 0.46875
+    },
+    "q_table": "c835b70c0d31f6e26146ff618d4bce7f03f8ed55a6733bf2026ad1e3d52d63b4",
+    "trajectories": "ff694051e506972ba6e0b1ab2dfe02c6790666ab41336a85599a9f8f5189c6f9"
+  },
+  "wnt5a_sparse_recovery_masked": {
+    "actions": "b406fd84808777cd130db91821b2b53ef6e4e69b9e45b910a323f9bf514e07b4",
+    "history": "2f3c9facb6b723bad7fbc812fa6454dc26a48abd517a2a79c852510e3ffbc3bd",
+    "metrics": {
+      "avg_first_goal_step": 3.210526315789474,
+      "avg_first_goal_time": 3.1973684210526314,
+      "num_goal_reached": 76.0,
+      "num_initial_states": 96.0,
+      "success_rate": 0.4166666666666667,
+      "violation_rate": 0.0
+    },
+    "q_table": "f4cac532d6ca838ad39e29118567e4910d2a4de21e62cdcb549ea40390b9372b",
+    "trajectories": "6b735daea86d79b7c7a9292e272fec703c73a1fa76d98ef8314e6d7ca13321f3"
+  }
+}

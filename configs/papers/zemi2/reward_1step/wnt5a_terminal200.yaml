@@ -1,0 +1,30 @@
+seeds:
+- 11
+- 12
+- 13
+- 14
+- 15
+output_dir: outputs/papers/zemi2_reward_1step
+learning:
+  alpha: 0.5
+  gamma: 0.99
+  epsilon:
+    start: 1.0
+    end: 0.01
+reward:
+  step: 2.0
+  terminal: 200.0
+  edge_cost: 1.0
+  violation_penalty: 0.0
+horizon:
+  max_steps: 10
+  goal_spec: first_entry
+  time_in_state: true
+models:
+  wnt5a:
+    episodes: 24000
+    reach_horizon: 7
+    constraint_type: recovery
+    recovery_tau: 2
+    initial_states: all
+record_summary: false

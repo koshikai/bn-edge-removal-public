@@ -1,0 +1,35 @@
+# ゼミ資料 2（tex/zemi2/）の副結果: 目標集合内の新規介入（onset）への課金
+#
+# グローバルな介入コストは削除したハード制約版原稿と同じ c_edge=0.1 に戻し，
+# 目標集合に入ってから新しく除去したエッジ（h_i=0 かつ u_i=1）にだけ
+# goal_onset_cost=5.0 を課す。Cortical（単調性）では，除去済みエッジを
+# u=1 で保持するだけのステップには課金されないため，per-step 版のように
+# 制御が崩れない。Wnt5a（休薬期間）では h_i=0 が「休薬中でない」を意味する
+# ので，休薬明けの再介入のたびに課金される。
+seeds: [11, 12, 13, 14, 15]
+output_dir: outputs/papers/zemi2_goal_onset
+learning:
+  alpha: 0.5
+  gamma: 0.99
+  epsilon:
+    start: 1.0
+    end: 0.01
+reward:
+  step: 2.0
+  terminal: 80.0
+  edge_cost: 0.1
+  goal_onset_cost: 5.0
+  violation_penalty: 0.0
+horizon:
+  max_steps: 10
+models:
+  cortical:
+    episodes: 15000
+    reach_horizon: 5
+    constraint_type: monotone
+  wnt5a:
+    episodes: 24000
+    reach_horizon: 7
+    constraint_type: recovery
+    recovery_tau: 2
+    initial_states: all

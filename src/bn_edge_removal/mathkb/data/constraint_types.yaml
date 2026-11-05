@@ -1,0 +1,17 @@
+# Rows of the constraint_types table.
+- constraint_key: monotone
+  display_name: Monotone
+  parameter_schema: '{}'
+  flag_state_domain: Binary flag vector with one bit per removable edge.
+  update_rule: h_i' = h_i or u_i
+  violation_rule: Violation when h_i == 1 and u_i == 0.
+  allowed_action_rule: Allow only actions where every previously removed edge stays active.
+  default_parameters: '{}'
+- constraint_key: recovery
+  display_name: Recovery
+  parameter_schema: '{"tau": "int >= 1"}'
+  flag_state_domain: Cooldown counter vector with values in [0, tau] per removable edge.
+  update_rule: u_i == 1 => h_i' = tau else h_i' = max(0, h_i - 1)
+  violation_rule: Violation when h_i > 0 and u_i == 1.
+  allowed_action_rule: Allow only actions where cooldown-positive edges stay inactive.
+  default_parameters: '{"tau": 2}'

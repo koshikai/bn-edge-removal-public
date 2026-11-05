@@ -39,7 +39,7 @@ def main() -> int:
         description="Start a marimo app, smoke-test the Web UI, then shut it down."
     )
     default_notebook = os.environ.get(
-        "MARIMO_NOTEBOOK", "notebooks/reachability_dashboard.py"
+        "MARIMO_NOTEBOOK", "notebooks/bn_experiment_dashboard.py"
     )
     parser.add_argument(
         "--notebook",

@@ -1,0 +1,30 @@
+# 介入コストが過剰な場合（c_edge=10.0）。必要な介入まで抑えられる
+#
+# ゼミ資料 2（tex/zemi2/）の報酬設計の掃引。Wnt5a のみ，全 128 状態を学習・評価する。
+seeds:
+- 11
+- 12
+- 13
+- 14
+- 15
+output_dir: outputs/papers/zemi2_reward_sweep
+learning:
+  alpha: 0.5
+  gamma: 0.99
+  epsilon:
+    start: 1.0
+    end: 0.01
+reward:
+  step: 2.0
+  terminal: 80.0
+  edge_cost: 10.0
+  violation_penalty: 0.0
+horizon:
+  max_steps: 10
+models:
+  wnt5a:
+    episodes: 24000
+    reach_horizon: 7
+    constraint_type: recovery
+    recovery_tau: 2
+    initial_states: all

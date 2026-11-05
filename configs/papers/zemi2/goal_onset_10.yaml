@@ -1,0 +1,31 @@
+# ゼミ資料 2（tex/zemi2/）の副結果: 目標集合内の新規介入（onset）への課金（10.0）
+#
+# goal_onset_5.yaml の感度確認。Wnt5a では 5.0 より介入数が減るが，成功率が
+# 100% をわずかに下回る（99.7%）。有効域が狭いことを示すために残す。
+seeds: [11, 12, 13, 14, 15]
+output_dir: outputs/papers/zemi2_goal_onset
+learning:
+  alpha: 0.5
+  gamma: 0.99
+  epsilon:
+    start: 1.0
+    end: 0.01
+reward:
+  step: 2.0
+  terminal: 80.0
+  edge_cost: 0.1
+  goal_onset_cost: 10.0
+  violation_penalty: 0.0
+horizon:
+  max_steps: 10
+models:
+  cortical:
+    episodes: 15000
+    reach_horizon: 5
+    constraint_type: monotone
+  wnt5a:
+    episodes: 24000
+    reach_horizon: 7
+    constraint_type: recovery
+    recovery_tau: 2
+    initial_states: all

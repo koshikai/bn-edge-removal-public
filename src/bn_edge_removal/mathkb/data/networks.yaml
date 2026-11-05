@@ -1,0 +1,58 @@
+# Network metadata that is not in models/network_specs/*.yaml.
+metadata:
+  cell_cycle10:
+    display_name: CellCycle10
+    domain: mammalian cell cycle
+    origin_type: literature
+    notes: Goal is stabilization to a G1 arrest state under edge-removal control.
+  cortical:
+    display_name: Cortical
+    domain: cortical inhibitory circuit
+    origin_type: project_designed
+    notes: Project-designed monotone Boolean network with two alternating target states and
+      all-removable inhibitory interventions.
+  s_pombe:
+    display_name: S. pombe
+    domain: fission yeast cell cycle
+    origin_type: literature
+    notes: Goal is stabilization to a G1 arrest state in the S. pombe model.
+  wnt5a:
+    display_name: Wnt5a
+    domain: Wnt5a signaling
+    origin_type: project_designed
+    notes: Project-designed signaling model with two target states and a network-specific
+      controllable-initial-state condition.
+node_descriptions:
+  cell_cycle10:
+    1: Retinoblastoma tumor suppressor.
+    2: Transcription factor E2F.
+    3: Cyclin E.
+    4: Cyclin A.
+    5: Cell division cycle 20.
+    6: Cdc20 homolog 1.
+    7: Ubiquitin-conjugating enzyme UbcH10.
+    8: Cyclin B.
+    9: Cyclin-dependent kinase inhibitor p27.
+    10: Cyclin D.
+  s_pombe:
+    1: External start signal.
+    2: S-phase promoting kinase.
+    3: M-phase promoting kinase.
+    4: Active M-phase promoting kinase.
+    5: S-phase inhibitor Ste9.
+    6: S-phase inhibitor Rum1.
+    7: M-phase trigger Slp1.
+    8: Phosphatase PP.
+    9: Phosphatase activator Cdc25.
+    10: Kinase inhibitor Wee1/Mik1.
+goal_meanings:
+  cell_cycle10:
+    1: G1 arrest state (Rb=1, Cdh1=1, p27=1).
+  cortical:
+    1: Alternating inhibition-stabilized target pattern A.
+    2: Alternating inhibition-stabilized target pattern B.
+  s_pombe:
+    1: G1 arrest state in the fission-yeast cell-cycle model.
+  wnt5a:
+    1: Non-recovery state.
+    2: Recovery state.

@@ -1,0 +1,33 @@
+# ゼミ資料 2（tex/zemi2/）の本文用設定
+#
+# ハード制約（行動マスキング）で，Wnt5a は全 128 状態を学習・評価する。
+# 介入コスト c_edge は削除したハード制約版原稿の 0.1 ではなく 1.0 を用いる。
+# 0.1 では目標集合内でも介入がほぼ無料になり，不要な介入で目標集合を
+# 出る軌道が 640 中 39 本，失敗が 9 件あった（configs/papers/zemi2/reward_sweep/edge_cost_0p1.yaml）。
+# 1.0 ではその軌道が 3 本に減り，5 seed すべて 128/128 になる。
+seeds: [11, 12, 13, 14, 15]
+output_dir: outputs/papers/zemi2
+learning:
+  alpha: 0.5
+  gamma: 0.99
+  epsilon:
+    start: 1.0
+    end: 0.01
+reward:
+  step: 2.0
+  terminal: 80.0
+  edge_cost: 1.0
+  violation_penalty: 0.0
+horizon:
+  max_steps: 10
+models:
+  cortical:
+    episodes: 15000
+    reach_horizon: 5
+    constraint_type: monotone
+  wnt5a:
+    episodes: 24000
+    reach_horizon: 7
+    constraint_type: recovery
+    recovery_tau: 2
+    initial_states: all

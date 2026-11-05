@@ -1,26 +1,19 @@
 import argparse
-from pathlib import Path
 
 import numpy as np
 import pandas as pd
 
-from bn_edge_removal.cortical import CorticalModel
-from bn_edge_removal.env import (
-    EdgeRemovalEnv,
-    HorizonConfig,
-    RewardConfig,
-)
-from bn_edge_removal.evaluation import evaluate_policy
-from bn_edge_removal.plotting import (
+from bn_edge_removal.analysis.plotting import (
     plot_training_curves,
     plot_trajectories,
 )
-from bn_edge_removal.q_learning import (
-    EpsilonSchedule,
-    QLearningConfig,
-    train_q_learning,
+from bn_edge_removal.control.env import (
+    EdgeRemovalEnv,
+    HorizonConfig,
+    RewardConfig,
+    resolve_constraint_type,
 )
-from bn_edge_removal.utils import (
+from bn_edge_removal.experiment.utils import (
     current_timestamp,
     load_config,
     prepare_output_dir,
@@ -28,26 +21,23 @@ from bn_edge_removal.utils import (
     save_results,
     setup_logger,
     update_experiment_summary,
-    write_daily_report_request,
     write_report,
 )
-
-
-def _update_latest_symlink(output_dir: Path) -> None:
-    latest_link = Path("outputs/latest")
-    if latest_link.exists() or latest_link.is_symlink():
-        latest_link.unlink()
-    try:
-        latest_link.symlink_to(
-            output_dir.relative_to(latest_link.parent), target_is_directory=True
-        )
-    except Exception:
-        pass
+from bn_edge_removal.learning.evaluation import evaluate_policy
+from bn_edge_removal.learning.q_learning import (
+    EpsilonSchedule,
+    QLearningConfig,
+    train_q_learning,
+)
+from bn_edge_removal.models.cortical import CorticalModel
 
 
 def _parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Train Q-learning on Cortical model.")
     parser.add_argument("--config", type=str, default="configs/cortical_monotone.yaml")
+    parser.add_argument(
+        "--seed", type=int, default=None, help="Override the seed in the config."
+    )
     return parser.parse_args()
 
 
@@ -70,6 +60,8 @@ def main() -> None:
     args = _parse_args()
 
     config = load_config(args.config)
+    if args.seed is not None:
+        config["seed"] = args.seed
 
     output_dir_config = config.get("output_dir", "outputs")
     experiment_name = config.get("model", {}).get("name", "cortical")
@@ -100,11 +92,15 @@ def main() -> None:
         reach_horizon=int(config["horizon"]["reach_horizon"]),
         max_steps=int(config["horizon"]["max_steps"]),
     )
+    constraint_cfg = config.get("constraint", {})
+    constraint_type = resolve_constraint_type(constraint_cfg, default="monotone")
     env = EdgeRemovalEnv(
         model=model,
         reward=reward,
         horizon=horizon,
-        action_masking=bool(config["constraint"].get("action_masking", False)),
+        action_masking=bool(constraint_cfg.get("action_masking", False)),
+        constraint_type=constraint_type,
+        recovery_tau=int(constraint_cfg.get("recovery_tau", 2)),
         rng=rng,
     )
 
@@ -173,18 +169,9 @@ def main() -> None:
         output_dir,
     )
 
-    request_path = write_daily_report_request(
-        output_dir=output_dir,
-        experiment_name=experiment_name,
-        timestamp=timestamp,
-        config_path=args.config,
-        metrics=results.get("metrics", {}),
-    )
-
     logger.info("Run complete")
     logger.info(f"Success rate: {eval_result.metrics['success_rate']:.3f}")
     logger.info(f"Violation rate: {eval_result.metrics['violation_rate']:.3f}")
-    logger.info(f"Run: uv run poe daily-report --request {request_path}")
 
 
 if __name__ == "__main__":

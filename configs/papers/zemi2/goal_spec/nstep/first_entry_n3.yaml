@@ -1,0 +1,33 @@
+# ゼミ資料 2（tex/zemi2/）: first-entry の n-step 長 感度分析。c_edge=1.0，n=3。
+#
+# 主比較は n=10（first_entry_n10.yaml）。n=5 では初期目標状態の退出が残るため，
+# n=3 と n=10 で 100% になること，n=5 だけが非単調に失敗することを記録する。
+seeds: [11, 12, 13, 14, 15]
+output_dir: outputs/papers/zemi2_goal_spec_nstep
+learning:
+  alpha: 0.5
+  gamma: 0.99
+  epsilon:
+    start: 1.0
+    end: 0.01
+  n_step: 3
+reward:
+  step: 2.0
+  terminal: 80.0
+  edge_cost: 1.0
+  violation_penalty: 0.0
+horizon:
+  max_steps: 10
+  goal_spec: first_entry
+  time_in_state: true
+models:
+  cortical:
+    episodes: 15000
+    reach_horizon: 5
+    constraint_type: monotone
+  wnt5a:
+    episodes: 24000
+    reach_horizon: 7
+    constraint_type: recovery
+    recovery_tau: 2
+    initial_states: all

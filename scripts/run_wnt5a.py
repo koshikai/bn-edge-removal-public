@@ -4,27 +4,17 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-from bn_edge_removal.env import (
-    EdgeRemovalEnv,
-    HorizonConfig,
-    RewardConfig,
-)
-from bn_edge_removal.evaluation_sparse import (
-    evaluate_policy_sparse,
-)
-from bn_edge_removal.plotting import (
+from bn_edge_removal.analysis.plotting import (
     plot_training_curves,
     plot_trajectories,
 )
-from bn_edge_removal.q_learning import (
-    EpsilonSchedule,
-    QLearningConfig,
+from bn_edge_removal.control.env import (
+    EdgeRemovalEnv,
+    HorizonConfig,
+    RewardConfig,
+    resolve_constraint_type,
 )
-from bn_edge_removal.q_learning_sparse import (
-    SparseQTable,
-    train_q_learning_sparse,
-)
-from bn_edge_removal.utils import (
+from bn_edge_removal.experiment.utils import (
     current_timestamp,
     load_config,
     prepare_output_dir,
@@ -32,10 +22,18 @@ from bn_edge_removal.utils import (
     save_results,
     setup_logger,
     update_experiment_summary,
-    write_daily_report_request,
     write_report,
 )
-from bn_edge_removal.wnt5a import Wnt5aModel
+from bn_edge_removal.learning.evaluation import (
+    evaluate_policy_sparse,
+)
+from bn_edge_removal.learning.q_learning import (
+    EpsilonSchedule,
+    QLearningConfig,
+    SparseQTable,
+    train_q_learning_sparse,
+)
+from bn_edge_removal.models.wnt5a import Wnt5aModel
 
 
 def _state_pool(model: Wnt5aModel, pool_name: str) -> list[list[int]]:
@@ -80,9 +78,14 @@ def _save_sparse_q_table(
 def main() -> None:
     parser = argparse.ArgumentParser(description="Train Q-learning on Wnt5a model.")
     parser.add_argument("--config", type=str, default="configs/wnt5a_recovery.yaml")
+    parser.add_argument(
+        "--seed", type=int, default=None, help="Override the seed in the config."
+    )
     args = parser.parse_args()
 
     config = load_config(args.config)
+    if args.seed is not None:
+        config["seed"] = args.seed
     output_dir_config = config.get("output_dir", "outputs")
     experiment_name = config.get("model", {}).get("name", "wnt5a")
 
@@ -119,7 +122,7 @@ def main() -> None:
         reward=reward,
         horizon=horizon,
         action_masking=bool(constraint_cfg.get("action_masking", False)),
-        constraint_type=str(constraint_cfg.get("type", "recovery")),
+        constraint_type=resolve_constraint_type(constraint_cfg, default="recovery"),
         recovery_tau=int(constraint_cfg.get("recovery_tau", 2)),
         rng=rng,
     )
@@ -197,18 +200,9 @@ def main() -> None:
         output_dir,
     )
 
-    request_path = write_daily_report_request(
-        output_dir=output_dir,
-        experiment_name=experiment_name,
-        timestamp=timestamp,
-        config_path=args.config,
-        metrics=results.get("metrics", {}),
-    )
-
     logger.info("Run complete")
     logger.info(f"Success rate: {eval_result.metrics['success_rate']:.3f}")
     logger.info(f"Violation rate: {eval_result.metrics['violation_rate']:.3f}")
-    logger.info(f"Run: uv run poe daily-report --request {request_path}")
 
 
 if __name__ == "__main__":

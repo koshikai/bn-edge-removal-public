@@ -1,0 +1,35 @@
+# ゼミ資料 2（tex/zemi2/）: 成功判定（goal_spec）の主比較。c_edge=1.0，n-step n=10。
+#
+# 初到達 t_reach <= H かつ到達後に目標集合を一度も出ないことを成功とする。状態は (x, h, t, モニタ)。
+# 1-step Q 学習では seed 11 の初期状態 114 が未到達になり 639/640 だったため，
+# 終端報酬を途中の状態へ直接伝える n-step 戻り（n=10 = T）を主比較に用いる。
+# 報酬・学習条件は jcmsi_hard_all128.yaml と同じで，成功判定・状態・更新幅だけを変える。
+seeds: [11, 12, 13, 14, 15]
+output_dir: outputs/papers/zemi2_goal_spec_nstep
+learning:
+  alpha: 0.5
+  gamma: 0.99
+  epsilon:
+    start: 1.0
+    end: 0.01
+  n_step: 10
+reward:
+  step: 2.0
+  terminal: 80.0
+  edge_cost: 1.0
+  violation_penalty: 0.0
+horizon:
+  max_steps: 10
+  goal_spec: first_entry
+  time_in_state: true
+models:
+  cortical:
+    episodes: 15000
+    reach_horizon: 5
+    constraint_type: monotone
+  wnt5a:
+    episodes: 24000
+    reach_horizon: 7
+    constraint_type: recovery
+    recovery_tau: 2
+    initial_states: all

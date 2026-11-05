@@ -3,23 +3,17 @@ import argparse
 import numpy as np
 import pandas as pd
 
-from bn_edge_removal.cell_cycle10 import CellCycle10Model
-from bn_edge_removal.env import (
-    EdgeRemovalEnv,
-    HorizonConfig,
-    RewardConfig,
-)
-from bn_edge_removal.evaluation import evaluate_policy
-from bn_edge_removal.plotting import (
+from bn_edge_removal.analysis.plotting import (
     plot_training_curves,
     plot_trajectories,
 )
-from bn_edge_removal.q_learning import (
-    EpsilonSchedule,
-    QLearningConfig,
-    train_q_learning,
+from bn_edge_removal.control.env import (
+    EdgeRemovalEnv,
+    HorizonConfig,
+    RewardConfig,
+    resolve_constraint_type,
 )
-from bn_edge_removal.utils import (
+from bn_edge_removal.experiment.utils import (
     current_timestamp,
     load_config,
     prepare_output_dir,
@@ -27,9 +21,15 @@ from bn_edge_removal.utils import (
     save_results,
     setup_logger,
     update_experiment_summary,
-    write_daily_report_request,
     write_report,
 )
+from bn_edge_removal.learning.evaluation import evaluate_policy
+from bn_edge_removal.learning.q_learning import (
+    EpsilonSchedule,
+    QLearningConfig,
+    train_q_learning,
+)
+from bn_edge_removal.models.cell_cycle10 import CellCycle10Model
 
 
 def _parse_args() -> argparse.Namespace:
@@ -90,11 +90,14 @@ def main() -> None:
         reach_horizon=int(config["horizon"]["reach_horizon"]),
         max_steps=int(config["horizon"]["max_steps"]),
     )
+    constraint_cfg = config.get("constraint", {})
     env = EdgeRemovalEnv(
         model=model,
         reward=reward,
         horizon=horizon,
-        action_masking=bool(config["constraint"].get("action_masking", False)),
+        action_masking=bool(constraint_cfg.get("action_masking", False)),
+        constraint_type=resolve_constraint_type(constraint_cfg, default="monotone"),
+        recovery_tau=int(constraint_cfg.get("recovery_tau", 2)),
         rng=rng,
     )
 
@@ -163,18 +166,9 @@ def main() -> None:
         output_dir,
     )
 
-    request_path = write_daily_report_request(
-        output_dir=output_dir,
-        experiment_name=experiment_name,
-        timestamp=timestamp,
-        config_path=args.config,
-        metrics=results.get("metrics", {}),
-    )
-
     logger.info("Run complete")
     logger.info(f"Success rate: {eval_result.metrics['success_rate']:.3f}")
     logger.info(f"Violation rate: {eval_result.metrics['violation_rate']:.3f}")
-    logger.info(f"Run: uv run poe daily-report --request {request_path}")
 
 
 if __name__ == "__main__":

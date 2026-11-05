@@ -1,0 +1,28 @@
+seeds:
+- 11
+- 12
+- 13
+- 14
+- 15
+output_dir: outputs/papers/zemi2_reward_1step
+learning:
+  alpha: 0.5
+  gamma: 0.99
+  epsilon:
+    start: 1.0
+    end: 0.01
+reward:
+  step: 2.0
+  terminal: 80.0
+  edge_cost: 1.0
+  violation_penalty: 0.0
+horizon:
+  max_steps: 10
+  goal_spec: first_entry
+  time_in_state: true
+models:
+  cortical:
+    episodes: 15000
+    reach_horizon: 5
+    constraint_type: monotone
+record_summary: false

@@ -1,0 +1,160 @@
+# MathKB sources: files in this repository and external papers.
+# Repo paths are checked to exist when the seed is built.
+repo:
+- source_key: repo:boolean_network_theory
+  source_type: repo_doc
+  title: Boolean Network Theory
+  relative_path: docs/research/boolean_network_theory.md
+  anchor: ''
+  citation_text: Project-level theory note that summarizes BN basics, edge-removal control,
+    MDP/Q-learning framing, and STL-style constraints.
+  trust_level: high
+- source_key: repo:q_learning_only_strategy
+  source_type: repo_doc
+  title: Q-Learning Only Strategy
+  relative_path: docs/research/q_learning_only_strategy.md
+  anchor: ''
+  citation_text: Research-positioning note that defines the empirical scope and excludes STP-based
+    guarantees from the core loop.
+  trust_level: high
+- source_key: repo:network_specs_readme
+  source_type: repo_doc
+  title: Boolean Network Specifications README
+  relative_path: src/bn_edge_removal/models/network_specs/README.md
+  anchor: ''
+  citation_text: Human-readable catalog for network purpose, node semantics, goal states,
+    removable edges, and literature provenance.
+  trust_level: high
+- source_key: code:env_py
+  source_type: code
+  title: EdgeRemovalEnv
+  relative_path: src/bn_edge_removal/control/env.py
+  anchor: ''
+  citation_text: Environment implementation for reward shaping, extended state IDs, constraint
+    handling, and goal-trajectory success checks.
+  trust_level: high
+- source_key: code:stl_monotone_py
+  source_type: code
+  title: stl_monotone
+  relative_path: src/bn_edge_removal/control/stl_monotone.py
+  anchor: ''
+  citation_text: Reference implementation for monotone flag updates, violation checks, and
+    allowed-action enumeration.
+  trust_level: high
+- source_key: code:stl_recovery_py
+  source_type: code
+  title: stl_recovery
+  relative_path: src/bn_edge_removal/control/stl_recovery.py
+  anchor: ''
+  citation_text: Reference implementation for recovery-horizon counters, violation checks,
+    and allowed-action enumeration.
+  trust_level: high
+- source_key: code:reachability_py
+  source_type: code
+  title: reachability
+  relative_path: src/bn_edge_removal/analysis/reachability.py
+  anchor: ''
+  citation_text: Exact reachability verifier with strict/ignore modes and witness trajectory
+    reconstruction.
+  trust_level: high
+- source_key: code:cell_cycle10_yaml
+  source_type: code
+  title: cell_cycle10 network spec
+  relative_path: src/bn_edge_removal/models/network_specs/cell_cycle10.yaml
+  anchor: ''
+  citation_text: Machine-readable source of truth for the cell_cycle10 network.
+  trust_level: high
+- source_key: code:cortical_yaml
+  source_type: code
+  title: cortical network spec
+  relative_path: src/bn_edge_removal/models/network_specs/cortical.yaml
+  anchor: ''
+  citation_text: Machine-readable source of truth for the cortical network.
+  trust_level: high
+- source_key: code:s_pombe_yaml
+  source_type: code
+  title: s_pombe network spec
+  relative_path: src/bn_edge_removal/models/network_specs/s_pombe.yaml
+  anchor: ''
+  citation_text: Machine-readable source of truth for the s_pombe network.
+  trust_level: high
+- source_key: code:wnt5a_yaml
+  source_type: code
+  title: wnt5a network spec
+  relative_path: src/bn_edge_removal/models/network_specs/wnt5a.yaml
+  anchor: ''
+  citation_text: Machine-readable source of truth for the wnt5a network.
+  trust_level: high
+- source_key: test:stl_monotone
+  source_type: test
+  title: test_stl_monotone
+  relative_path: tests/bn_edge_removal/test_stl_monotone.py
+  anchor: ''
+  citation_text: Regression test that checks monotone update_flags and check_violation semantics.
+  trust_level: high
+- source_key: test:stl_recovery
+  source_type: test
+  title: test_stl_recovery
+  relative_path: tests/bn_edge_removal/test_stl_recovery.py
+  anchor: ''
+  citation_text: Regression test that checks recovery update_flags, allowed_actions, and violation
+    semantics.
+  trust_level: high
+- source_key: test:env_reward
+  source_type: test
+  title: test_env_reward
+  relative_path: tests/bn_edge_removal/test_env_reward.py
+  anchor: ''
+  citation_text: Reward regression test for new-edge cost behavior under monotone and recovery
+    constraints.
+  trust_level: high
+- source_key: test:reachability
+  source_type: test
+  title: test_reachability
+  relative_path: tests/bn_edge_removal/test_reachability.py
+  anchor: ''
+  citation_text: Reachability regression tests covering strict/ignore modes and global reachability
+    counts.
+  trust_level: high
+papers:
+- source_key: paper:faure_2006
+  title: Faure et al. (2006) Dynamical Analysis of a Generic Boolean Model for the Control
+    of the Mammalian Cell Cycle
+  location: https://doi.org/10.1093/bioinformatics/btl210
+  citation_text: Primary literature source for the mammalian cell-cycle Boolean network.
+  trust_level: high
+- source_key: paper:davidich_bornholdt_2008
+  title: Davidich & Bornholdt (2008) Boolean Network Model Predicts Cell Cycle Sequence of
+    Fission Yeast
+  location: https://doi.org/10.1371/journal.pone.0001672
+  citation_text: Primary literature source for the fission-yeast cell-cycle network.
+  trust_level: high
+- source_key: paper:sanzeni_2020
+  title: Sanzeni et al. (2020) Inhibition stabilization is a widespread property of cortical
+    networks
+  location: https://doi.org/10.7554/eLife.54875
+  citation_text: Related cortical-network literature used as biological motivation.
+  trust_level: medium
+- source_key: paper:giacomantonio_goodhill_2010
+  title: Giacomantonio & Goodhill (2010) A Boolean Model of the Gene Regulatory Network Underlying
+    Mammalian Cortical Area Development
+  location: https://doi.org/10.1371/journal.pcbi.1000936
+  citation_text: Related Boolean-network literature for cortical development modeling.
+  trust_level: medium
+- source_key: paper:kumawat_gosens_2016
+  title: 'Kumawat & Gosens (2016) WNT-5A: signaling and functions in health and disease'
+  location: https://doi.org/10.1007/s00018-015-2076-y
+  citation_text: Background literature for Wnt5a signaling semantics.
+  trust_level: medium
+- source_key: paper:siegle_2018
+  title: Siegle et al. (2018) A Boolean network of the crosstalk between IGF and Wnt signaling
+    in aging satellite cells
+  location: https://doi.org/10.1371/journal.pone.0195126
+  citation_text: Related Boolean-network literature for signaling-pathway modeling.
+  trust_level: medium
+- source_key: paper:yachie_kinoshita_2018
+  title: Yachie-Kinoshita et al. (2018) Modeling signaling-dependent pluripotent cell states
+    with Boolean logic can predict cell fate transitions
+  location: https://doi.org/10.15252/msb.201777952
+  citation_text: Related Boolean-logic literature for cell-fate transitions.
+  trust_level: medium
