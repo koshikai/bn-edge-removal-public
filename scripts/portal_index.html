@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>BN Edge Removal Control</title>
-  <meta name="description" content="遺伝子ネットワークのつながりを一時的に切って望ましい状態へ導く制御を、「一度切ったら戻せない」「切ったら休む」といった時間の制約を守りながら強化学習で学ばせる研究の解説とデモ。">
+  <meta name="description" content="ブーリアンネットワークのエッジ除去制御に単調性・休薬期間という時間的な入力制約を課し、行動マスキング付き Q 学習で制御方策を獲得する研究の解説とデモ。">
   <style>
     :root {
       --bg: #fbfbfa;
@@ -305,164 +305,150 @@
 <main>
 
   <p class="eyebrow mono">Research note · 2026</p>
-  <h1>時間の制約を守りながら、遺伝子ネットワークのつながりを切って制御する</h1>
-  <p class="subtitle">時間入力制約下におけるブーリアンネットワークのエッジ除去制御 ／ Edge Removal Control of Boolean Networks under Temporal Input Constraints</p>
+  <h1>時間入力制約下におけるブーリアンネットワークのエッジ除去制御</h1>
+  <p class="subtitle">Edge Removal Control of Boolean Networks under Temporal Input Constraints</p>
   <p class="byline">越 海斗（Kaito Koshi）</p>
   <ul class="top-links">
-    <li><a href="#demo">デモを触る ↓</a></li>
+    <li><a href="#demo">デモ ↓</a></li>
     <li><a href="https://github.com/koshikai/bn-edge-removal-public" target="_blank" rel="noopener noreferrer">GitHub ↗</a></li>
     <li><a href="#cite">引用</a></li>
   </ul>
 
   <div class="tldr">
-    <p><strong>TL;DR</strong>　遺伝子同士の「つながり（エッジ）」を一時的に切ることで、細胞の状態を望ましい状態へ導き、そこに留める。この制御を、
-      <strong>「一度切ったら元に戻せない」「切ったら 2 ステップ休む」</strong>といった時間の制約を守りながら、強化学習（Q 学習）で学ばせました。
-      制約を破る行動は最初から選択肢に入れないので、<strong>学習中も含めて制約違反は 0</strong>。
-      2 つの遺伝子ネットワークのすべての初期状態で、期限内に目標へ到達し、その後も留まることに <strong>5 seed すべてで 100% 成功</strong>しました。</p>
+    <p><strong>概要</strong>　遺伝子調節ネットワークを表すブーリアンネットワークに対し、遺伝子間の相互作用（エッジ）を一時的に除去して、状態を目標集合へ到達させ、その後も留める制御を考える。本研究では「一度除去したエッジは元に戻せない」（単調性）、「除去した後の一定期間は同じエッジを除去できない」（休薬期間）という時間的な入力制約を課し、これを満たす制御方策を Q 学習で獲得する。入力制約に違反する行動は行動マスキングで選択肢から除外するため、学習中も含めて違反は生じない。Cortical Development Model と Wnt5a モデルの全初期状態について、5 seed のすべてで期限内の到達とその後の維持に成功した（成功率 100%）。</p>
   </div>
 
   <ul class="cards">
     <li class="card">
-      <span class="tag mono">01 · RECORD</span>
-      <h3>履歴を記録する</h3>
-      <p>どのエッジをいつ切ったかを、エッジごとの小さな「フラグ」に記録します。現在の遺伝子の状態だけでは分からない履歴を、学習に渡せます。</p>
+      <span class="tag mono">01</span>
+      <h3>フラグ状態</h3>
+      <p>入力制約の判定に必要な介入履歴を、エッジごとのフラグに記録する。BN の状態だけでは判断できない履歴を、Q 学習の状態に含められる。</p>
     </li>
     <li class="card">
-      <span class="tag mono">02 · MASK</span>
-      <h3>違反する行動は選ばせない</h3>
-      <p>フラグを見れば、次に許される行動が分かります。違反する行動は候補から外すので、探索中でも制約は破られません。</p>
+      <span class="tag mono">02</span>
+      <h3>行動マスキング</h3>
+      <p>フラグから、各時刻に許容される行動の集合が決まる。違反する行動を候補から除外するため、探索中も入力制約は破られない。</p>
     </li>
     <li class="card">
-      <span class="tag mono">03 · MONITOR</span>
-      <h3>目標の進み具合を見張る</h3>
-      <p>「まだ到達していない」「到達して維持中」「失敗が確定」の 3 段階を記録し、到達前と離脱後を区別して学習させます。</p>
+      <span class="tag mono">03</span>
+      <h3>監視状態</h3>
+      <p>目標仕様の進行を「未到達」「到達後維持中」「失敗確定」の 3 値で記録し、到達前の状態と離脱後の状態を区別する。</p>
     </li>
   </ul>
 
   <!-- ===================================================== -->
-  <h2 id="what"><span class="no">01</span>何を、どうやって制御するのか</h2>
+  <h2 id="what"><span class="no">01</span>ブーリアンネットワークとエッジ除去制御</h2>
 
-  <p>遺伝子の働きは、他の遺伝子に活性化されたり抑えられたりする関係でつながっています。このつながりを、遺伝子調節ネットワークと呼びます。
-    ここでは各遺伝子を ON（1）か OFF（0）だけで表す<b>ブーリアンネットワーク</b>（BN）を使います。
-    時刻 <span class="m">t</span> の状態 <span class="m">x<sub>t</sub></span> は 0/1 を <span class="m">n</span> 個並べたもので、全遺伝子が同時に更新されます。</p>
+  <p>遺伝子の発現は、他の遺伝子による活性化や抑制を受けて変化する。この相互作用を表したものを遺伝子調節ネットワークと呼ぶ。本研究では、各遺伝子の発現状態を ON（1）と OFF（0）の二値で表す<b>ブーリアンネットワーク</b>（BN）を用いる。時刻 <span class="m">t</span> の状態 <span class="m">x<sub>t</sub></span> は <span class="m">n</span> 個の二値を並べたベクトルであり、全遺伝子を同期的に更新する。</p>
   <div class="eq"><i>x</i><sub><i>t</i>+1</sub> = <i>f</i>(<i>x</i><sub><i>t</i></sub>)</div>
-  <p>状態の数は有限（<span class="m">2<sup>n</sup></span> 通り）なので、放っておけば軌道はいつか固定点か周期的な振る舞いに落ち着きます。問題は、<b>落ち着く先が望ましい状態とは限らない</b>ことです。</p>
+  <p>状態空間は有限（<span class="m">2<sup>n</sup></span> 通り）であるため、任意の初期状態から出発した軌道は、固定点または周期アトラクタに収束する。ただし、収束先が望ましい状態であるとは限らない。</p>
 
-  <p>よくある制御は、遺伝子の ON/OFF を外から直接書き換えます。この研究で扱う<b>エッジ除去制御</b>はそうせず、<b>遺伝子同士のつながりを一時的に切ります</b>。
-    薬で信号の受け渡しを阻害するイメージで、遺伝子の状態そのものには触れません。</p>
-  <p>エッジ <span class="m">j → i</span> を切ると、遺伝子 <span class="m">i</span> の更新は遺伝子 <span class="m">j</span> の状態を見なくなります。
-    式の上では、活性化の入力 <span class="m">x<sup>(j)</sup></span> を 0 に、抑制の入力 <span class="m">¬x<sup>(j)</sup></span> を 1（抑制なし）に置き換えます。
-    切れるエッジは事前に決まっていて、時刻ごとに「どのエッジを切るか」を表す 0/1 のベクトル <span class="m">u<sub>t</sub></span> が制御入力です。</p>
-  <div class="eq"><i>x</i><sub><i>t</i>+1</sub> = <i>f̃</i>(<i>x</i><sub><i>t</i></sub>, <i>u</i><sub><i>t</i></sub>),　　<i>u</i><sub><i>k</i>,<i>t</i></sub> = 1 ⇔ 時刻 <i>t</i> にエッジ <i>k</i> を切る</div>
+  <p>BN の制御では、外部入力によってノードの状態を直接操作する手法が一般的である。これに対し<b>エッジ除去制御</b>では、遺伝子間の相互作用（エッジ）を一時的に阻害する。遺伝子の発現そのものではなく信号伝達経路に介入するため、副作用の少ない治療戦略につながる可能性がある。</p>
+  <p>エッジ <span class="m">j → i</span> を除去すると、遺伝子 <span class="m">i</span> の更新関数は遺伝子 <span class="m">j</span> の状態に依存しなくなる。具体的には、活性化入力 <span class="m">x<sup>(j)</sup></span> を 0 に、抑制入力 <span class="m">¬x<sup>(j)</sup></span> を 1 に置き換える。除去可能なエッジはあらかじめ定めておき、各時刻にどのエッジを除去するかを表す二値ベクトル <span class="m">u<sub>t</sub></span> を制御入力とする。</p>
+  <div class="eq"><i>x</i><sub><i>t</i>+1</sub> = <i>f̃</i>(<i>x</i><sub><i>t</i></sub>, <i>u</i><sub><i>t</i></sub>),　　<i>u</i><sub><i>k</i>,<i>t</i></sub> = 1 ⇔ 時刻 <i>t</i> にエッジ <i>k</i> を除去する</div>
 
   <!-- ===================================================== -->
-  <h2 id="constraints"><span class="no">02</span>どんな「時間の制約」を守りたいのか</h2>
+  <h2 id="constraints"><span class="no">02</span>時間的な入力制約</h2>
 
-  <p>実際の治療では、介入のタイミングに決まりがあります。この研究では、医療応用で重要になる 2 つの制約を扱います。
-    どちらも信号時相論理（STL）という、時間についての条件を書くための論理式で書けます。</p>
+  <p>医療応用では、介入の時間的な構造や頻度に制約がある。本研究では、生物学的応用で重要となる次の 2 つの入力制約を扱う。いずれも、時間に関する仕様を記述する信号時相論理（STL）の式で表せる。</p>
 
-  <h3>単調性：一度切ったら戻せない</h3>
-  <p>CRISPR-Cas9 によるゲノム編集のように、一度の操作が元に戻せない場合です。あるエッジを切ったら、以後ずっと切り続けなければなりません。</p>
-  <div class="strip-row"><span class="lab">許される</span><span class="strip"><span>0</span><span>0</span><span class="cut">1</span><span class="cut">1</span><span class="cut">1</span><span class="cut">1</span></span></div>
-  <div class="strip-row"><span class="lab">違反</span><span class="strip"><span>0</span><span class="cut">1</span><span class="cut">1</span><span class="bad">0</span><span>0</span><span>0</span></span><span class="small muted">切った後に戻している</span></div>
+  <h3>単調性</h3>
+  <p>CRISPR-Cas9 によるゲノム編集のように、一度行った操作を元に戻せない場合を表す。あるエッジを除去したら、以後もそのエッジを除去し続けなければならない。</p>
+  <div class="strip-row"><span class="lab">充足する例</span><span class="strip"><span>0</span><span>0</span><span class="cut">1</span><span class="cut">1</span><span class="cut">1</span><span class="cut">1</span></span></div>
+  <div class="strip-row"><span class="lab">違反する例</span><span class="strip"><span>0</span><span class="cut">1</span><span class="cut">1</span><span class="bad">0</span><span>0</span><span>0</span></span><span class="small muted">除去した後に復帰させている</span></div>
 
-  <h3>休薬期間：切ったら τ ステップ休む</h3>
-  <p>抗がん剤の投与スケジュールのように、介入の後に回復のための休みが必要な場合です。あるエッジを切ったら、その後 <span class="m">τ</span> ステップは同じエッジを切れません（ここでは <span class="m">τ</span> = 2）。</p>
-  <div class="strip-row"><span class="lab">許される</span><span class="strip"><span class="cut">1</span><span class="rest">休</span><span class="rest">休</span><span class="cut">1</span><span class="rest">休</span><span class="rest">休</span></span></div>
-  <div class="strip-row"><span class="lab">違反</span><span class="strip"><span class="cut">1</span><span class="rest">休</span><span class="cut bad">1</span><span>0</span><span>0</span><span>0</span></span><span class="small muted">休みの途中で切っている</span></div>
+  <h3>休薬期間</h3>
+  <p>抗がん剤の投与スケジュールのように、介入後に回復期間が必要な場合を表す。あるエッジを除去したら、その後 <span class="m">τ</span> ステップは同じエッジを除去できない（本研究では <span class="m">τ</span> = 2）。</p>
+  <div class="strip-row"><span class="lab">充足する例</span><span class="strip"><span class="cut">1</span><span class="rest">休</span><span class="rest">休</span><span class="cut">1</span><span class="rest">休</span><span class="rest">休</span></span></div>
+  <div class="strip-row"><span class="lab">違反する例</span><span class="strip"><span class="cut">1</span><span class="rest">休</span><span class="cut bad">1</span><span>0</span><span>0</span><span>0</span></span><span class="small muted">休薬期間中に除去している</span></div>
 
   <!-- ===================================================== -->
-  <h2 id="goal"><span class="no">03</span>何ができたら「成功」なのか</h2>
+  <h2 id="goal"><span class="no">03</span>制御目的</h2>
 
-  <p>目標は 1 つの状態ではなく、望ましい状態の<b>集合</b> <span class="m">𝒳<sub>goal</sub></span> です。そのうえで、時間を区切って成功を定義します。</p>
+  <p>目標は単一の状態ではなく、望ましい状態の<b>集合</b> <span class="m">𝒳<sub>goal</sub></span> である。本研究では、この集合への安定化を有限の時間区間で次のように定める。</p>
   <ul class="setup">
-    <li><b>到達期限 <span class="m">H</span>：</b>この時刻までに、目標集合へ初めて入る。</li>
-    <li><b>終了時刻 <span class="m">T</span>：</b>初めて入った時刻から、この時刻まで一度も目標集合を出ない。</li>
-    <li><b>入力の制約：</b>その間ずっと、単調性か休薬期間を守る。</li>
+    <li><b>到達期限 <span class="m">H</span>：</b>時刻 <span class="m">H</span> までに目標集合へ初めて到達する。</li>
+    <li><b>終了時刻 <span class="m">T</span>：</b>初到達の時刻から時刻 <span class="m">T</span> まで、目標集合の外に出ない。</li>
+    <li><b>入力制約：</b>この間を通して、単調性または休薬期間を満たす。</li>
   </ul>
-  <p>この 3 つをすべて満たしたうえで、切ったエッジの延べ本数（介入数）<span class="m">J = Σ<sub>t</sub> ‖u<sub>t</sub>‖<sub>1</sub></span> をできるだけ小さくする制御方策を求めます。
-    「一度入ったが途中で出てしまい、また戻ってきた」場合は失敗です。</p>
+  <p>これらをすべて満たし、かつ除去エッジ数の総和（介入数）<span class="m">J = Σ<sub>t</sub> ‖u<sub>t</sub>‖<sub>1</sub></span> が小さい制御方策を求める。目標集合に到達した後に離脱した場合は、再び到達しても失敗とみなす。</p>
 
   <!-- ===================================================== -->
-  <h2 id="why"><span class="no">04</span>なぜ難しいのか</h2>
+  <h2 id="why"><span class="no">04</span>問題の難しさ</h2>
 
-  <p>制約が<b>過去の入力に依存する</b>からです。いまの遺伝子の状態 <span class="m">x<sub>t</sub></span> が同じでも、
-    「2 ステップ前にこのエッジを切ったか」によって、いま切ってよいかが変わります。
-    状態だけを見て行動を決める Q 学習に <span class="m">x<sub>t</sub></span> だけを渡すと、制約を守るのに必要な情報が足りません。</p>
-  <p>目標の側にも同じ問題があります。目標集合の外にいるという点では同じでも、「まだ一度も入っていない」のか「入った後に出てしまった（もう失敗）」のかで、意味がまったく違います。</p>
+  <p>この問題の難しさは、入力制約が<b>過去の入力に依存する</b>ことにある。同じ状態 <span class="m">x<sub>t</sub></span> であっても、2 ステップ前に同じエッジを除去したかどうかで、現在そのエッジを除去してよいかが変わる。したがって、<span class="m">x<sub>t</sub></span> だけを状態とする Q 学習では、入力制約の判定に必要な情報が不足する。</p>
+  <p>目標仕様にも同様の問題がある。目標集合の外にある状態でも、まだ一度も到達していない場合と、到達後に離脱して失敗が確定した場合とでは意味が異なる。</p>
 
   <!-- ===================================================== -->
-  <h2 id="method"><span class="no">05</span>どう解いたのか</h2>
+  <h2 id="method"><span class="no">05</span>提案手法</h2>
 
-  <h3>① フラグ状態：履歴を数個の数字に圧縮する</h3>
-  <p>制約の判定に必要な履歴だけを、エッジごとのフラグ <span class="m">h<sub>k,t</sub></span> に記録します。履歴全体を覚える必要はありません。</p>
+  <h3>フラグ状態による状態拡張</h3>
+  <p>入力制約の判定に必要な履歴だけを、エッジごとのフラグ <span class="m">h<sub>k,t</sub></span> に記録する。入力履歴全体を保持する必要はない。</p>
   <div class="table-wrap">
   <table class="t">
     <thead><tr><th></th><th>単調性</th><th>休薬期間（τ）</th></tr></thead>
     <tbody>
-      <tr><td>フラグの意味</td><td>過去に切ったことがあるか（0/1）</td><td>再び切れるまでの残りステップ数（0〜τ）</td></tr>
-      <tr><td>更新</td><td><span class="m">h ← h ∨ u</span></td><td>切ったら <span class="m">τ</span>、切らなければ 1 減らす（下限 0）</td></tr>
-      <tr><td>違反になる行動</td><td><span class="m">h = 1</span> なのに切らない</td><td><span class="m">h &gt; 0</span> なのに切る</td></tr>
+      <tr><td>フラグの意味</td><td>過去に除去したことがあるか（0/1）</td><td>再び除去できるまでの残りステップ数（0〜τ）</td></tr>
+      <tr><td>更新則</td><td><span class="m">h ← h ∨ u</span></td><td>除去したら <span class="m">τ</span>、除去しなければ 1 減らす（下限 0）</td></tr>
+      <tr><td>違反となる行動</td><td><span class="m">h = 1</span> のときに除去しない</td><td><span class="m">h &gt; 0</span> のときに除去する</td></tr>
     </tbody>
   </table>
   </div>
 
-  <h3>② 行動マスキング：違反する行動を候補から外す</h3>
-  <p>フラグを見れば、違反になる行動が分かります。単調性なら <span class="m">h<sub>k</sub> = 1</span> のエッジは「切る」に固定し、休薬期間なら <span class="m">h<sub>k</sub> &gt; 0</span> のエッジは「切らない」に固定します。
-    残ったエッジだけ自由に選べます。ランダムに探索するときも、Q 値が最大の行動を選ぶときも、この許される行動の中から選びます。
-    許される行動は必ず 1 つ以上あるので（単調性なら「今まで通り」、休薬期間なら「何もしない」）、行き詰まることもありません。</p>
-  <p class="result-line">その結果、違反は罰で減らすのではなく、そもそも起きません。学習の途中でも 0 です。</p>
-  <p class="muted small">前の研究 [1] では、違反に罰（負の報酬）を与えて制約を守るよう促していたため、違反しないことは保証されませんでした。</p>
+  <h3>行動マスキング</h3>
+  <p>フラグから、違反となる行動を判定できる。単調性では <span class="m">h<sub>k</sub> = 1</span> のエッジを「除去する」に固定し、休薬期間では <span class="m">h<sub>k</sub> &gt; 0</span> のエッジを「除去しない」に固定する。それ以外のエッジは自由に選べる。ε-greedy による探索でも Q 値が最大の行動の選択でも、この許容行動集合の中から行動を選ぶ。許容行動集合は常に空ではない（単調性では現在のフラグと同じ行動、休薬期間では何も除去しない行動が許容される）。</p>
+  <p class="result-line">これにより、入力制約の違反はペナルティで抑えるのではなく、構成的に生じなくなる。学習中も違反は 0 である。</p>
+  <p class="muted small">先行研究 [1] では、違反にペナルティ（負の報酬）を与えて入力制約の充足を促していたため、違反しないことは保証されなかった。</p>
 
-  <h3>③ 監視状態：目標の進み具合を 3 段階で記録する</h3>
-  <p>目標の進み具合を <span class="m">s<sub>t</sub> ∈ {0, 1, 2}</span> で記録します。</p>
+  <h3>監視状態</h3>
+  <p>目標仕様の進行状況を <span class="m">s<sub>t</sub> ∈ {0, 1, 2}</span> で記録する。</p>
   <ul class="setup">
-    <li><b>0：</b>まだ目標集合に入っていない</li>
-    <li><b>1：</b>入った後、ずっと目標集合内にいる</li>
-    <li><b>2：</b>失敗が確定した（入った後に出た、または期限 <span class="m">H</span> までに入れなかった）。一度 2 になったら戻らない</li>
+    <li><b>0：</b>目標集合に未到達</li>
+    <li><b>1：</b>初到達後、目標集合内に留まっている</li>
+    <li><b>2：</b>失敗が確定した（到達後に離脱した、または期限 <span class="m">H</span> までに到達しなかった）。一度 2 になると以後も 2 のままである</li>
   </ul>
-  <p>終了時に <span class="m">s<sub>T</sub> = 1</span> なら成功です。監視状態は離脱を禁止するものではなく、起きたことを記録するだけです。</p>
+  <p>終了時刻に <span class="m">s<sub>T</sub> = 1</span> であれば成功である。監視状態は離脱を禁止するものではなく、観測された軌道の状況を記録する。</p>
 
-  <h3>Q 学習と報酬</h3>
-  <p>Q 学習の状態として、遺伝子の状態・フラグ・監視状態の組 <span class="m">(x<sub>t</sub>, h<sub>t</sub>, s<sub>t</sub>)</span> を使います。報酬は次の 3 つの和です。</p>
+  <h3>Q 学習と報酬設計</h3>
+  <p>Q 学習の状態には、BN 状態・フラグ状態・監視状態の組 <span class="m">(x<sub>t</sub>, h<sub>t</sub>, s<sub>t</sub>)</span> を用いる。報酬は次の 3 項の和とする。</p>
   <ul class="setup">
-    <li><b>目標集合内にいる各ステップ：</b><span class="m">+r<sub>step</sub></span></li>
-    <li><b>切ったエッジ 1 本ごと：</b><span class="m">−c<sub>edge</sub></span>（介入を減らすため）</li>
-    <li><b>成功して終了したとき（<span class="m">s<sub>T</sub> = 1</span>）だけ：</b><span class="m">+R<sub>goal</sub></span></li>
+    <li><b>目標集合内にある各ステップ：</b><span class="m">+r<sub>step</sub></span></li>
+    <li><b>除去したエッジ 1 本あたり：</b><span class="m">−c<sub>edge</sub></span>（介入数の低減を促す）</li>
+    <li><b>成功してエピソードを終えた場合（<span class="m">s<sub>T</sub> = 1</span>）のみ：</b><span class="m">+R<sub>goal</sub></span></li>
   </ul>
-  <p>一度離脱すると <span class="m">s<sub>t</sub> = 2</span> のままなので、戻ってきても最後のボーナスはもらえません。こうして「入ったら出ない」ことを促します。</p>
+  <p>一度離脱すると <span class="m">s<sub>t</sub> = 2</span> が続くため、再到達しても終端報酬は得られない。この報酬設計により、初到達後の維持を促す。</p>
 
   <!-- ===================================================== -->
-  <h2 id="results"><span class="no">06</span>うまくいったのか</h2>
+  <h2 id="results"><span class="no">06</span>計算例と結果</h2>
 
-  <p class="result-line">はい。2 つのモデルのすべての初期状態で、5 seed（11〜15）すべてが成功しました。制約違反も離脱も 0 です。</p>
+  <p class="result-line">2 つのモデルの全初期状態について、5 seed（11〜15）のすべてで成功した。入力制約の違反と目標集合からの離脱は、いずれも 0 であった。</p>
 
   <div class="stats">
-    <div class="stat"><div class="v">100%</div><div class="k">期限内に到達し、最後まで維持できた初期状態の割合（両モデル・全 seed）</div></div>
-    <div class="stat"><div class="v">0</div><div class="k">制約違反（学習中も評価中も）</div></div>
-    <div class="stat"><div class="v">0</div><div class="k">目標集合に入った後の離脱</div></div>
+    <div class="stat"><div class="v">100%</div><div class="k">期限内に到達し、終了時刻まで維持した初期状態の割合（両モデル・全 seed）</div></div>
+    <div class="stat"><div class="v">0</div><div class="k">入力制約の違反（学習中・評価中とも）</div></div>
+    <div class="stat"><div class="v">0</div><div class="k">初到達後の目標集合からの離脱</div></div>
   </div>
 
-  <h3>計算例 1：Cortical Development Model × 単調性</h3>
-  <p>大脳皮質の領野が分かれていく過程の、5 遺伝子のモデル [2] です。目標は、胎生 10.5 日の前極（Fgf8・Pax6・Sp8 が ON）と後極（Emx2・Coup-tfi が ON）の 2 つの発現パターンで、どちらも制御なしのネットワークの固定点です。</p>
+  <h3>計算例 1：Cortical Development Model（単調性）</h3>
+  <p>大脳皮質の領野形成に関わる 5 遺伝子のモデル [2] である。目標集合は、胎生 10.5 日における前極（Fgf8・Pax6・Sp8 が ON）と後極（Emx2・Coup-tfi が ON）の発現パターンからなり、いずれも無制御ネットワークの固定点である。</p>
   <ul class="setup">
-    <li><b>切れるエッジ：</b>6 本</li>
-    <li><b>制約：</b>単調性（一度切ったら戻せない）</li>
-    <li><b>期限と長さ：</b><span class="m">H</span> = 5、<span class="m">T</span> = 10</li>
-    <li><b>学習：</b>15,000 エピソード。全 32 初期状態を順番に使う</li>
+    <li><b>除去可能エッジ：</b>6 本</li>
+    <li><b>入力制約：</b>単調性</li>
+    <li><b>到達期限と終了時刻：</b><span class="m">H</span> = 5、<span class="m">T</span> = 10</li>
+    <li><b>学習：</b>15,000 エピソード。学習時の初期状態は全 32 状態を巡回させる</li>
     <li><b>報酬：</b><span class="m">r<sub>step</sub></span> = 2、<span class="m">R<sub>goal</sub></span> = 80、<span class="m">c<sub>edge</sub></span> = 1</li>
-    <li><b>介入なしの場合：</b>32 状態中 10 状態だけが成功</li>
+    <li><b>無制御の場合：</b>32 状態中 10 状態のみ成功</li>
   </ul>
 
-  <h3>計算例 2：Wnt5a モデル × 休薬期間</h3>
-  <p>メラノーマの転移に関わる Wnt5a シグナル伝達経路の、7 遺伝子のモデル [3, 4] です。制御なしでは 4 つの固定点があり、そのうち <span class="m">x<sup>(7)</sup></span> = 1 の 2 つを目標とします。</p>
+  <h3>計算例 2：Wnt5a モデル（休薬期間）</h3>
+  <p>メラノーマの転移に関わる Wnt5a シグナル伝達経路の 7 遺伝子モデル [3, 4] である。無制御ネットワークは 4 つの固定点をもち、そのうち <span class="m">x<sup>(7)</sup></span> = 1 である 2 つを目標集合とする。</p>
   <ul class="setup">
-    <li><b>切れるエッジ：</b>8 本</li>
-    <li><b>制約：</b>休薬期間 <span class="m">τ</span> = 2</li>
-    <li><b>期限と長さ：</b><span class="m">H</span> = 7、<span class="m">T</span> = 10</li>
-    <li><b>学習：</b>24,000 エピソード。全 128 初期状態を順番に使う</li>
+    <li><b>除去可能エッジ：</b>8 本</li>
+    <li><b>入力制約：</b>休薬期間（<span class="m">τ</span> = 2）</li>
+    <li><b>到達期限と終了時刻：</b><span class="m">H</span> = 7、<span class="m">T</span> = 10</li>
+    <li><b>学習：</b>24,000 エピソード。学習時の初期状態は全 128 状態を巡回させる</li>
     <li><b>報酬：</b><span class="m">c<sub>edge</sub></span> = 2（その他は計算例 1 と同じ）</li>
-    <li><b>介入なしの場合：</b>128 状態中 108 状態が成功。時刻を含めた全探索で、休薬を守ったまま 128 状態すべてが成功可能だと確認済み</li>
+    <li><b>無制御の場合：</b>128 状態中 108 状態が成功。時刻を含む状態での全探索により、休薬期間を満たしたまま全 128 状態で成功可能であることを確認している</li>
   </ul>
 
   <div class="table-wrap">
@@ -476,8 +462,7 @@
     </tbody>
   </table>
   </div>
-  <p class="muted small">全初期状態の平均を、さらに 5 seed で平均 ± 標本標準偏差にまとめた値。介入数は 1 エピソード（10 ステップ）で切ったエッジの延べ本数。
-    Cortical の介入数が大きいのは単調性のためで、早い時刻に切ったエッジは最後まで切り続けるので、1 本切るだけで延べ数が最大 10 増えます。</p>
+  <p class="muted small">各指標を全初期状態で平均し、さらに 5 seed の平均 ± 標本標準偏差で示した。介入数は 1 エピソード（10 ステップ）における除去エッジ数の総和である。Cortical の介入数が大きいのは単調性による。早い時刻に除去したエッジは終了時刻まで除去し続けるため、1 本の除去で介入数が最大 10 増える。</p>
 </main>
 
 <!-- ===================================================== -->
@@ -487,23 +472,23 @@
       <div><span class="ex-label">モデル</span>
         <span class="seg" id="seg-model" role="group" aria-label="モデル">
           <button type="button" data-v="cortical" aria-pressed="true">Cortical（単調性）</button>
-          <button type="button" data-v="wnt5a" aria-pressed="false">Wnt5a（休薬 τ=2）</button>
+          <button type="button" data-v="wnt5a" aria-pressed="false">Wnt5a（休薬期間 τ=2）</button>
         </span>
       </div>
       <div><span class="ex-label">制御</span>
         <span class="seg" id="seg-mode" role="group" aria-label="制御の方法">
-          <button type="button" data-v="learned" aria-pressed="true">学習した方策</button>
-          <button type="button" data-v="none" aria-pressed="false">介入なし</button>
-          <button type="button" data-v="manual" aria-pressed="false">自分で切る</button>
+          <button type="button" data-v="learned" aria-pressed="true">学習済み方策</button>
+          <button type="button" data-v="none" aria-pressed="false">無制御</button>
+          <button type="button" data-v="manual" aria-pressed="false">手動操作</button>
         </span>
       </div>
     </div>
 
-    <div class="ex-label">初期状態 <span class="mono">x₀</span>（状態 ID。<span class="mono">x⁽¹⁾</span> を最上位ビットとする 2 進数）</div>
+    <div class="ex-label">初期状態 <span class="mono">x₀</span>（状態 ID は <span class="mono">x⁽¹⁾</span> を最上位ビットとする 2 進数の 10 進表記）</div>
     <div class="states" id="states" role="group" aria-label="初期状態"></div>
     <div class="legend">
       <span><i style="border:1px solid var(--goal)"></i>目標集合の状態</span>
-      <span><i style="background:var(--ink-mute);width:5px;height:5px;border-radius:50%;vertical-align:1px"></i>介入なしでも成功する状態</span>
+      <span><i style="background:var(--ink-mute);width:5px;height:5px;border-radius:50%;vertical-align:1px"></i>無制御でも成功する初期状態</span>
     </div>
 
     <div class="ex-main">
@@ -519,9 +504,9 @@
           <span class="mono small" id="tlabel">t = 0</span>
         </div>
         <div class="ex-ctrl" id="ctrl-manual" hidden>
-          <button type="button" class="btn primary" id="btn-step">このステップを実行 →</button>
-          <button type="button" class="btn" id="btn-undo">1 つ戻す</button>
-          <button type="button" class="btn" id="btn-reset">最初から</button>
+          <button type="button" class="btn primary" id="btn-step">1 ステップ進める →</button>
+          <button type="button" class="btn" id="btn-undo">1 ステップ戻す</button>
+          <button type="button" class="btn" id="btn-reset">リセット</button>
         </div>
         <div class="verdict" id="verdict"></div>
       </div>
@@ -531,39 +516,35 @@
 </section>
 
 <main style="padding-top: 0;">
-  <p class="muted small" style="margin-top:10px">デモの「学習した方策」は seed 11 で学習した方策の軌道を、実験で保存した記録からそのまま再生しています（Cortical 32 状態・Wnt5a 128 状態すべて）。
-    ページ内でブール関数を計算し直した結果と一致することも確認済みです。seed 11 の Wnt5a は介入数が平均 3.4 で、表の 5 seed 平均（1.8）より多めです。</p>
+  <p class="muted small" style="margin-top:10px">デモの「学習済み方策」では、seed 11 で学習した方策の軌道を、実験時に保存した記録から再生している（Cortical は 32 状態、Wnt5a は 128 状態のすべて）。ページ内でブール関数から計算し直した軌道が、記録と一致することも確認している。なお、seed 11 の Wnt5a の介入数は平均 3.4 であり、表の 5 seed 平均（1.8）より多い。</p>
 
-  <h3>学習の進み方</h3>
-  <p>学習中のエピソードの成功率です（250 エピソードごとの平均）。探索の確率 <span class="m">ε</span> を 1.0 から 0.01 へ線形に下げているので、序盤はほぼランダムに行動します。それでもマスキングにより、制約違反は最初から 0 です。</p>
+  <h3>学習曲線</h3>
+  <p>学習中のエピソードの成功率を、250 エピソードごとに平均して示す。探索率 <span class="m">ε</span> は 1.0 から 0.01 へ線形に減衰させるため、学習初期の行動はほぼランダムである。それでも行動マスキングにより、入力制約の違反は学習開始時から 0 である。</p>
   <div class="curves" id="curves"></div>
 
   <!-- ===================================================== -->
-  <h2 id="limits"><span class="no">07</span>注意点</h2>
+  <h2 id="limits"><span class="no">07</span>手法の限界と注意点</h2>
   <ul class="setup">
-    <li><b>制約は保証、維持は保証しない。</b>入力の制約はマスキングで必ず守られます。一方、目標集合に留まることは報酬で促しているだけで、保証はありません。今回の計算例で離脱が 0 だったのは結果です。</li>
-    <li><b>Q 表に時刻を入れていない。</b>期限 <span class="m">H</span> と終了時刻 <span class="m">T</span> の判定には時刻を使いますが、Q 表の状態は <span class="m">(x, h, s)</span> だけです。同じ状態なら残り時間にかかわらず同じ行動を選ぶので、有限時間の問題としての最適性は一般には保証されません。</li>
-    <li><b>Wnt5a の介入コストは評価と同じ seed で選んだ。</b><span class="m">c<sub>edge</sub></span> = 2 の選定に評価と同じ 5 seed を使っているので、独立な検証ではありません。</li>
-    <li><b>介入の最小化は保証しない。</b>介入コストは介入を減らす方向に働きますが、介入数が最小であることや、到達後に介入が 0 になることは保証しません。</li>
-    <li><b>前の研究とは条件が複数違う。</b>[1] とは初期状態集合（Wnt5a で 96 → 128 状態）、介入コスト、一部の学習条件が異なるため、結果の差を 1 つの変更だけのおかげとは言えません。</li>
-    <li><b>ネットワークは小さい。</b>5 遺伝子と 7 遺伝子で、Q 表で扱える規模です。</li>
+    <li><b>目標集合での維持は保証しない。</b>入力制約は行動マスキングにより必ず満たされる。一方、目標集合での維持は報酬によって促しているだけで、保証はない。本計算例で離脱が 0 であったのは結果である。</li>
+    <li><b>Q テーブルに時刻を含めていない。</b>到達期限 <span class="m">H</span> と終了時刻 <span class="m">T</span> の判定には時刻を用いるが、Q テーブルの状態は <span class="m">(x, h, s)</span> のみである。同じ状態では残り時間によらず同じ行動を選ぶため、有限ホライズン問題としての最適性は一般に保証されない。</li>
+    <li><b>Wnt5a の除去コストは評価と同じ seed で選定した。</b><span class="m">c<sub>edge</sub></span> = 2 の選定に評価と同じ 5 seed を用いたため、独立な検証ではない。</li>
+    <li><b>介入数の最小化は保証しない。</b>除去コストは介入を減らす方向に働くが、介入数が最小であることや、到達後に介入が 0 になることは保証しない。</li>
+    <li><b>先行研究とは複数の条件が異なる。</b>[1] とは初期状態集合（Wnt5a で 96 → 128 状態）、除去コスト、一部の学習条件が異なるため、結果の差を一つの変更だけに帰することはできない。</li>
+    <li><b>対象ネットワークは小規模である。</b>5 遺伝子と 7 遺伝子であり、Q テーブルで扱える規模にとどまる。</li>
   </ul>
 
   <!-- ===================================================== -->
-  <h2 id="next"><span class="no">08</span>これから</h2>
+  <h2 id="next"><span class="no">08</span>今後の課題</h2>
   <ul class="setup">
-    <li>深層強化学習を使って、Q 表に収まらない大きなネットワークへ広げる。</li>
-    <li>単調性と休薬期間を同時に課すなど、より多様な時相論理の仕様を扱う。</li>
-    <li>更新に確率を含む確率的ブーリアンネットワークへ拡張する。</li>
+    <li>深層強化学習を用いて、Q テーブルに収まらない大規模ネットワークへ適用する。</li>
+    <li>単調性と休薬期間の同時考慮など、より多様な時相論理仕様を扱う。</li>
+    <li>確率的ブーリアンネットワークへ拡張する。</li>
   </ul>
 
   <!-- ===================================================== -->
   <h2 id="related"><span class="no">09</span>背景と関連研究</h2>
-  <p>BN は遺伝子調節ネットワークのモデルとして古くから使われ [5]、セミテンソル積による代数的な解析 [6] で、到達可能性や安定化の研究が進んできました。
-    制御の方法としては、ノードを直接操作するピン留め制御 [7] や強化学習による手法 [8] があります。
-    エッジ除去制御と Q 学習による安定化は Li と Li [9] が提案しましたが、入力の履歴に対する制約は扱っていませんでした。
-    STL のような時間的な仕様を強化学習に組み込む研究はロボティクスを中心に進んでいます [10–12] が、主に実数値の信号を対象としていて、BN のような離散システムにはあまり適用されていません。
-    この研究は、筆者らの [1] を、マスキングによる制約の厳密な充足と、初到達後の維持を求める目標へ発展させたものです。</p>
+  <p>BN は遺伝子調節ネットワークのモデルとして広く用いられており [5]、セミテンソル積を用いた代数的アプローチ [6] により、到達可能性解析や安定化制御の研究が進められてきた。制御手法としては、ノードの状態を直接操作するピン留め制御 [7] や、強化学習を用いる手法 [8] が提案されている。エッジ除去制御と Q 学習による安定化は Li と Li [9] が提案したが、制御入力の履歴に対する制約は扱われていない。</p>
+  <p>STL などの時間的仕様を強化学習に組み込む研究は、ロボティクスを中心に進められている [10–12]。しかし、これらは主に実数値信号を対象としており、BN のような離散システムへの適用は十分に検討されていない。本研究は筆者らの先行研究 [1] を発展させ、行動マスキングによる入力制約の厳密な充足と、初到達後の維持を求める目標仕様を扱う。</p>
   <ol class="refs">
     <li>K. Koshi, K. Kobayashi, Y. Yamashita, K. Sawada, “Edge Removal Control of Boolean Networks with STL Specifications Using Reinforcement Learning,” <i>Proc. ITC-CSCC 2026</i>, 2026.</li>
     <li>C. E. Giacomantonio, G. J. Goodhill, “A Boolean model of the gene regulatory network underlying mammalian cortical area development,” <i>PLoS Comput. Biol.</i>, 6(9), e1000936, 2010. <a href="https://doi.org/10.1371/journal.pcbi.1000936" target="_blank" rel="noopener noreferrer">doi</a></li>
@@ -581,8 +562,7 @@
 
   <!-- ===================================================== -->
   <h2 id="cite"><span class="no">10</span>コードと引用</h2>
-  <p>実装（ネットワーク定義、環境、行動マスキング付き Q 学習、実験設定）は <a href="https://github.com/koshikai/bn-edge-removal-public" target="_blank" rel="noopener noreferrer">GitHub</a> で公開しています。
-    本文の設定は <span class="mono small">configs/papers/zemi2/reward_1step/</span> にあります。手法を参照する場合は、次の論文を引用してください。</p>
+  <p>実装（ネットワーク定義、環境、行動マスキング付き Q 学習、実験設定）は <a href="https://github.com/koshikai/bn-edge-removal-public" target="_blank" rel="noopener noreferrer">GitHub</a> で公開している。本ページの計算例の設定は <span class="mono small">configs/papers/zemi2/reward_1step/</span> にある。本手法を参照する場合は、次の論文を引用されたい。</p>
   <pre class="bib mono">@inproceedings{Koshi2026itccscc,
   author    = {K. Koshi and K. Kobayashi and Y. Yamashita and K. Sawada},
   title     = {Edge Removal Control of {B}oolean Networks with {STL}
@@ -795,7 +775,7 @@
     var cap = document.getElementById("graph-cap");
     var g = inGoal(M, toId(xbits));
     cap.textContent = "t = " + t + "　状態 ID " + toId(xbits) + (g ? "（目標集合）" : "") +
-      (ubits ? "　切るエッジ " + (count(ubits) ? ubits.map(function (v, j) { return v ? j + 1 : null; }).filter(Boolean).join(", ") : "なし") : "　（入力なし）");
+      (ubits ? "　除去エッジ " + (count(ubits) ? ubits.map(function (v, j) { return v ? j + 1 : null; }).filter(Boolean).join(", ") : "なし") : "　（入力なし）");
   }
 
   // ---------------- raster ----------------
@@ -865,9 +845,9 @@
         if (c5 === T) { R_.appendChild(cell("na", "")); continue; }
         if (manual && c5 === done) {
           var lock = mk[k] !== "free", isCut = st.pick[k] === 1;
-          var title = mk[k] === "forced-on" ? "単調性：一度切ったので切り続ける" : mk[k] === "forced-off" ? "休薬中：あと " + ep.h[done][k] + " ステップ" : "クリックで切る／戻す";
+          var title = mk[k] === "forced-on" ? "単調性：除去済みのため除去を継続する" : mk[k] === "forced-off" ? "休薬期間中：残り " + ep.h[done][k] + " ステップ" : "クリックで除去の有無を切り替える";
           (function (kk, lk) {
-            R_.appendChild(cell("pick cur" + (isCut ? " cut" : "") + (lk ? " locked" : ""), lk ? (mk[kk] === "forced-off" ? "休" : "🔒") : (isCut ? "切" : ""),
+            R_.appendChild(cell("pick cur" + (isCut ? " cut" : "") + (lk ? " locked" : ""), lk ? (mk[kk] === "forced-off" ? "休" : "固") : (isCut ? "除" : ""),
               lk ? null : function () { st.pick[kk] = 1 - st.pick[kk]; render(); }, title));
           })(k, lock);
           continue;
@@ -876,7 +856,7 @@
         var cutNow = ep.us[c5][k] === 1;
         var resting = !cutNow && M.spec === "rest" && ep.h[c5][k] > 0;
         R_.appendChild(cell((cutNow ? "cut" : resting ? "rest" : "") + (c5 === t ? " cur" : "") + (c5 > t && !manual ? " future" : ""),
-          cutNow ? "切" : resting ? "休" : "", colClick(c5)));
+          cutNow ? "除" : resting ? "休" : "", colClick(c5)));
       }
     }
 
@@ -897,23 +877,23 @@
     if (sEnd === 2) {
       V.className = "verdict ng";
       V.textContent = first >= 0 && first <= M.H
-        ? "失敗：t = " + first + " で目標集合に入りましたが、その後に出てしまいました。"
-        : "失敗：期限 H = " + M.H + " までに目標集合へ入れませんでした。";
+        ? "失敗：t = " + first + " で目標集合に到達したが、その後に離脱した。"
+        : "失敗：到達期限 H = " + M.H + " までに目標集合へ到達しなかった。";
     } else if (finished && sEnd === 1) {
       V.className = "verdict ok";
-      V.textContent = "成功：t = " + first + " で目標集合に初めて入り、t = " + T + " まで留まりました。切ったエッジの延べ本数は " + total + "。";
+      V.textContent = "成功：t = " + first + " で目標集合に初到達し、t = " + T + " まで維持した。介入数は " + total + "。";
     } else if (sEnd === 1) {
-      V.textContent = "途中：t = " + first + " で目標集合に入り、維持中です。t = " + T + " まで出なければ成功。";
+      V.textContent = "途中：t = " + first + " で目標集合に到達し、維持している。t = " + T + " まで離脱しなければ成功となる。";
     } else {
-      V.textContent = "途中：まだ目標集合に入っていません（期限は t = " + M.H + "）。";
+      V.textContent = "途中：目標集合に未到達（到達期限は t = " + M.H + "）。";
     }
     if (!finished && st.mode !== "manual") V.textContent = "";
 
     document.getElementById("hint").textContent = manual
       ? (M.spec === "mono"
-        ? "点線の枠をクリックすると、このステップで切るエッジを選べます。単調性のため、一度切ったエッジは 🔒 になり、戻せません（行動マスキング）。"
-        : "点線の枠をクリックすると、このステップで切るエッジを選べます。切ったエッジは 2 ステップ「休」になり、その間は選べません（行動マスキング）。")
-      : "列をクリックするかスライダーを動かすと、その時刻のネットワークを左に表示します。左の図で × が付いた点線のエッジが、その時刻に切っているエッジです。";
+        ? "破線の枠をクリックすると、このステップで除去するエッジを選べる。単調性により、一度除去したエッジは「固」となり復帰できない（行動マスキング）。"
+        : "破線の枠をクリックすると、このステップで除去するエッジを選べる。除去したエッジは 2 ステップの間「休」となり、選択できない（行動マスキング）。")
+      : "列をクリックするかスライダーを動かすと、その時刻のネットワークを左図に表示する。左図で × を付けた破線のエッジが、その時刻に除去しているエッジである。";
 
     // state buttons
     var btns = document.querySelectorAll("#states button");
@@ -1001,7 +981,7 @@
     });
     var cap = document.createElement("p");
     cap.className = "muted small"; cap.style.gridColumn = "1 / -1"; cap.style.margin = "0";
-    cap.textContent = "seed 11。縦軸は学習中のエピソードが成功した割合、横軸はエピソード数。学習中の制約違反は両モデルとも全エピソードで 0。";
+    cap.textContent = "seed 11。縦軸は学習中のエピソードの成功率、横軸はエピソード数である。学習中の入力制約の違反は、両モデルとも全エピソードで 0 であった。";
     box.appendChild(cap);
   }
 
