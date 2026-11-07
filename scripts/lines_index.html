@@ -350,6 +350,8 @@
       .grid32 { grid-template-columns: repeat(4, 1fr); }
       .lines { grid-template-columns: 1fr; }
       dl.kv div { grid-template-columns: 5.6em 1fr; }
+      .table-wrap table.t.narrow { min-width: 0; }
+      .table-wrap table.t.narrow th, .table-wrap table.t.narrow td { padding: 6px 7px; font-size: 0.82rem; }
     }
     @media (prefers-reduced-motion: reduce) {
       *, *::before, *::after { animation: none !important; transition: none !important; }
@@ -367,7 +369,7 @@
   <p class="byline">越 海斗（Kaito Koshi）</p>
   <ul class="top-links">
     <li><a href="#demo">デモ ↓</a></li>
-    <li><a href="./zemi2.html">詳細（/zemi2.html）</a></li>
+    <li><a href="./zemi2.html">既存の解説</a></li>
     <li><a href="https://github.com/koshikai/bn-edge-removal-public" target="_blank" rel="noopener noreferrer">GitHub ↗</a></li>
   </ul>
 
@@ -554,7 +556,7 @@
       <dl class="kv">
         <div><dt>入力</dt><dd>学習済みの複数の方策の successor features と、新しい報酬の重み</dd></div>
         <div><dt>出力</dt><dd>各状態で、方策群の中から最も価値の高いものを選ぶ方策</dd></div>
-        <div><dt>保証</dt><dd>SF が正確なら、方策群のどれよりも悪くならない。近似誤差があると、その分だけ弱まる</dd></div>
+        <div><dt>保証</dt><dd>方策群の中から価値の高いものを選ぶ（GPI）。近似誤差があると、その分だけ弱まる</dd></div>
       </dl>
     </li>
   </ul>
@@ -736,7 +738,7 @@
     <li>対象は 243 family。目的関数は <span class="m">H</span> = 20 の occupancy。即時の単一辺除去（matched-k1）。遷移数の予算を揃えて比べた。</li>
     <li>主結果は ΔAUC +0.01933、95% CI [+0.01259, +0.02662]。</li>
     <li>予算ごとの差は +0.020、<wbr>+0.029、<wbr>+0.041、<wbr>+0.053、<wbr>-0.024、<wbr>-0.085 と符号が変わる。</li>
-    <li>最大予算で oracle の 10% 以内に入った割合は 70.5% と 8.6%。</li>
+    <li>最大予算で oracle の 10% 以内に入った割合は、offline が 70.5%、学習器が 8.6%。</li>
   </ul>
   <p class="small muted">注意：「Q 学習が上」という主張ではない。宣言した予算範囲の平均で、oracle との差が小さい、という主張である。</p>
 
@@ -774,7 +776,7 @@
   <p>ring 4台（16状態）。trigger 数は directed で 37 から 31、bidirectional で 32 から 31 に減る。整定時間は長くなる。</p>
 
   <h3>DQN <span class="badge b-closed">閉じた</span></h3>
-  <p>状態依存の辺除去を DQN の閉ループで学習した。2026-10-27 に閉じた。Q 表を関数近似に置き換える路線だった。数値は載せない。</p>
+  <p>状態依存の辺除去を DQN の閉ループで学習した。Q 表を関数近似に置き換える路線で、mammalian では条件判定を2つ同時に通せず、2026-10-27 に本人の指示で区切った。研究上の結論ではない。数値は載せない。</p>
 
   <h3>旧 C2D / BBM <span class="badge b-closed">一部閉鎖</span></h3>
   <p>Axis A は節点介入、Axis B は不可逆の辺除去。Axis B の学習路線は閉じた。数値は載せない。</p>
@@ -821,7 +823,7 @@
 
   <!-- ===================================================== 11. footer -->
   <footer>
-    <p>出典：<a href="https://github.com/koshikai/bn-edge-removal-public" target="_blank" rel="noopener noreferrer">https://github.com/koshikai/bn-edge-removal-public</a> · 既存ポータル <a href="./zemi2.html">/zemi2.html</a>（時間入力制約下のエッジ除去制御）</p>
+    <p>出典：<a href="https://github.com/koshikai/bn-edge-removal-public" target="_blank" rel="noopener noreferrer">https://github.com/koshikai/bn-edge-removal-public</a> · 既存の解説ページ <a href="./zemi2.html">zemi2</a>（時間入力制約下のエッジ除去制御）</p>
     <p>最終更新：2026-11-08</p>
     <p>著者：越 海斗（Kaito Koshi）</p>
   </footer>
