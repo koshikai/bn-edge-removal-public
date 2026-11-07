@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ロボット群の通信リンク · 研究ラインの地図</title>
-  <meta name="description" content="4台のロボットの環で、通信リンクを切る制御を全16状態について調べたライン。">
+  <meta name="description" content="ブーリアンな意思決定をする4台のロボットの環で、通信リンクの除去だけで目標へ安定化できるかを全16状態について調べたライン。">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -12,99 +12,219 @@
   <nav class="crumbs"><a href="../">地図</a> / <span>ロボット群の通信リンク</span></nav>
   <p class="eyebrow mono">LINE 06 · 全状態探索</p>
   <h1>ロボット群の通信リンク</h1>
-  <p class="lede">4台のロボットの環で、通信リンクを切って振る舞いを変える。</p>
-  <p class="badges"><span class="badge exact">exact</span></p>
+  <p class="lede">全状態探索。ブーリアンな意思決定をするロボット群で、通信リンクの除去だけで目標集合へ安定化できるかを調べる。ring 4台、16状態。</p>
+  <p class="badges"><span class="badge exact">exact</span><span class="badge closed">閉じた（2026-10-06）</span><span class="badge exploratory">4台・16状態だけ</span></p>
 
   <figure>
-    <svg viewBox="0 0 640 290" role="img" aria-labelledby="fig-cap">
+    <svg class="fig-wide" width="100%" viewBox="0 0 360 450" role="img" aria-labelledby="sw-f1-cap">
       <defs>
-        <marker id="a-f" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path class="mk-fixed" d="M0 0 L10 5 L0 10 z"/></marker>
-        <marker id="a-c" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path class="mk-cut" d="M0 0 L10 5 L0 10 z"/></marker>
+        <marker id="swa" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path class="mk-fixed" d="M0 0 L10 5 L0 10 z"/></marker>
       </defs>
-      <!-- directed -->
-      <text class="lbl-b mid" x="160" y="22">directed</text>
-      <circle class="nd pin" cx="160" cy="60" r="20"/><text class="nt" x="160" y="60">R1</text>
-      <circle class="nd" cx="250" cy="150" r="20"/><text class="nt" x="250" y="150">R2</text>
-      <circle class="nd" cx="160" cy="240" r="20"/><text class="nt" x="160" y="240">R3</text>
-      <circle class="nd" cx="70" cy="150" r="20"/><text class="nt" x="70" y="150">R4</text>
-      <path class="e e-cut" d="M176 74 L234 134" marker-end="url(#a-c)"/>
-      <path class="e e-fixed" d="M236 166 L176 226" marker-end="url(#a-f)"/>
-      <path class="e e-fixed" d="M144 226 L86 166" marker-end="url(#a-f)"/>
-      <path class="e e-fixed" d="M84 134 L144 74" marker-end="url(#a-f)"/>
-      <text class="lbl-s lbl-cut" x="214" y="96">このステップで除去</text>
-      <text class="lbl-s mid" x="160" y="32">leader</text>
-
-      <line class="ax-d" x1="320" y1="20" x2="320" y2="270"/>
-
-      <!-- bidirectional -->
-      <text class="lbl-b mid" x="480" y="22">bidirectional</text>
-      <circle class="nd pin" cx="480" cy="60" r="20"/><text class="nt" x="480" y="60">R1</text>
-      <circle class="nd" cx="570" cy="150" r="20"/><text class="nt" x="570" y="150">R2</text>
-      <circle class="nd" cx="480" cy="240" r="20"/><text class="nt" x="480" y="240">R3</text>
-      <circle class="nd" cx="390" cy="150" r="20"/><text class="nt" x="390" y="150">R4</text>
-      <path class="e e-cut" d="M496 74 L554 134"/>
-      <path class="e e-fixed" d="M556 166 L496 226"/>
-      <path class="e e-fixed" d="M464 226 L406 166"/>
-      <path class="e e-fixed" d="M404 134 L464 74"/>
-      <text class="lbl-s lbl-cut" x="534" y="96">このステップで除去</text>
-      <text class="lbl-s mid" x="480" y="32">leader</text>
-
-      <text class="lbl-s" x="10" y="284">予算 = 1ステップで除去できるリンクの最大数（累積しない）。tie-break は leader 優先</text>
+      <rect class="box" x="30" y="10" width="300" height="56" rx="8"/>
+      <text class="lbl-b mid" x="180" y="33">入力：ring 4台、全16状態</text>
+      <text class="lbl mid" x="180" y="53">leader は別の1台、値は0</text>
+      <path class="e e-fixed" d="M180 66 L180 88" marker-end="url(#swa)"/>
+      <rect class="box-a" x="30" y="90" width="300" height="56" rx="8"/>
+      <text class="lbl-b mid" x="180" y="113">条件：向き2種 × 同数票2方式</text>
+      <text class="lbl mid" x="180" y="133">予算 B = 1ステップの最大除去本数</text>
+      <path class="e e-fixed" d="M180 146 L180 168" marker-end="url(#swa)"/>
+      <rect class="box-u" x="30" y="170" width="300" height="74" rx="8"/>
+      <text class="lbl-b mid" x="180" y="193">判定：全状態が 0000 へ落ち着くか</text>
+      <text class="lbl mid" x="180" y="213">B を0から全辺数まで調べる</text>
+      <text class="lbl mid" x="180" y="232">自己起動は T ≤ 5、許容判定2種</text>
+      <path class="e e-fixed" d="M180 244 L180 266" marker-end="url(#swa)"/>
+      <rect class="box" x="30" y="268" width="300" height="56" rx="8"/>
+      <text class="lbl-b mid" x="180" y="291">故障：制御と別のマスク</text>
+      <text class="lbl mid" x="180" y="311">モデル A / B1 / B2、予算に数えない</text>
+      <path class="e e-fixed" d="M180 324 L180 346" marker-end="url(#swa)"/>
+      <rect class="box-g" x="30" y="348" width="300" height="92" rx="8"/>
+      <text class="lbl-b mid" x="180" y="371">集計：16状態すべて</text>
+      <text class="lbl mid" x="180" y="391">B_min、trigger 数、整定時間</text>
+      <text class="lbl mid" x="180" y="410">exposure、故障の下での B_min</text>
+      <text class="lbl mid" x="180" y="428">標本ではなく全数</text>
     </svg>
-    <figcaption id="fig-cap">4台の環。左は向きのあるリンク、右は双方向のリンク。太い枠が leader の R1。リンクの向きと台数の並びは説明用である。各ステップで、予算の数までリンクを除去できる。除去は次のステップには持ち越さない。どのリンクを切るかは図の例で、結果の政策ではない。</figcaption>
+    <figcaption id="sw-f1-cap">図1 実験の流れ。4台の follower の16状態すべてについて、通信リンクの除去だけで目標 0000 へ安定化できるかを調べる。予算、同数票の扱い、自己起動の保持時間、故障を順に変える。結果は標本ではなく全数の列挙である。</figcaption>
   </figure>
 
   <h2><span class="no">01</span>問い</h2>
-  <p>通信リンクを切ると、自己起動の trigger は減るか。全状態を安定化できるか。故障があっても使える静的な政策はあるか。</p>
+  <p><span class="badge exact">exact</span> このラインの問いは、通信を切るだけで群れが目標に落ち着くか、である。ロボットはそれぞれ0か1の意思を持ち、近くのロボットと leader の票で多数決をとる。制御できるのは、どの通信リンクを切るかだけである。ロボットの値を直接書き換えることはしない。</p>
+  <p>問いは3つに分かれる。1つ目は、1ステップに何本まで切ってよいとすれば、全状態から目標へ着けるか。2つ目は、評価の回数を減らす自己起動（self-triggered）の制御で、何が得られ何を失うか。3つ目は、通信の故障が起きても同じ結論が残るか。</p>
+  <p>状態は4台で16個しかない。だから<b>結果は標本ではなく全数の列挙</b>である。すべての状態、すべての行動、すべての保持時間を調べている。</p>
+  <span class="cite mono">README.md:28@35bdcf5</span>
 
-  <h2><span class="no">02</span>モデルと規模</h2>
-  <ul>
-    <li>ring 4台。状態は全部で16。</li>
-    <li>tie-break は leader 優先。</li>
-    <li>リンクの向きで2つのモードを分ける：directed と bidirectional。</li>
-  </ul>
-
-  <h2><span class="no">03</span>何を動かすか</h2>
-  <p>ロボット間の通信リンクを除去する。予算は<b>1ステップで除去できるリンクの最大数</b>で、累積ではない。</p>
-
-  <h2><span class="no">04</span>実験の設計</h2>
-  <ul>
-    <li>全16状態を調べる。乱数は使わない。</li>
-    <li>介入なしと介入ありで、自己起動の trigger 数を数える。</li>
-    <li>follower 単体の故障と、leader の故障まで含めた場合で、robust な最小予算 B_min を求める。</li>
-  </ul>
-
-  <h2><span class="no">05</span>結果</h2>
-  <div class="kpi">
-    <div><span class="v mono">37 → 31</span><span class="k">自己起動の trigger 数（directed）</span></div>
-    <div><span class="v mono">32 → 31</span><span class="k">自己起動の trigger 数（bidirectional）</span></div>
-    <div><span class="v mono">16 / 16</span><span class="k">安定化を確認した状態（両モード）</span></div>
-  </div>
-  <ul>
-    <li>自己起動の trigger 数は、directed で 37 から 31、bidirectional で 32 から 31 になった。</li>
-    <li>全16状態の安定化は、両モードで確認した。</li>
-    <li>平均の整定時間は長くなる。</li>
-  </ul>
-
-  <h3>故障を含めた場合</h3>
+  <h2><span class="no">02</span>設定</h2>
+  <p><span class="badge exact">exact</span> 構成は configs/ring_4.yaml にある。follower は4台で、全16状態を調べる。グラフは向きのある環（directed ring）と両向きの環（bidirectional ring）の2種である。</p>
   <div class="table-wrap">
-  <table class="t">
-    <thead><tr><th>故障の範囲</th><th>directed</th><th>bidirectional</th></tr></thead>
+  <table class="t" style="min-width: 0;">
+    <caption class="small muted" style="caption-side: top; text-align: left;">表1 モデルと条件</caption>
+    <thead><tr><th>項目</th><th>値</th></tr></thead>
     <tbody>
-      <tr><td>follower 単体</td><td>robust な B_min = 1</td><td>robust な B_min = 2</td></tr>
-      <tr><td>leader まで含める</td><td>全体で不能</td><td>B_min = 4。robust な静的政策は存在しない。open-loop (51,1) は成立する</td></tr>
+      <tr><td>follower</td><td>4台、全16状態</td></tr>
+      <tr><td>グラフ</td><td>directed ring と bidirectional ring</td></tr>
+      <tr><td>状態ID</td><td>最上位 bit が x_0（<span class="mono">0001</span> は ID 1、<span class="mono">1000</span> は ID 8）</td></tr>
+      <tr><td>辺の向き</td><td><span class="mono">A[j][i]=1</span> は j→i。自己ループは禁止</td></tr>
+      <tr><td>leader</td><td>別の1台、値 r=0。各 follower へ毎ステップ1票</td></tr>
+      <tr><td>更新</td><td>全 follower が同じ時刻の状態から同期更新</td></tr>
+      <tr><td>同数票</td><td><span class="mono">leader</span>（leader の値）と <span class="mono">hold</span>（現在の値）</td></tr>
+      <tr><td>行動</td><td>辺の除去マスク。最下位 bit が辺 0、bit 1 は除去</td></tr>
+      <tr><td>行動の数</td><td><span class="mono">Σ<sub>b=0..B</sub> C(|E|, b)</span></td></tr>
+      <tr><td>予算 B</td><td>1ステップで除去できる辺の最大数（累積ではない）</td></tr>
+      <tr><td>全列挙の範囲</td><td><span class="mono">n ≤ 6</span>、<span class="mono">|E| ≤ 12</span></td></tr>
     </tbody>
   </table>
   </div>
+  <p>状態は x = (x_0, …, x_3) で、状態IDの最上位 bit が x_0 である。follower 間の辺は (始点, 終点) の辞書順に番号をつける。自分の票は別に数えるので、グラフの自己ループは禁止する。</p>
+  <p>leader は別の1台で、値は r=0 である。各 follower は毎ステップ、自分の値と leader の値を1票ずつ含めて多数決をとる。Milestone 1〜4 では leader への接続は常に使える。同数票になったとき、<span class="mono">leader</span> 方式は leader の値を、<span class="mono">hold</span> 方式は現在の値を採る。両方の結果を保存する。</p>
+  <p>予算 B は、1ステップで除去できる辺の最大数である。累積の除去本数でも、トポロジーを変えた回数でもない。</p>
+  <span class="cite mono">README.md:39@35bdcf5</span>
+  <span class="cite mono">README.md:40@35bdcf5</span>
+  <span class="cite mono">README.md:41@35bdcf5</span>
+  <span class="cite mono">README.md:42@35bdcf5</span>
+  <span class="cite mono">README.md:44@35bdcf5</span>
+  <span class="cite mono">README.md:45@35bdcf5</span>
+  <span class="cite mono">README.md:78@35bdcf5</span>
 
-  <h2><span class="no">06</span>読むときの注意</h2>
-  <div class="note">
-    <p><b>状態 feedback が必須かどうかは、まだ確認できていない。</b>そのため、学習の導入は見送った。</p>
-    <p>trigger 数は減るが、平均の整定時間は長くなる。片方だけで良し悪しを決めない。</p>
+  <h2><span class="no">03</span>介入の意味</h2>
+  <p><span class="badge exact">exact</span> 辺 j→i を除去すると、follower i の投票集合から j の票を外す。外した票を0の票として数えることはしない。故障で届かない leader の票も同じで、0の票として使わない。</p>
+  <p class="eq">x_i(k+1) = 多数決{ x_i(k), r, x_j(k) : j→i は除去されていない }</p>
+  <p>この扱いでは、同数票の規則が結果を大きく左右する。<span class="mono">hold</span> 方式では、directed と bidirectional のどちらでも、全予算・全行動で次の状態が 1111 になる。つまり 1111 から抜けられない。規則から読むと、全員が1のとき、辺を何本切っても残る票は自分の1と leader の0と隣の1だけである。1が多いか同数になり、同数なら現在の1を保つ。</p>
+  <p>他のラインとの違い。<a href="asyncbn.html">非同期 BN</a> や <a href="sfgpi.html">SF + GPI</a> のラインは、ブーリアン関数の入力に定数を代入する。このラインは定数を代入せず、票そのものを数えない。だから「切ると0になる」という読み方はここでは成り立たない。</p>
+  <span class="cite mono">docs/robust_model.md:9@35bdcf5</span>
+  <span class="cite mono">docs/research_issues.md:7@35bdcf5</span>
+
+  <h2><span class="no">04</span>実験の手順</h2>
+  <ol class="steps">
+    <li>最小予算を決める。予算 B を0から全 follower 辺数まで順に調べ、全16状態から安定化できる最小の B を B_min とする。成功した場合の比較には最小予算を、不可能な場合には最大予算を使う。<span class="cite mono">docs/milestone_5_report.md:71@35bdcf5</span></li>
+    <li>自己起動を列挙する。予算は directed で1、bidirectional で2とした。保持時間の上限は T_max = 5 である。全状態・全行動・全 T について許容かどうかを判定する。<span class="cite mono">configs/self_triggered_ring_4.yaml:9@35bdcf5</span></li>
+    <li>許容判定を2種で行う。目標の外では、終端の順位 V_B(x_T) が初期の V_B(x_0) より下がることを求める（<span class="mono">terminal_decrease</span>）。より強い定義では、途中の順位もすべて V_B(x_0) 以下であることを加える（<span class="mono">nonincreasing_then_decrease</span>）。<span class="cite mono">docs/milestone_4.md:9@35bdcf5</span></li>
+    <li>目標の中を確かめる。目標の中では順位の減少を求めない。x_1 から x_T まですべてが目標の中にあるかを確かめ、途中で外へ出て戻る候補は捨てる。<span class="cite mono">docs/milestone_4.md:11@35bdcf5</span></li>
+    <li>候補を選ぶ。許容な候補から、保持時間の最大、除去辺数の最小、前の行動との変更辺数の最小、行動IDの最小の順に選ぶ。重みつきの点数は使わない。<span class="cite mono">docs/milestone_4.md:21@35bdcf5</span></li>
+    <li>故障を入れる。故障は制御と別のマスクで扱い、除去の予算に数えない。頑健性は、同じ行動 u がすべての許容故障 ξ で成立することを求める（∃u ∀ξ）。<span class="cite mono">docs/robust_model.md:3@35bdcf5</span><span class="cite mono">docs/robust_model.md:26@35bdcf5</span></li>
+  </ol>
+  <p>判定は全数の列挙で決まり、標本を抽出しない。16状態すべてを同じ重みで数える。除外規則は、このページの資料に無い。</p>
+
+  <h2><span class="no">05</span>指標の定義</h2>
+  <p><span class="badge exact">exact</span> B_min は、全16状態から目標へ安定化できる最小の予算である。どの予算でも安定化できないとき、B_min は存在しないと書く。</p>
+  <p>trigger 数 N_trig は、k=0 の初期評価から、最初の予定された目標維持の確認までの制御器の呼び出し数である。初期状態がすでに目標の中でも1回と数える。総数は16状態の和である。</p>
+  <p>整定時間は、最後まで目標に留まり続ける末尾の区間が始まる時刻である。最後に評価した時刻とは別の列にする。2つを混ぜると、自己起動の制御に追加の観測を仮定することになる。表2の平均整定時間の分母は16状態である。</p>
+  <p>exposure は、実行した区間ごとに保持したステップ数と除去した辺数を掛け、その和をとったものである。最後の維持確認で選んだ保持時間は、まだ実行していないので加えない。</p>
+  <p class="eq">exposure = Σ<sub>実行した区間</sub>（保持ステップ数 × 除去辺数）</p>
+  <p>故障の下での評価では、各故障モデルで安定化できる状態の数（分母は16）と、そのときの B_min を書く。開ループの評価では、目標がすべての行動・すべての故障の下で吸収状態なので、最初に目標へ着いた時刻が整定時間と一致する。<b>故障の下での最悪の整定時間</b>の値は、このページの資料に無い。</p>
+  <span class="cite mono">docs/robust_model.md:52@35bdcf5</span>
+  <span class="cite mono">docs/milestone_4.md:27@35bdcf5</span>
+  <span class="cite mono">docs/milestone_4.md:31@35bdcf5</span>
+  <span class="cite mono">docs/milestone_4.md:33@35bdcf5</span>
+
+  <h2><span class="no">06</span>結果</h2>
+  <div class="kpi">
+    <div><span class="v mono">1</span><span class="k">directed ring の B_min</span><span class="unit">leader 方式、16状態</span></div>
+    <div><span class="v mono">2</span><span class="k">bidirectional ring の B_min</span><span class="unit">leader 方式、16状態</span></div>
+    <div><span class="v mono">なし</span><span class="k">hold 方式の B_min</span><span class="unit">全予算を調べても不成立</span></div>
   </div>
+  <p><span class="badge exact">exact</span> leader 方式では、directed ring は全状態から安定化でき、B_min は1だった。bidirectional ring も全状態から安定化でき、B_min は2だった。hold 方式では、全予算を調べても全体の安定化は成立しなかった。</p>
+  <span class="cite mono">results/edge_budget.md:9@35bdcf5</span>
+  <span class="cite mono">results/edge_budget.md:10@35bdcf5</span>
+  <span class="cite mono">results/edge_budget.md:11@35bdcf5</span>
+  <p>自己起動の制御は、周期的な評価（periodic）より trigger の総数を減らした（表2、図2）。directed ring（B=1）では37から31へ、bidirectional ring（B=2）では32から31へ減った。どちらのグラフでも、trigger が増えた状態はなかった。<b>代わりに、directed ring の平均整定時間は1.3125から1.875ステップに延びた。</b></p>
+  <div class="table-wrap">
+  <table class="t" style="min-width: 0;">
+    <caption class="small muted" style="caption-side: top; text-align: left;">表2 周期方式から自己起動への変化（16状態、leader 方式）</caption>
+    <thead><tr><th>項目</th><th style="text-align: right;">directed（B=1）</th><th style="text-align: right;">bidirectional（B=2）</th></tr></thead>
+    <tbody>
+      <tr><td>trigger 総数</td><td class="mono" style="text-align: right;">37 → 31</td><td class="mono" style="text-align: right;">32 → 31</td></tr>
+      <tr><td>総数の比</td><td class="num mono">0.837838</td><td class="num mono">0.96875</td></tr>
+      <tr><td>削減</td><td class="num mono">16.216%</td><td class="num mono">3.125%</td></tr>
+      <tr><td>trigger が減った状態</td><td class="num mono">5</td><td class="num mono">1</td></tr>
+      <tr><td>trigger が増えた状態</td><td class="num mono">0</td><td class="num mono">0</td></tr>
+      <tr><td>平均整定時間（ステップ）</td><td class="mono" style="text-align: right;">1.3125 → 1.875</td><td class="num">資料に無い</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <span class="cite mono">docs/milestone_4.md:39@35bdcf5</span>
+  <span class="cite mono">docs/milestone_4.md:40@35bdcf5</span>
+
+  <figure>
+    <svg class="fig-wide" width="100%" viewBox="0 0 360 260" role="img" aria-labelledby="sw-f2-cap">
+      <text class="lbl" x="8" y="16">trigger 総数（回、16状態の和）</text>
+      <line class="ax" x1="130" y1="28" x2="130" y2="210"/>
+      <line class="ax-d" x1="230" y1="28" x2="230" y2="210"/>
+      <line class="ax-d" x1="330" y1="28" x2="330" y2="210"/>
+      <text class="lbl-b" x="8" y="46">directed、B=1</text>
+      <text class="lbl" x="8" y="70">周期方式</text>
+      <rect x="130" y="56" width="185" height="20" fill="var(--ink-mute)"/>
+      <text class="lbl" x="320" y="71">37</text>
+      <text class="lbl" x="8" y="100">自己起動</text>
+      <rect x="130" y="86" width="155" height="20" fill="var(--accent)"/>
+      <text class="lbl" x="290" y="101">31</text>
+      <text class="lbl-b" x="8" y="134">bidirectional、B=2</text>
+      <text class="lbl" x="8" y="158">周期方式</text>
+      <rect x="130" y="144" width="160" height="20" fill="var(--ink-mute)"/>
+      <text class="lbl" x="295" y="159">32</text>
+      <text class="lbl" x="8" y="188">自己起動</text>
+      <rect x="130" y="174" width="155" height="20" fill="var(--accent)"/>
+      <text class="lbl" x="290" y="189">31</text>
+      <text class="lbl mid" x="130" y="228">0</text>
+      <text class="lbl mid" x="230" y="228">20</text>
+      <text class="lbl mid" x="330" y="228">40</text>
+      <text class="lbl mid" x="230" y="250">trigger 総数（回）</text>
+    </svg>
+    <figcaption id="sw-f2-cap">図2 trigger 総数。灰色が周期方式、青が自己起動。値は16状態の和で、全数の列挙なので区間はない。</figcaption>
+  </figure>
+
+  <h2><span class="no">07</span>内訳と副次</h2>
+  <p><span class="badge exact">exact</span> 故障を入れると、結論は故障モデルによって変わる。モデル A は follower 間の辺が1本だけ壊れる。モデル B1 は、follower の辺と leader のリンクを合わせて1本だけ壊れる。モデル B2 は、leader のリンクの任意の部分集合が壊れる。</p>
+  <div class="table-wrap">
+  <table class="t" style="min-width: 0; font-size: 0.82rem;">
+    <caption class="small muted" style="caption-side: top; text-align: left;">表3 故障モデルごとの結果（分母は16状態）</caption>
+    <thead><tr><th>故障</th><th>グラフ</th><th>安定化 / B_min</th><th>固定マスク</th><th>固定して復元</th></tr></thead>
+    <tbody>
+      <tr><td rowspan="2">A follower 単体</td><td>directed</td><td class="mono">16/16 / 1</td><td class="mono">mask 1</td><td class="mono">(1,1)</td></tr>
+      <tr><td>bidir.</td><td class="mono">16/16 / 2</td><td class="mono">mask 17</td><td class="mono">(17,1)</td></tr>
+      <tr><td rowspan="2">B1 全体で1本</td><td>directed</td><td class="mono">1/16 / なし</td><td>なし</td><td>なし</td></tr>
+      <tr><td>bidir.</td><td class="mono">16/16 / 4</td><td>なし</td><td class="mono">(51,1)</td></tr>
+      <tr><td rowspan="2">B2 leader の部分集合</td><td>directed</td><td class="mono">1/16 / なし</td><td>なし</td><td>H_s ≤ 10 でなし</td></tr>
+      <tr><td>bidir.</td><td class="mono">7/16 / なし</td><td>なし</td><td>H_s ≤ 10 でなし</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <span class="cite mono">docs/milestone_5_report.md:66@35bdcf5</span>
+  <span class="cite mono">docs/milestone_5_report.md:67@35bdcf5</span>
+  <span class="cite mono">docs/milestone_5_report.md:68@35bdcf5</span>
+  <p>B1 では、directed ring は1状態しか守れず、B_min は存在しない。bidirectional ring は予算4で全状態を守れる。予算4なら1ステップで2台を同時に切り離せるので、leader のリンクが1本壊れても少なくとも1台に leader の情報が届く。mask 51 はノード1と3へ入る辺を除去する。最後の列は、開ループで復元後の探索結果から後向きに求めた組で、表の値をそのまま写した。表の「なし」は、B_min や全状態で使える行動が存在しないことを指す。bidir. は bidirectional ring の略である。</p>
+  <span class="cite mono">docs/milestone_5_report.md:73@35bdcf5</span>
+  <span class="cite mono">docs/robust_model.md:52@35bdcf5</span>
+  <p>固定した1つの行動でも全状態を安定化できる。directed ring で mask 1（0→1 を除去）を固定すると、全16状態から高々4ステップで 0000 へ着く。bidirectional ring で mask 17（0→1 と 2→1 を除去）を固定すると、高々3ステップで着く。状態に応じて行動を変えなくても、この規模では足りる。</p>
+  <span class="cite mono">docs/research_issues.md:55@35bdcf5</span>
+  <p>総数で改善しても、個別の状態では悪くなることがある。directed ring で 1111 から始めると、周期方式は整定3、trigger 4、exposure 2 で、自己起動は整定4、trigger 2、exposure 5 だった。trigger は減るが、整定時間と exposure は増える。3つの指標の向きは揃わない。</p>
+  <span class="cite mono">docs/milestone_4.md:44@35bdcf5</span>
+
+  <h2><span class="no">08</span>届かなかったこと</h2>
+  <p><span class="badge exact">exact</span> 全ノードが leader を直接参照するという仮定は強い。実際の leader の通信や、物理的な編隊の安定性を表さない。同数票の扱いが結果を大きく変えるので、方式を混ぜた評価は避ける。</p>
+  <span class="cite mono">README.md:76@35bdcf5</span>
+  <p>自己起動で選ばれた保持時間は、探索上限に張りついている。各グラフで、目標外の15状態すべてに T=5 の許容な組があった。T=5 は探索上限 T_max の範囲での最大値で、最大の安全な保持時間ではない。上限を上げたときに何が起きるかは分かっていない。</p>
+  <span class="cite mono">docs/milestone_4.md:42@35bdcf5</span>
+  <p>全列挙の計算量は、状態数と辺数に対して指数的に増える。実験の実行器は n ≤ 6、|E| ≤ 12 に制限している。大きな群れで同じ結論が成り立つかは分かっていない。</p>
+  <span class="cite mono">README.md:78@35bdcf5</span>
+  <p><span class="badge closed">閉じた</span> ラインは2026年10月6日に閉じた。基準の HEAD は 459e806 である。閉じた範囲は Branch B、Milestone 11〜19 の学習・履歴・有限記憶の必要性の監査である。厳密な監査を積み重ねたが、追加の研究を正当化する根拠が今はないので、能動的な研究を終えた。</p>
+  <span class="cite mono">docs/RESEARCH_LINE_STATUS.md:8@35bdcf5</span>
+  <span class="cite mono">docs/RESEARCH_LINE_STATUS.md:10@35bdcf5</span>
+
+  <h2><span class="no">09</span>読むときの注意</h2>
+  <div class="note">
+    <p><b>「通信を切れば群れは必ず目標に落ち着く」とは読まない。</b>hold 方式では B_min が存在しない。結論は同数票の規則に依存する。</p>
+    <p>結果は4台・16状態の環だけのものである。全数の列挙なので区間はないが、規模を広げたときの保証もない。</p>
+    <p>trigger の削減は総数の話である。1111 のように、個別の状態では整定時間と exposure が増える。</p>
+    <p>leader の値は r=0 に固定し、目標は 0000 である。ほかの目標や leader の値での結果は、このページの資料に無い。</p>
+  </div>
+  <p>型の整理。このページの数値はすべて全数の列挙で得た exact な値である。ただし範囲は ring 4台と上の仮定の中に限る。</p>
+
+  <h2><span class="no">10</span>再現の手がかり</h2>
+  <p>リポジトリは boolean-multi-agent-control、commit は 35bdcf5 である。予算の実験は <span class="mono" style="overflow-wrap: anywhere;">02_edge_budget.py</span> が <span class="mono" style="overflow-wrap: anywhere;">configs/ring_4.yaml</span> を読んで実行する。自己起動の設定は <span class="mono" style="overflow-wrap: anywhere;">configs/self_triggered_ring_4.yaml</span> にある。</p>
+  <p>結果と報告は <span class="mono" style="overflow-wrap: anywhere;">results/edge_budget.md</span>、<span class="mono" style="overflow-wrap: anywhere;">docs/milestone_4.md</span>、<span class="mono" style="overflow-wrap: anywhere;">docs/milestone_5_report.md</span>、故障モデルは <span class="mono" style="overflow-wrap: anywhere;">docs/robust_model.md</span> にある。閉鎖の記録は <span class="mono" style="overflow-wrap: anywhere;">docs/RESEARCH_LINE_STATUS.md</span> である。実行時間はこのページの資料に無い。</p>
+  <span class="cite mono">README.md:28@35bdcf5</span>
 
   <footer>
-    <p>出典：<a href="https://github.com/koshikai/bn-edge-removal-public" target="_blank" rel="noopener noreferrer">https://github.com/koshikai/bn-edge-removal-public</a></p>
+    <p>出典：boolean-multi-agent-control @ 35bdcf5 · このページ：<a href="https://github.com/koshikai/bn-edge-removal-public" target="_blank" rel="noopener noreferrer">https://github.com/koshikai/bn-edge-removal-public</a></p>
     <p>最終更新：2026-11-08</p>
     <p><a href="../">← 研究ラインの地図へ戻る</a> · <a href="../#numbers">数値の一覧</a> · <a href="../#lines">ライン一覧</a></p>
     <p class="pager"><a href="asyncbn.html">← 非同期 BN</a> · <a href="drqn.html">DQN →</a></p>

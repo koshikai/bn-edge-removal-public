@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>SF + GPI · 研究ラインの地図</title>
-  <meta name="description" content="MAPK モデルで、successor features と GPI による方策の再利用を試した探索ライン。">
+  <meta name="description" content="厳密な辺除去の下で、複数の報酬に対する方策の再利用が成り立つかを MAPK 1モデルで調べた探索ライン。">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -12,105 +12,208 @@
   <nav class="crumbs"><a href="../">地図</a> / <span>SF + GPI</span></nav>
   <p class="eyebrow mono">LINE 04 · 探索</p>
   <h1>SF + GPI</h1>
-  <p class="lede">学習済みの方策を組み合わせ、新しい報酬で使い回す。</p>
-  <p class="badges"><span class="badge exploratory">exploratory</span><span class="badge exploratory">MAPK 1モデル</span><span class="badge exploratory">多重比較補正なし</span></p>
+  <p class="lede">探索。厳密な辺除去の下で、複数の報酬に対する方策の再利用が成り立つか。MAPK 1モデル、除去可能辺10本、累積4本まで。</p>
+  <p class="badges"><span class="badge exploratory">exploratory</span><span class="badge exact">設定は exact</span><span class="badge exploratory">MAPK 1モデル</span><span class="badge exploratory">多重比較補正なし</span></p>
 
   <figure>
-    <svg viewBox="0 0 640 300" role="img" aria-labelledby="fig-cap">
+    <svg class="fig-wide" width="100%" viewBox="0 0 360 430" role="img" aria-labelledby="sf-f1-cap">
       <defs>
-        <marker id="a-f" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path class="mk-fixed" d="M0 0 L10 5 L0 10 z"/></marker>
-        <marker id="a-r" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path class="mk-rem" d="M0 0 L10 5 L0 10 z"/></marker>
-        <marker id="a-c" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path class="mk-cut" d="M0 0 L10 5 L0 10 z"/></marker>
+        <marker id="sfa" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path class="mk-fixed" d="M0 0 L10 5 L0 10 z"/></marker>
       </defs>
-      <!-- policy library -->
-      <text class="lbl-b" x="10" y="22">学習済みの方策群</text>
-      <rect class="box" x="10" y="34" width="120" height="30" rx="5"/><text class="lbl-m mid" x="70" y="53">π1 · ψ1</text>
-      <rect class="box" x="10" y="72" width="120" height="30" rx="5"/><text class="lbl-m mid" x="70" y="91">π2 · ψ2</text>
-      <rect class="box" x="10" y="110" width="120" height="30" rx="5"/><text class="lbl-m mid" x="70" y="129">π3 · ψ3</text>
-      <text class="lbl-m mid" x="70" y="156">⋮</text>
-      <rect class="box-a" x="10" y="180" width="140" height="40" rx="5"/>
-      <text class="lbl mid" x="80" y="205">新しい報酬の重み w</text>
-      <path class="e e-fixed" d="M130 87 L208 110" marker-end="url(#a-f)"/>
-      <path class="e e-rem" d="M150 200 L208 140" marker-end="url(#a-r)"/>
-      <!-- GPI -->
-      <rect class="box-a" x="210" y="90" width="130" height="70" rx="6"/>
-      <text class="lbl-b mid" x="275" y="117">GPI</text>
-      <text class="lbl-m mid" x="275" y="139">max_i ψ_i · w</text>
-      <path class="e e-rem" d="M340 125 L398 125" marker-end="url(#a-r)"/>
-      <!-- action -->
-      <rect class="box-u" x="400" y="100" width="124" height="50" rx="6"/>
-      <text class="lbl-b mid lbl-cut" x="462" y="121">1本だけ切替</text>
-      <text class="lbl-s mid" x="462" y="139">10本中、累積4本まで</text>
-      <path class="e e-cut" d="M524 125 L538 125" marker-end="url(#a-c)"/>
-      <!-- environment -->
-      <rect class="box" x="540" y="70" width="90" height="110" rx="6"/>
-      <text class="lbl-b mid" x="585" y="98">MAPK</text>
-      <text class="lbl-s mid" x="585" y="118">53ノード</text>
-      <text class="lbl-s mid" x="585" y="134">入力4</text>
-      <text class="lbl-s mid" x="585" y="150">内部49</text>
-      <!-- inner microsteps -->
-      <text class="lbl-s" x="10" y="262">1判断の中：ランダムな単一ノード更新を 49 回</text>
-      <g>
-        <rect class="sq" x="10" y="272" width="8" height="18"/><rect class="sq on" x="20" y="272" width="8" height="18"/>
-        <rect class="sq" x="30" y="272" width="8" height="18"/><rect class="sq" x="40" y="272" width="8" height="18"/>
-        <rect class="sq on" x="50" y="272" width="8" height="18"/><rect class="sq" x="60" y="272" width="8" height="18"/>
-        <rect class="sq" x="70" y="272" width="8" height="18"/><rect class="sq on" x="80" y="272" width="8" height="18"/>
-        <rect class="sq" x="90" y="272" width="8" height="18"/><rect class="sq" x="100" y="272" width="8" height="18"/>
-        <text class="lbl-s" x="114" y="286">… 49 回目</text>
-      </g>
-      <path class="e e-fixed e-dash" d="M585 180 L585 236 L275 236 L275 162" marker-end="url(#a-f)"/>
-      <text class="lbl-s" x="420" y="230">次の判断へ状態を返す</text>
+      <rect class="box" x="30" y="10" width="300" height="56" rx="8"/>
+      <text class="lbl-b mid" x="180" y="33">入力：MAPK、外部入力 1010</text>
+      <text class="lbl mid" x="180" y="53">元方策9本の軌跡で SF を学ぶ</text>
+      <path class="e e-fixed" d="M180 66 L180 88" marker-end="url(#sfa)"/>
+      <rect class="box-a" x="30" y="90" width="300" height="56" rx="8"/>
+      <text class="lbl-b mid" x="180" y="113">条件：報酬の重み w を変える</text>
+      <text class="lbl mid" x="180" y="133">評価の入力は 1010 と 1100</text>
+      <path class="e e-fixed" d="M180 146 L180 168" marker-end="url(#sfa)"/>
+      <rect class="box-u" x="30" y="170" width="300" height="74" rx="8"/>
+      <text class="lbl-b mid" x="180" y="193">行動：GPI が辺を1本だけ切り替える</text>
+      <text class="lbl mid" x="180" y="213">10本中、同時に4本まで</text>
+      <text class="lbl mid" x="180" y="232">1判断の中で単一ノード更新 49 回</text>
+      <path class="e e-fixed" d="M180 244 L180 266" marker-end="url(#sfa)"/>
+      <rect class="box" x="30" y="268" width="300" height="56" rx="8"/>
+      <text class="lbl-b mid" x="180" y="291">判定：目標に届いたか、報酬</text>
+      <text class="lbl mid" x="180" y="311">割引報酬は12判断、γ = 0.9</text>
+      <path class="e e-fixed" d="M180 324 L180 346" marker-end="url(#sfa)"/>
+      <rect class="box-g" x="30" y="348" width="300" height="72" rx="8"/>
+      <text class="lbl-b mid" x="180" y="371">集計：10 学習 seed が単位</text>
+      <text class="lbl mid" x="180" y="391">到達率・割引報酬・費用込み報酬</text>
+      <text class="lbl mid" x="180" y="409">検定は探索的、補正なし</text>
     </svg>
-    <figcaption id="fig-cap">学習済みの方策の successor features（ψ）と新しい報酬の重み w から、GPI が行動を選ぶ。行動は除去可能辺の切替1本。1判断の間に、内部ノードが1つずつランダムに 49 回更新される。</figcaption>
+    <figcaption id="sf-f1-cap">図1 実験の流れ。外部入力 1010 で、元方策9本の軌跡から successor features（SF）を学ぶ。評価では報酬の重みを変え、一般化方策改善（GPI）が辺を1本ずつ切り替える。独立な統計単位は学習 seed の10個である。</figcaption>
   </figure>
 
   <h2><span class="no">01</span>問い</h2>
-  <p>学習済みの方策群を、新しい報酬の下で組み合わせて使い回せるか。そのとき到達率と割引報酬はどうなるか。</p>
+  <p><span class="badge exploratory">exploratory</span> このラインの問いは、方策の再利用が報酬を変えても効果を保つかである。一度学んだ方策群を、別の目標や別の介入価格の下でそのまま使い回せるか。使い回したとき、到達率、報酬、計算の総費用は許容できるか。</p>
+  <p>道具は2つある。後継特徴（successor features, SF）は、方策ごとに将来の特徴の期待値を持つ。報酬が特徴の線形和なら、新しい重み w との内積で価値を出せる。一般化方策改善（generalized policy improvement, GPI）は、複数の方策の価値の最大値をとって行動を選ぶ。</p>
+  <p>主張の中心は<b>厳密な辺除去の下での多報酬の方策再利用</b>である。SAT と Trap Space の証明書は構造の補助か強い比較相手として使う。SF が SAT による直接制御に勝つことは主張しない。</p>
+  <span class="cite mono">README.md:12@6c6dcc0</span>
+  <span class="cite mono">docs/RESEARCH_STATUS.md:13@6c6dcc0</span>
 
-  <h2><span class="no">02</span>モデルと規模</h2>
-  <ul>
-    <li>MAPK モデル1つ。53ノードで、外部入力が4、非同期に更新する内部ノードが49。</li>
-    <li>モデルは1つだけで、多重比較の補正はしていない。</li>
-  </ul>
-
-  <h2><span class="no">03</span>何を動かすか</h2>
-  <ul>
-    <li>極性制約つきの除去可能辺が10本ある。累積で4本まで切れる。</li>
-    <li><b>1判断につき1本だけ切り替える。</b></li>
-    <li>1判断の中で、ランダムな単一ノード更新が 49 回起きる。</li>
-  </ul>
-
-  <h2><span class="no">04</span>実験の設計</h2>
-  <p>4つの方法を、到達率と割引報酬で並べる。</p>
-  <ul>
-    <li>SF+GPI</li>
-    <li>多様な方策</li>
-    <li>同数の勾配更新の線形 Q</li>
-    <li>SAT を使う直接制御</li>
-  </ul>
-
-  <h2><span class="no">05</span>結果</h2>
+  <h2><span class="no">02</span>設定</h2>
+  <p><span class="badge exact">exact</span> 評価するモデルは Grieco らの MAPK ブーリアンネットワーク1つである。53ノードのうち外部入力が4、非同期に更新する内部ノードが49ある。除去できる辺は極性制約つきの10本で、同時に切れるのは4本までである。1回の制御判断で切り替えるのは1本までとする。</p>
   <div class="table-wrap">
-  <table class="t">
-    <thead><tr><th>方法</th><th class="num">到達率</th><th class="num">割引報酬</th></tr></thead>
+  <table class="t" style="min-width: 0;">
+    <caption class="small muted" style="caption-side: top; text-align: left;">表1 モデルと条件</caption>
+    <thead><tr><th>項目</th><th>値</th></tr></thead>
     <tbody>
-      <tr><td>SF+GPI</td><td class="num">81.04%</td><td class="num">0.615</td></tr>
-      <tr><td>多様な方策</td><td class="num">81.30%</td><td class="num">0.628</td></tr>
-      <tr><td>同数の勾配更新の線形 Q</td><td class="num">79.32%</td><td class="num">0.531</td></tr>
-      <tr><td>SAT を使う直接制御</td><td class="num">95.47%</td><td class="num">0.018</td></tr>
+      <tr><td>モデル</td><td>MAPK（1モデル）</td></tr>
+      <tr><td>ノード</td><td>53（外部入力4、非同期の内部49）</td></tr>
+      <tr><td>除去可能辺</td><td>極性制約つき10本</td></tr>
+      <tr><td>同時に切れる本数</td><td>最大4本</td></tr>
+      <tr><td>1判断で切り替える本数</td><td>最大1本</td></tr>
+      <tr><td>1判断の中身</td><td>ランダムな単一ノード更新 49 回</td></tr>
+      <tr><td>合法なマスク</td><td>386 個（固定マスクの更新関数としては 163 種）</td></tr>
+      <tr><td>学習の外部入力</td><td class="mono">1010</td></tr>
+      <tr><td>評価の外部入力</td><td><span class="mono">1010</span>（報酬の転移）と <span class="mono">1100</span>（学習に使わないダイナミクス）</td></tr>
+      <tr><td>独立な統計単位</td><td>学習 seed 10個</td></tr>
     </tbody>
   </table>
   </div>
-  <p>到達率は SAT を使う直接制御が最も高い。割引報酬は SAT を使う直接制御が最も低い。</p>
+  <p>1判断の中には、ランダムに選んだ1ノードの更新が49回入る。だから同じマスクを選んでも、判断ごとの状態の進み方はばらつく。学習は外部入力 1010 だけで行う。評価は、同じ 1010 で報酬だけを変える場合と、学習に使わない 1100 の場合の両方で行う。</p>
+  <p>合法なマスク386個は、SAT で比べると、固定マスクの更新関数として163種に分かれる。論理的に同じ関数になるマスクがあるということである。ただし、マスクの履歴が違えば、将来の費用や許される切り替えも違う。だから、関数が同じでもマスク切り替えの意思決定問題として同じ状態にはならない。</p>
+  <span class="cite mono">README.md:12@6c6dcc0</span>
+  <span class="cite mono">docs/RESEARCH_STATUS.md:10@6c6dcc0</span>
 
-  <h2><span class="no">06</span>読むときの注意</h2>
-  <div class="note">
-    <p>到達率では SAT が上回る。<b>SF の主張は報酬込みの再利用であって、SAT への優位ではない。</b></p>
-    <p>MAPK 1モデルだけの結果で、多重比較補正はしていない。</p>
+  <h2><span class="no">03</span>介入の意味</h2>
+  <p><span class="badge exact">exact</span> 辺 i→j への介入は、終点 j の更新関数 f_j だけを置き換える。置き換え先は、f_j の中の x_i に定数 c を代入した関数である。x_i の値、f_i、j 以外のノードの更新関数は変わらない。x_i はほかの終点には元どおり作用する。ノード i を固定する操作ではない。</p>
+  <p class="eq">f_j′(x) = f_j(x) |<sub>x_i = c</sub>　（活性化辺は c = 0、抑制辺は c = 1）</p>
+  <p>MAPK では、この介入を符号付き辺特異的ブーリアン介入（signed edge-specific Boolean intervention）と呼ぶ。活性化辺には0を、抑制辺には1を代入する。つまり符号つきのリテラルを偽にする。抑制辺の4本は、抑制が常にかかる状態になる。10本中7本は、単独で切ると終点が定数0になる。</p>
+  <p>仮の例で書く。f_j = x_i OR x_k で、i→j が活性化辺なら、c = 0 を代入して f_j′ = x_k になる。f_j = x_k AND NOT x_i で、i→j が抑制辺なら、c = 1 を代入して f_j′ = 0 になる。後者では、抑制辺を切ると終点が定数になる。この例はモデルの実際の規則ではなく、式の読み方を示すためのものである。</p>
+  <p>他のラインとの違い。<a href="asyncbn.html">非同期 BN</a> のラインは、NOT の下でもリテラル0を代入する。このラインは抑制辺に1を代入する。どちらも「辺の除去」と呼ばれるが、抑制辺での意味が違う。数値を並べて優劣を言わない。</p>
+  <span class="cite mono">docs/INTERVENTION_SEMANTICS_ja.md:7@6c6dcc0</span>
+  <span class="cite mono">docs/INTERVENTION_SEMANTICS_ja.md:19@6c6dcc0</span>
+
+  <h2><span class="no">04</span>実験の手順</h2>
+  <p><span class="badge exploratory">exploratory</span> 実験は番号つきのディレクトリに分かれ、それぞれ独立に実行できる。このページでは 01、03、07 の3つを使う。番号は手順の順を示すもので、実行した時期の順を示すものではない。</p>
+  <ol class="steps">
+    <li>01 方策ライブラリ。元方策9本と、ダイナミクスが多様な9本で SF+GPI を作り、到達率と割引報酬を比べた。同じ SF の中で、GPI の最大値選択と方策価値の平均も比べた。各手法の試行数は 1,920 である。<span class="cite mono">docs/RESEARCH_STATUS.md:12@6c6dcc0</span></li>
+    <li>03 報酬の転移。報酬課題を8つ用意した。単一目標が4つ（重み1.0）、隣り合う2目標の組み合わせが4つ（主0.65＋副0.35）である。SF は表現型4つと証明済み Trap Space の占有4つ、合わせて8つの事象の特徴を学ぶ。試行は10 seed × 8報酬 × 3価格 × 4評価系列で、手法あたり960軌跡、5方式で4800軌跡である。<span class="cite mono">experiments/03_reward_transfer/README_ja.md:24@6c6dcc0</span><span class="cite mono">experiments/03_reward_transfer/README_ja.md:25@6c6dcc0</span><span class="cite mono">experiments/03_reward_transfer/README_ja.md:27@6c6dcc0</span></li>
+    <li>07 純粋な報酬の転移。元方策9本は、マスク 0,1,2,3,4,5,6,7,16 へ向かう固定の追跡方策である。強化学習で最適化した方策ではない。主比較の4手法は、総勾配更新数と学習に使う one-hot の4課題を揃えた。<span class="cite mono">experiments/07_pure_reward_transfer/README_ja.md:68@6c6dcc0</span></li>
+    <li>予算を揃える。07 の総勾配更新数は、教師24状態で112回、48状態で168回、96状態で280回（seed・手法あたり）である。01 の線形報酬 Q にも、勾配更新数を揃えた版がある。<span class="cite mono">experiments/07_pure_reward_transfer/README_ja.md:70@6c6dcc0</span></li>
+    <li>評価する。07 の評価は教師96状態で、各手法1,280試行（10 seed × 32報酬 × 2価格 × 2エピソード）である。独立な統計単位は10個の学習 seed である。<span class="cite mono">experiments/07_pure_reward_transfer/README_ja.md:9@6c6dcc0</span></li>
+    <li>検定する。10 seed の両側符号反転検定を使う。取りうる最小の p 値は 2/1024 である。族単位の補正はせず、事前登録もない。<span class="cite mono">docs/INTERVENTION_SEMANTICS_ja.md:34@6c6dcc0</span><span class="cite mono">experiments/03_reward_transfer/README_ja.md:58@6c6dcc0</span></li>
+  </ol>
+  <p>比較は2種類に分けて読む。1つ目は勾配更新数を揃えた主比較である。07 の4手法と、01 の「勾配更新数を揃えた線形報酬 Q」がこれに当たる。2つ目は揃えていない比較である。01 の十分に学習した線形報酬 Q と条件付き Q は、学習量が揃っていない。SAT を使う直接制御は、目標に対応するマスクを知っている別の情報条件である。</p>
+  <p>除外規則は、このページの資料に無い。試行は seed の中で互いに独立ではないので、試行数を標本数として扱わない。</p>
+
+  <h2><span class="no">05</span>指標の定義</h2>
+  <p><span class="badge exact">exact</span> 到達率は、目標の Trap Space に達した試行の割合である。分母は手法ごとの試行数で、01 では 1,920 である。率の差はパーセントポイントで書く。</p>
+  <p>割引報酬は、03 の定義では12判断の有限和で、割引率は γ = 0.9 である。</p>
+  <p class="eq">G = Σ<sub>t=0..11</sub> γ<sup>t</sup> r<sub>t</sub>　（γ = 0.9）</p>
+  <p>報酬 r_t は、8つの事象の特徴に報酬の重みを掛けた線形和である。だから新しい報酬は、既知の事象の基底の組み合わせになる。全く新しい生物学的事象への転移ではない。表2の割引報酬は手法ごとの平均で、分母は表1の到達率と同じ試行数である。01 の表が 03 と同じ12判断の打ち切りを使うかは、このページの資料では確かめていない。</p>
+  <p>費用込み平均報酬は、介入の費用を差し引いた報酬の平均である。SF+GPI はこの指標で、表に並ぶ手法の中で最良だった。<b>生の到達率では最良ではない。</b></p>
+  <span class="cite mono">experiments/03_reward_transfer/README_ja.md:24@6c6dcc0</span>
+  <span class="cite mono">experiments/03_reward_transfer/README_ja.md:25@6c6dcc0</span>
+  <span class="cite mono">docs/RESEARCH_STATUS.md:13@6c6dcc0</span>
+
+  <h2><span class="no">06</span>結果</h2>
+  <div class="kpi">
+    <div><span class="v mono">81.04%</span><span class="k">元方策9本の SF+GPI</span><span class="unit">到達率、各 1,920 試行</span></div>
+    <div><span class="v mono">81.30%</span><span class="k">多様な9本の SF+GPI</span><span class="unit">到達率、p = .805</span></div>
+    <div><span class="v mono">95.47%</span><span class="k">SAT を使う直接制御</span><span class="unit">到達率、別の情報条件</span></div>
   </div>
+  <p><span class="badge exploratory">exploratory</span> 01 の4手法を表2に並べる。到達率は SAT を使う直接制御が最も高く、95.47% だった。割引報酬は SAT を使う直接制御が最も低く、0.018 だった。割引報酬が最も高いのは多様な9本の SF+GPI で、0.628 だった。</p>
+  <div class="table-wrap">
+  <table class="t" style="min-width: 0;">
+    <caption class="small muted" style="caption-side: top; text-align: left;">表2 到達率と割引報酬（01、各手法 1,920 試行、10 seed）</caption>
+    <thead><tr><th>手法</th><th class="num">到達率</th><th class="num">割引報酬</th></tr></thead>
+    <tbody>
+      <tr><td>元方策9本の SF+GPI</td><td class="num mono">81.04%</td><td class="num mono">0.615</td></tr>
+      <tr><td>多様な9本の SF+GPI</td><td class="num mono">81.30%</td><td class="num mono">0.628</td></tr>
+      <tr><td>線形報酬 Q（勾配更新数を揃えた）</td><td class="num mono">79.32%</td><td class="num mono">0.531</td></tr>
+      <tr><td>SAT を使う直接制御</td><td class="num mono">95.47%</td><td class="num mono">0.018</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p>表2の値は、源リポジトリの README にある結果表（commit 6c6dcc0）から写した。この表の行の引用番号は、このページの資料に無い。</p>
+  <p>SAT を使う直接制御は、到達率で SF+GPI を上回る。ただし目標に対応する最終マスクを知っている条件で、比べる情報量が等しくない。割引報酬がなぜ低いのかは、このページの資料では分かっていない。</p>
+
+  <figure>
+    <svg class="fig-wide" width="100%" viewBox="0 0 360 330" role="img" aria-labelledby="sf-f2-cap">
+      <text class="lbl" x="8" y="16">到達率（%）、01、各手法 1,920 試行</text>
+      <line class="ax" x1="140" y1="28" x2="140" y2="282"/>
+      <line class="ax-d" x1="230" y1="28" x2="230" y2="282"/>
+      <line class="ax-d" x1="320" y1="28" x2="320" y2="282"/>
+      <text class="lbl" x="8" y="51">元9本 SF+GPI</text>
+      <rect x="140" y="38" width="145.87" height="20" fill="var(--accent)"/>
+      <text class="lbl" x="290" y="53">81.04</text>
+      <text class="lbl" x="8" y="87">多様9本 SF+GPI</text>
+      <rect x="140" y="74" width="146.34" height="20" fill="var(--accent)"/>
+      <text class="lbl" x="291" y="89">81.30</text>
+      <text class="lbl" x="8" y="123">同 SF・価値の平均</text>
+      <rect x="140" y="110" width="122.15" height="20" fill="var(--ink-mute)"/>
+      <text class="lbl" x="267" y="125">67.86</text>
+      <text class="lbl" x="8" y="159">線形Q（揃えた）</text>
+      <rect x="140" y="146" width="142.78" height="20" fill="var(--ink-mute)"/>
+      <text class="lbl" x="287" y="161">79.32</text>
+      <text class="lbl" x="8" y="195">線形Q（十分）</text>
+      <rect x="140" y="182" width="156.01" height="20" fill="var(--ink-soft)"/>
+      <text class="lbl" x="301" y="197">86.67</text>
+      <text class="lbl" x="8" y="231">条件付き Q</text>
+      <rect x="140" y="218" width="157.32" height="20" fill="var(--ink-soft)"/>
+      <text class="lbl" x="302" y="233">87.40</text>
+      <text class="lbl" x="8" y="267">SAT 直接制御</text>
+      <rect x="140" y="254" width="171.85" height="20" fill="var(--cut)"/>
+      <text class="lbl" x="316" y="269">95.47</text>
+      <text class="lbl mid" x="140" y="300">0</text>
+      <text class="lbl mid" x="230" y="300">50</text>
+      <text class="lbl mid" x="320" y="300">100</text>
+      <text class="lbl mid" x="230" y="320">到達率（%）</text>
+    </svg>
+    <figcaption id="sf-f2-cap">図2 01 の到達率。上の2本は SF+GPI、3本目は同じ多様な SF で GPI の代わりに方策価値の平均をとったもの。4本目は勾配更新数を揃えた線形報酬 Q、5本目と6本目は学習量を揃えていない Q、最下段は別の情報条件の SAT 直接制御。区間は報告されていないので描いていない。</figcaption>
+  </figure>
+
+  <h2><span class="no">07</span>内訳と副次</h2>
+  <p><span class="badge exploratory">exploratory</span> GPI の最大値選択の効果を、同じ多様な SF の中で調べた。GPI は到達率81.30%、方策価値の平均は67.86%で、差は+13.44ポイントだった。探索的な p 値は .00195 である。ただし比べた相手は平均で、最良の単一方策ではない。最良の単一方策より上だとは、この比較からは言えない。</p>
+  <span class="cite mono">docs/RESEARCH_STATUS.md:12@6c6dcc0</span>
+  <p>方策ライブラリの多様さには効果が見えなかった。元方策9本は更新関数として4種しか表さない。多様な9本は9種を表す。それでも到達率は元の81.04%に対して多様な版で81.30%で、p = .805 だった。<b>ダイナミクスの多様さだけでは、到達率の差は確立できなかった。</b></p>
+  <span class="cite mono">docs/RESEARCH_STATUS.md:12@6c6dcc0</span>
+  <div class="table-wrap">
+  <table class="t" style="min-width: 0;">
+    <caption class="small muted" style="caption-side: top; text-align: left;">表3 条件を揃えた比較と揃えていない比較（到達率、01）</caption>
+    <thead><tr><th>比較</th><th>手法</th><th class="num">到達率</th></tr></thead>
+    <tbody>
+      <tr><td rowspan="2">同じ SF の中</td><td>GPI（最大値）</td><td class="num mono">81.30%</td></tr>
+      <tr><td>方策価値の平均</td><td class="num mono">67.86%</td></tr>
+      <tr><td>勾配更新数を揃えた</td><td>線形報酬 Q</td><td class="num mono">79.32%</td></tr>
+      <tr><td rowspan="2">学習量を揃えていない</td><td>十分に学習した線形報酬 Q</td><td class="num mono">86.67%</td></tr>
+      <tr><td>条件付き Q</td><td class="num mono">87.40%</td></tr>
+      <tr><td>別の情報条件</td><td>SAT を使う直接制御</td><td class="num mono">95.47%</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p>線形報酬 Q は、条件によって順位が入れ替わる。勾配更新数を揃えると79.32%で、SF+GPI の2つの版より低い。十分に学習すると86.67%で、SF+GPI の2つの版より高い。追加の勾配更新はただではない。学習量を揃えるかどうかで、読み取れる結論が変わる。</p>
+  <span class="cite mono">docs/RESEARCH_STATUS.md:13@6c6dcc0</span>
+  <p>規模への依存。07 は教師24・48・96状態の3予算で比べた。このページの資料に載っている 07 の数値は、予算と試行数の設計だけである。予算ごとの結果の値は資料に無いので書かない。</p>
+
+  <h2><span class="no">08</span>届かなかったこと</h2>
+  <p><span class="badge exploratory">exploratory</span> 統計的な一般性は確立していない。有意性の解析の多くは10学習 seed の事後比較で、族単位の補正をしていない。03 の比較も探索的で、事前登録も多重比較補正もない。</p>
+  <span class="cite mono">docs/RESEARCH_STATUS.md:25@6c6dcc0</span>
+  <span class="cite mono">experiments/03_reward_transfer/README_ja.md:58@6c6dcc0</span>
+  <p>補正をかけると、10 seed の設計では有意に届かない。両側符号反転検定の最小 p 値は 2/1024 である。Holm 補正後は、60検定の族で0.117、72検定の族で0.141より小さくならない。<b>どれほど揃った結果でも、これらの族の補正後の p 値はこの下限より小さくならない。</b>そのため、これらの族は効果量と区間で報告し、探索的と明記する。</p>
+  <span class="cite mono">docs/INTERVENTION_SEMANTICS_ja.md:34@6c6dcc0</span>
+  <p>厳密な辺除去で評価したモデルは MAPK の1つだけである。別のモデルでの独立な確認は、このラインの範囲では得ていない。</p>
+  <span class="cite mono">README.md:12@6c6dcc0</span>
+  <p>過去の CSV との照合では、完全には一致しない行が残っている。原因は確定していない。件数と照合の詳細は、このページの資料に無いので書かない。</p>
+
+  <h2><span class="no">09</span>読むときの注意</h2>
+  <div class="note">
+    <p><b>「SF+GPI が SAT より優れる」とは読まない。</b>到達率では SAT を使う直接制御が上である。SF の主張は、費用込みの報酬で見た方策の再利用である。</p>
+    <p>GPI 対平均の+13.44ポイントは、平均という弱い比較相手に対する差である。最良の単一方策との比較ではない。</p>
+    <p>元方策は固定の追跡方策で、最適化した方策ではない。新しい報酬は既知の4目標の組み合わせで、新しい目標を見つけたことを示さない。</p>
+    <p>ここでの辺除去は、抑制辺に1を代入する定義である。「生物学的な辺のノックアウト」とは読まない。</p>
+  </div>
+  <p>型の整理。モデル、介入、指標の定義は exact である。到達率、報酬、検定の結果は exploratory として読む。</p>
+
+  <h2><span class="no">10</span>再現の手がかり</h2>
+  <p>リポジトリは boolean-edge-removal-sf-transfer、commit は 6c6dcc0 である。全体の要約は <span class="mono" style="overflow-wrap: anywhere;">README.md</span>、確かめた結果と負の結果は <span class="mono" style="overflow-wrap: anywhere;">docs/RESEARCH_STATUS.md</span>、介入の定義は <span class="mono" style="overflow-wrap: anywhere;">docs/INTERVENTION_SEMANTICS_ja.md</span> にある。</p>
+  <p>各実験は <span class="mono" style="overflow-wrap: anywhere;">experiments/03_reward_transfer/</span> や <span class="mono" style="overflow-wrap: anywhere;">experiments/07_pure_reward_transfer/</span> のように独立したディレクトリにあり、それぞれの README_ja.md に条件が書かれている。実行時間はこのページの資料に無い。</p>
 
   <footer>
-    <p>出典：<a href="https://github.com/koshikai/bn-edge-removal-public" target="_blank" rel="noopener noreferrer">https://github.com/koshikai/bn-edge-removal-public</a></p>
+    <p>出典：boolean-edge-removal-sf-transfer @ 6c6dcc0 · このページ：<a href="https://github.com/koshikai/bn-edge-removal-public" target="_blank" rel="noopener noreferrer">https://github.com/koshikai/bn-edge-removal-public</a></p>
     <p>最終更新：2026-11-08</p>
     <p><a href="../">← 研究ラインの地図へ戻る</a> · <a href="../#numbers">数値の一覧</a> · <a href="../#lines">ライン一覧</a></p>
     <p class="pager"><a href="setab.html">← 設定 A/B</a> · <a href="asyncbn.html">非同期 BN →</a></p>
