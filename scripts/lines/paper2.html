@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>本体 Paper 2 · 研究ラインの地図</title>
-  <meta name="description" content="一度作った制御器を別の目標や個体へ使い回すと得か損かを確かめた確認研究。">
+  <meta name="description" content="一度作った制御器を別の目標や個体へ使い回すと得か損かを確かめた確認研究。633 ファミリー、再利用上限50回。">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -12,75 +12,220 @@
   <nav class="crumbs"><a href="../">地図</a> / <span>本体 Paper 2</span></nav>
   <p class="eyebrow mono">LINE 02 · 確認研究</p>
   <h1>本体 Paper 2</h1>
-  <p class="lede">一度作った制御器を使い回すと、得か損かを測る。</p>
-  <p class="badges"><span class="badge confirm">確認研究</span><span class="badge closed">安全保証は主張しない</span></p>
+  <p class="lede">確認研究。一度作った制御器を別の目標・個体へ使い回すと得か損か。633 ファミリー、再利用上限50回、費用軸は B_source/M + B_target。</p>
+  <p class="badges"><span class="badge confirm">確認研究</span><span class="badge empirical">empirical</span><span class="badge closed">閉じた</span><span class="badge closed">安全性は保証しない</span></p>
 
   <figure>
-    <svg viewBox="0 0 640 250" role="img" aria-labelledby="fig-cap">
+    <svg class="fig-wide" width="100%" viewBox="0 0 360 410" role="img" aria-labelledby="p2-f1-cap">
       <defs>
-        <marker id="a-f" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path class="mk-fixed" d="M0 0 L10 5 L0 10 z"/></marker>
-        <marker id="a-r" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path class="mk-rem" d="M0 0 L10 5 L0 10 z"/></marker>
+        <marker id="p2a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path class="mk-fixed" d="M0 0 L10 5 L0 10 z"/></marker>
       </defs>
-      <!-- source -->
-      <rect class="box-a" x="10" y="85" width="150" height="70" rx="6"/>
-      <text class="lbl-b mid" x="85" y="112">source で作る</text>
-      <text class="lbl-m mid" x="85" y="134">費用 B_source</text>
-      <path class="e e-fixed" d="M160 120 L218 120" marker-end="url(#a-f)"/>
-      <rect class="box" x="220" y="95" width="110" height="50" rx="6"/>
-      <text class="lbl-b mid" x="275" y="125">制御器</text>
-      <!-- targets -->
-      <path class="e e-rem" d="M330 110 L418 40" marker-end="url(#a-r)"/>
-      <path class="e e-rem" d="M330 116 L418 90" marker-end="url(#a-r)"/>
-      <path class="e e-rem" d="M330 124 L418 150" marker-end="url(#a-r)"/>
-      <path class="e e-rem e-dash" d="M330 130 L418 200" marker-end="url(#a-r)"/>
-      <rect class="box" x="420" y="22" width="140" height="36" rx="5"/><text class="lbl mid" x="490" y="45">target 1 ＋B_target</text>
-      <rect class="box" x="420" y="72" width="140" height="36" rx="5"/><text class="lbl mid" x="490" y="95">target 2 ＋B_target</text>
-      <rect class="box" x="420" y="132" width="140" height="36" rx="5"/><text class="lbl mid" x="490" y="155">target 3 ＋B_target</text>
-      <text class="lbl-m mid" x="490" y="185">⋮</text>
-      <rect class="box-x" x="420" y="190" width="140" height="36" rx="5"/><text class="lbl mid" x="490" y="213">target M ＋B_target</text>
-      <text class="lbl-s" x="575" y="45">1回目</text>
-      <text class="lbl-s" x="575" y="213">最大 50 回</text>
-      <!-- axis note -->
-      <text class="lbl-s" x="10" y="200">1回あたりの費用 = B_source/M + B_target</text>
-      <text class="lbl-s" x="10" y="218">層：8→4、10→6、12→8 ／ horizon 20</text>
+      <rect class="box-a" x="30" y="10" width="300" height="52" rx="8"/>
+      <text class="lbl-b mid" x="180" y="32">入力：転移元3課題で学ぶ</text>
+      <text class="lbl mid" x="180" y="51">費用 B_source</text>
+      <path class="e e-fixed" d="M180 62 L180 84" marker-end="url(#p2a)"/>
+      <rect class="box" x="30" y="86" width="300" height="44" rx="8"/>
+      <text class="lbl-b mid" x="180" y="113">三方策 GPI ライブラリ</text>
+      <path class="e e-fixed" d="M130 130 L105 156" marker-end="url(#p2a)"/>
+      <rect class="box-a" x="30" y="158" width="140" height="72" rx="8"/>
+      <text class="lbl-b mid" x="100" y="182">GPIQ</text>
+      <text class="lbl mid" x="100" y="201">初期値に使う</text>
+      <text class="lbl mid" x="100" y="219">＋B_target</text>
+      <rect class="box" x="190" y="158" width="140" height="72" rx="8"/>
+      <text class="lbl-b mid" x="260" y="182">S</text>
+      <text class="lbl mid" x="260" y="201">転移なし</text>
+      <text class="lbl mid" x="260" y="219">＋B_target</text>
+      <text class="lbl mid" x="180" y="250">どちらも転移先3課題</text>
+      <path class="e e-fixed" d="M180 258 L180 278" marker-end="url(#p2a)"/>
+      <rect class="box" x="30" y="280" width="300" height="52" rx="8"/>
+      <text class="lbl-b mid" x="180" y="302">判定：費用込み AUC の差</text>
+      <text class="lbl mid" x="180" y="321">B_source/M + B_target、M = 1…50</text>
+      <path class="e e-fixed" d="M180 332 L180 352" marker-end="url(#p2a)"/>
+      <rect class="box-g" x="30" y="354" width="300" height="48" rx="8"/>
+      <text class="lbl-b mid" x="180" y="376">集計：633 ファミリー</text>
+      <text class="lbl mid" x="180" y="394">mu_1・mu_50・損益分岐回数</text>
     </svg>
-    <figcaption id="fig-cap">source で一度だけ制御器を作り、M 回の target に使い回す。source の費用は M 回で割る。各 target では B_target がかかる。M は最大 50。</figcaption>
+    <figcaption id="p2-f1-cap">図1 実験の流れ。転移元で一度だけ学び、三方策の GPI ライブラリを作る。転移先では GPIQ と S を同じ予算で動かす。転移元の費用を再利用回数 M で割り、費用込みの AUC の差をファミリーごとに出す。</figcaption>
   </figure>
 
   <h2><span class="no">01</span>問い</h2>
-  <p>一度作った制御器を、別の目標や個体へ使い回す。そうすると得か損か。</p>
+  <p><span class="badge confirm">確認研究</span> このラインは問いを2つに分ける。1つ目は冷たい開始である。転移元の費用を1回の再利用だけで負担すると、転移は得か損か。2つ目は有限回の償却である。同じ制御器を最大50回まで使い回し、転移元の費用を回数で割ると、どこで損益が釣り合うか。</p>
+  <p>冷たい開始の問いは、転移を一度しか使わない場面に当たる。償却の問いは、同じ制御器を多くの目標や個体へ配る場面に当たる。2つの答えが逆を向いても矛盾ではない。どちらの場面を想定するかで、読むべき数値が変わる。</p>
+  <p>尺度は小さいほど良い。正の差は、転移を使わない Scratch（S）が有利であることを意味する。</p>
+  <p>冷たい開始では S が有利だった。再利用1回の平均費用込み差は +0.051747、同時 95% 区間は [+0.045636, +0.058218] である。<b>再利用50回では符号が逆になった。</b>平均差は −0.015810、区間は [−0.017851, −0.013919] で、固定した再利用上限で GPIQ が有利だった。どちらの区間もゼロを含まない。</p>
+  <span class="cite mono">docs/paper2/manuscript_ja.md:12@29b0b83</span>
+  <span class="cite mono">docs/paper2/manuscript_ja.md:14@29b0b83</span>
+  <span class="cite mono">docs/paper2/manuscript_ja.md:15@29b0b83</span>
 
-  <h2><span class="no">02</span>モデルと規模</h2>
-  <ul>
-    <li>population-v-r5-transfer-confirmatory の 633 family を使う。試行 633、完走 633、枯渇 0。</li>
-    <li>層は3つ（8→4、10→6、12→8）。</li>
-    <li>horizon は 20。統計単位は family である。</li>
-  </ul>
+  <h2><span class="no">02</span>設定</h2>
+  <p><span class="badge confirm">確認研究</span> 母集団 Population V は独立な 633 ファミリーからなる。3層に 211 ファミリーずつ置いた。1つのファミリーの中に、同じダイナミクスを共有する転移元3課題と転移先3課題がある。試行した 633 ファミリーはすべて実現し、枯渇も置換もなかった。</p>
+  <div class="table-wrap">
+  <table class="t">
+    <caption class="small muted" style="caption-side: top; text-align: left;">表1 固定条件と層</caption>
+    <thead><tr><th>項目</th><th>値</th></tr></thead>
+    <tbody>
+      <tr><td>転移元予算</td><td class="mono">beta_src = 6</td></tr>
+      <tr><td>時間幅</td><td class="mono">H = 20（早期終了なし）</td></tr>
+      <tr><td>再利用上限</td><td class="mono">M_max = 50</td></tr>
+      <tr><td>転移元で作るもの</td><td>三方策の GPI ライブラリ</td></tr>
+      <tr><td>無差別マージン</td><td class="mono">0.0125</td></tr>
+      <tr><td>層 (n, removable)</td><td class="mono">(8,4), (10,6), (12,8)</td></tr>
+      <tr><td>ファミリー数</td><td>211 × 3 = 633（試行 633、実現 633）</td></tr>
+      <tr><td>1ファミリーの中身</td><td>転移元3課題 ＋ 転移先3課題（同じダイナミクス）</td></tr>
+      <tr><td>独立単位</td><td>ファミリーだけ</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p>各エピソードは20遷移で、早期終了はない。報酬は次状態の目標占有である。</p>
+  <span class="cite mono">docs/paper2/manuscript_ja.md:13@29b0b83</span>
+  <span class="cite mono">docs/paper2/manuscript_ja.md:190@29b0b83</span>
+  <span class="cite mono">docs/paper2/manuscript_ja.md:191@29b0b83</span>
+  <span class="cite mono">docs/paper2/manuscript_ja.md:195@29b0b83</span>
+  <span class="cite mono">docs/paper2/manuscript_ja.md:97@29b0b83</span>
 
-  <h2><span class="no">03</span>何を動かすか</h2>
-  <p>介入の型は本体の設定と同じで、辺を除去する。このラインで動かすのは<b>再利用の回数</b>である。最大 50 回まで使い回す。</p>
+  <h2><span class="no">03</span>介入の意味</h2>
+  <p><span class="badge confirm">確認研究</span> 比べる2手法は GPIQ と S である。どちらも転移先で同じ学習を行う。違いは初期値だけである。GPIQ は転移元で作った三方策の GPI ライブラリから始め、S は転移を使わずに始める。</p>
+  <p>費用の軸は、転移元の費用を再利用回数 M で割り、転移先の予算を足したものである。</p>
+  <p class="eq">B_effective = B_source / M + B_target</p>
+  <p>具体例を書く。M = 1 なら、GPIQ は転移元の費用 B_source を全部負担する。M = 50 なら、負担は B_source / 50 になる。同じ転移先の学習でも、M が大きいほど費用込みの曲線は左へ寄る。S は転移元を使わないので、比較の相手はいつも S の M = 1 の曲線である。</p>
+  <p>他のラインとの違い。<a href="paper1.html">Paper 1</a> は同じ予算で制御器の作り方を比べた。このラインは、作った制御器を使い回す回数を動かし、費用の配分を問う。</p>
+  <span class="cite mono">docs/paper2/manuscript_ja.md:152@29b0b83</span>
+  <span class="cite mono">docs/paper2/manuscript_ja.md:164@29b0b83</span>
 
-  <h2><span class="no">04</span>実験の設計</h2>
-  <p>費用の軸を次のように置く。source で作る費用を再利用の回数 M で割り、target ごとの費用を足す。</p>
-  <p class="eq">1回あたりの費用 = B_source / M + B_target</p>
-  <p>この軸の上で、再利用の回数ごとに損得を比べる。損と得が釣り合う回数を求める。</p>
+  <h2><span class="no">04</span>実験の手順</h2>
+  <ol class="steps">
+    <li><b>試行数を決める。</b>必要数の下限 568 を離脱率 0.9 で割り、三層に均等に配れる 633 を試行数にした。この算出の引用箇所はこのページの資料に無い。</li>
+    <li>3層に 211 ファミリーずつ生成した。事後的な代替シードは認めない規則で、633 すべてが実現した。<span class="cite mono">docs/paper2/manuscript_ja.md:195@29b0b83</span></li>
+    <li>各ファミリーで、転移元3課題に予算 beta_src = 6 を使い、三方策の GPI ライブラリを作った。<span class="cite mono">docs/paper2/manuscript_ja.md:13@29b0b83</span></li>
+    <li>転移先3課題で GPIQ と S を動かし、運用損失 G の曲線を記録した。<span class="cite mono">docs/paper2/manuscript_ja.md:107@29b0b83</span></li>
+    <li>M = 1…50 で費用込みの曲線を作り、ファミリー差 Delta_f(M) を出した。<span class="cite mono">docs/paper2/manuscript_ja.md:164@29b0b83</span></li>
+    <li>区間はファミリーを単位とする共有パーセンタイルブートストラップで出した。シード 27_000_001、50,000 回である。3推定量への Bonferroni 補正で、各区間の信頼水準を 0.9833333333333333 にした。全体の被覆率を少なくとも 95% にするためである。<span class="cite mono">docs/paper2/manuscript_ja.md:202@29b0b83</span><span class="cite mono">docs/paper2/manuscript_ja.md:203@29b0b83</span></li>
+  </ol>
+  <p>除外規則。独立単位はファミリーだけである。内部のタスク、手法シード、チェックポイント、予算点、再利用点は独立観測として扱わない。</p>
+  <span class="cite mono">docs/paper2/manuscript_ja.md:197@29b0b83</span>
 
-  <h2><span class="no">05</span>結果</h2>
+  <h2><span class="no">05</span>指標の定義</h2>
+  <p><span class="badge confirm">確認研究</span> 運用損失 G は、オラクルとの目的値の差を H で割った量である。目標 j、手法 m、予算 B ごとに定める。</p>
+  <p class="eq">G_j,m(B) = (J_oracle,j − J_operational,j,m(B)) / H</p>
+  <p>ファミリー差 Delta_f(M) は、費用込みの GPIQ 曲線の AUC と、S の曲線の AUC の差である。分母はなく、ファミリーごとの差である。</p>
+  <p class="eq">Delta_f(M) = AUC_f(GPIQ, M) − AUC_f(S, 1)</p>
+  <p>主要平均は <b>mu_1 = mean_f Delta_f(1)</b> と mu_50 = mean_f Delta_f(50) である。平均の分母は 633 ファミリー。損益分岐回数 M*_f は、費用込み GPIQ 曲線が S の比較を初めて横切る整数の再利用回数である。p_50 は、50回までに損益分岐へ到達したファミリーの割合で、分母は 633 である。</p>
+  <span class="cite mono">docs/paper2/manuscript_ja.md:107@29b0b83</span>
+  <span class="cite mono">docs/paper2/manuscript_ja.md:164@29b0b83</span>
+  <span class="cite mono">docs/paper2/manuscript_ja.md:168@29b0b83</span>
+  <span class="cite mono">docs/paper2/manuscript_ja.md:169@29b0b83</span>
+  <span class="cite mono">docs/paper2/manuscript_ja.md:16@29b0b83</span>
+
+  <h2><span class="no">06</span>結果</h2>
   <div class="kpi">
-    <div><span class="v mono">4 · 9 · 18</span><span class="k">損得が釣り合う再利用回数（分位点）</span></div>
-    <div><span class="v mono">5 / 633</span><span class="k">不利だった family</span></div>
-    <div><span class="v mono">0.79%</span><span class="k">不利だった割合（95% 区間 0.16〜1.58%）</span></div>
+    <div><span class="v mono">+0.051747</span><span class="k">mu_1（再利用1回）</span><span class="unit">正は S 有利、633 ファミリー</span></div>
+    <div><span class="v mono">−0.015810</span><span class="k">mu_50（再利用50回）</span><span class="unit">負は GPIQ 有利、633 ファミリー</span></div>
+    <div><span class="v mono">590 / 633</span><span class="k">50回までに損益分岐</span><span class="unit">p_50 = 0.932070</span></div>
   </div>
-  <p>損得が釣り合う再利用回数は、分位点で 4、9、18 回だった。不利だったのは 633 family のうち 5 family、0.79%（95% 区間 0.16〜1.58%）である。</p>
+  <p><span class="badge confirm">確認研究</span> 3つの主要推定量を表2に示す。3つとも計画した半幅の目標を達成した。p_50 は 0.932070、区間は [0.906793, 0.954186] である。590 ファミリーが到達し、43 ファミリーは50回で右打切りとなった。</p>
+  <div class="table-wrap">
+  <table class="t">
+    <caption class="small muted" style="caption-side: top; text-align: left;">表2 主要推定量（633 ファミリー）</caption>
+    <thead><tr><th>推定量</th><th class="num">点推定</th><th class="num">同時 95% 区間</th><th class="num">半幅 / 目標</th></tr></thead>
+    <tbody>
+      <tr><td>mu_1</td><td class="num mono">+0.051747</td><td class="num mono">[+0.045636, +0.058218]</td><td class="num mono">0.006291 / 0.0125</td></tr>
+      <tr><td>mu_50</td><td class="num mono">−0.015810</td><td class="num mono">[−0.017851, −0.013919]</td><td class="num mono">0.001966 / 0.0125</td></tr>
+      <tr><td>p_50</td><td class="num mono">0.932070</td><td class="num mono">[0.906793, 0.954186]</td><td class="num mono">0.023697 / 0.05</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <span class="cite mono">docs/paper2/tables/table1_primary_results.md:20@29b0b83</span>
+  <span class="cite mono">docs/paper2/manuscript_ja.md:16@29b0b83</span>
+  <p><span class="badge empirical">empirical</span> 平均曲線は7つの報告点で、+0.051747 から −0.015810 へ下がった（表3、図2）。符号は M = 10 と M = 20 の間で変わる。区間を持つのは M = 1 と M = 50 だけで、途中の5点は点推定である。</p>
+  <div class="table-wrap">
+  <table class="t">
+    <caption class="small muted" style="caption-side: top; text-align: left;">表3 平均費用込み差の曲線（633 ファミリー）</caption>
+    <thead><tr><th>M</th><th class="num">1</th><th class="num">2</th><th class="num">3</th><th class="num">5</th><th class="num">10</th><th class="num">20</th><th class="num">50</th></tr></thead>
+    <tbody>
+      <tr><td>平均差</td><td class="num mono">+0.051747</td><td class="num mono">+0.039725</td><td class="num mono">+0.028560</td><td class="num mono">+0.016158</td><td class="num mono">+0.003111</td><td class="num mono">−0.008904</td><td class="num mono">−0.015810</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <span class="cite mono">docs/paper2/manuscript_ja.md:253@29b0b83</span>
+  <span class="cite mono">docs/paper2/manuscript_ja.md:254@29b0b83</span>
 
-  <h2><span class="no">06</span>読むときの注意</h2>
+  <figure>
+    <svg class="fig-wide" width="100%" viewBox="0 0 360 290" role="img" aria-labelledby="p2-f2-cap">
+      <text class="lbl" x="10" y="16">平均差（正は S 有利）</text>
+      <line class="ax" x1="60" y1="30" x2="60" y2="230"/>
+      <line class="ax-d" x1="60" y1="30" x2="340" y2="30"/>
+      <line class="ax-d" x1="60" y1="80" x2="340" y2="80"/>
+      <line class="ax-d" x1="60" y1="130" x2="340" y2="130"/>
+      <line class="ax" x1="60" y1="180" x2="340" y2="180"/>
+      <line class="ax-d" x1="60" y1="230" x2="340" y2="230"/>
+      <text class="lbl" x="54" y="34" text-anchor="end">+0.06</text>
+      <text class="lbl" x="54" y="84" text-anchor="end">+0.04</text>
+      <text class="lbl" x="54" y="134" text-anchor="end">+0.02</text>
+      <text class="lbl" x="54" y="184" text-anchor="end">0</text>
+      <text class="lbl" x="54" y="234" text-anchor="end">−0.02</text>
+      <line x1="60" y1="65.9" x2="60" y2="34.5" stroke="var(--ink-soft)" stroke-width="1.4"/>
+      <line x1="340" y1="224.6" x2="340" y2="214.8" stroke="var(--ink-soft)" stroke-width="1.4"/>
+      <polyline fill="none" stroke="var(--accent)" stroke-width="2" points="60,50.6 109.6,80.7 138.6,108.6 175.2,139.6 224.8,172.2 274.4,202.3 340,219.5"/>
+      <circle class="dot" cx="60" cy="50.6" r="3.5"/>
+      <circle class="dot" cx="109.6" cy="80.7" r="3.5"/>
+      <circle class="dot" cx="138.6" cy="108.6" r="3.5"/>
+      <circle class="dot" cx="175.2" cy="139.6" r="3.5"/>
+      <circle class="dot" cx="224.8" cy="172.2" r="3.5"/>
+      <circle class="dot" cx="274.4" cy="202.3" r="3.5"/>
+      <circle class="dot" cx="340" cy="219.5" r="3.5"/>
+      <text class="lbl" x="68" y="48">+0.051747</text>
+      <text class="lbl" x="230" y="164">+0.003111</text>
+      <text class="lbl" x="338" y="102" text-anchor="end">M = 20：−0.008904</text>
+      <text class="lbl" x="338" y="120" text-anchor="end">M = 50：−0.015810</text>
+      <text class="lbl mid" x="60" y="248">1</text>
+      <text class="lbl mid" x="109.6" y="248">2</text>
+      <text class="lbl mid" x="138.6" y="248">3</text>
+      <text class="lbl mid" x="175.2" y="248">5</text>
+      <text class="lbl mid" x="224.8" y="248">10</text>
+      <text class="lbl mid" x="274.4" y="248">20</text>
+      <text class="lbl mid" x="340" y="248">50</text>
+      <text class="lbl mid" x="200" y="272">再利用回数 M（回、対数目盛）</text>
+    </svg>
+    <figcaption id="p2-f2-cap">図2 平均費用込み差 mean_f Delta_f(M) の7報告点（633 ファミリー）。縦線は M = 1 と M = 50 の同時 95% 区間。途中の点には区間が報告されていない。横軸は対数目盛で、ラベルの付いた点だけが報告値である。</figcaption>
+  </figure>
+
+  <h2><span class="no">07</span>内訳と副次</h2>
+  <p><span class="badge empirical">empirical</span> 50回時点で、マージン 0.0125 による記述的分類を行った。positive transfer が 286、neutral transfer が 342、negative transfer が 5 である。分母は 633 ファミリー。不利な転移の割合は 0.0078989、95% 区間は [0.0015798, 0.0157978] だった。</p>
+  <span class="cite mono">docs/paper2/manuscript_ja.md:279@29b0b83</span>
+  <span class="cite mono">docs/paper2/manuscript_ja.md:18@29b0b83</span>
+  <p>損益分岐回数の四分位点は 4、9、18 回だった。これは到達した 590 ファミリーに限った条件付きの値である。右打切りの 43 ファミリーは入っていない。この 43 ファミリーは、50回までに損益分岐へ届かなかった。50回より先で届くかどうかは、この実験の範囲の外にあり、分かっていない。</p>
+  <span class="cite mono">docs/paper2/manuscript_ja.md:17@29b0b83</span>
+  <p><span class="badge confirm">確認研究</span> 4つの実質的なモデレーターの区間は、すべてゼロを含んだ。この4つについて、効果の大きさが変わるとは区間からは言えない。</p>
+  <span class="cite mono">docs/paper2/manuscript_ja.md:294@29b0b83</span>
+  <p><span class="badge empirical">empirical</span> 機構ラダーの8区間は、すべてゼロを除外した。ただし点推定を見た後に作った区間である。<b>二次的かつ事後的なので、事前登録の主張も確認的な機構の主張も支えない。</b></p>
+  <span class="cite mono">docs/paper2/manuscript_ja.md:315@29b0b83</span>
+
+  <h2><span class="no">08</span>届かなかったこと</h2>
+  <p><span class="badge closed">閉じた</span> 過去の集計には never_amortizes（償却しない）という欄があった。この欄は構造上到達不能である。50回時点で有利なら、その時点までに必ず交差するからである。だから0件という値は、経験的に不在を見つけたことを意味しない。</p>
+  <span class="cite mono">docs/paper2/manuscript_ja.md:211@29b0b83</span>
+  <p><span class="badge empirical">empirical</span> 監査で実装の不備が見つかった。実行 revision 9534252 の旧実装では、SF 学習器に遷移表全体が渡されていた。標本を取る前に、全状態と全行動の特徴量が作られていた。修正後の再現は 633/633 を枯渇0で完走した。保存記録と比べると difference_count = 0、first_difference = null だった。比較は丸めも許容差も使っていない。</p>
+  <span class="cite mono">docs/paper2/manuscript_ja.md:113@29b0b83</span>
+  <span class="cite mono">docs/paper2/manuscript_ja.md:121@29b0b83</span>
+  <p><span class="badge closed">閉じた</span> 安全性は保証しない。不利な転移の観測割合は低いが、それは個別の転移が安全だという意味ではない。</p>
+  <span class="cite mono">docs/paper2/manuscript_ja.md:19@29b0b83</span>
+
+  <h2><span class="no">09</span>読むときの注意</h2>
   <div class="note">
-    <p><b>平均の損得の話であって、個別の転移での安全を保証しない。</b></p>
-    <p>不利だった family があることも、結果の一部として読む。</p>
+    <p><b>「転移はいつも得」とは読まない。</b>再利用1回では S が有利で、GPIQ が有利になるのは固定した上限50回での話である。</p>
+    <p>四分位点 4、9、18 は到達した 590 ファミリーに限った値である。633 全体の分布ではない。</p>
+    <p>平均曲線の符号が変わる位置は、報告点の間隔でしか分からない。M = 10 と M = 20 の間のどこで変わるかは、この曲線からは読み取れない。また、平均曲線の交差は個々のファミリーの損益分岐回数とは別の量である。</p>
+    <p>分類 286 / 342 / 5 と不利な転移の割合は記述的な評価で、確認研究の主要推定量ではない。</p>
   </div>
+  <p>確認研究の型を持つのは mu_1、mu_50、p_50 とモデレーターの区間である。平均曲線の途中の5点、分類、四分位点、機構ラダーは empirical として読む。</p>
+
+  <h2><span class="no">10</span>再現の手がかり</h2>
+  <p>リポジトリは bn-transfer-edge-control、commit は 29b0b83 である。原稿は <span class="mono" style="overflow-wrap: anywhere;">docs/paper2/manuscript_ja.md</span>、主要結果の表は <span class="mono" style="overflow-wrap: anywhere;">docs/paper2/tables/table1_primary_results.md</span> にある。</p>
+  <p>ブートストラップのシードは 27_000_001、反復は 50,000 回である。監査で問題になった旧実装の実行 revision は 9534252 である。実行時間はこのページの資料に無い。</p>
+  <span class="cite mono">docs/paper2/manuscript_ja.md:202@29b0b83</span>
+  <span class="cite mono">docs/paper2/manuscript_ja.md:113@29b0b83</span>
 
   <footer>
-    <p>出典：<a href="https://github.com/koshikai/bn-edge-removal-public" target="_blank" rel="noopener noreferrer">https://github.com/koshikai/bn-edge-removal-public</a></p>
+    <p>出典：bn-transfer-edge-control @ 29b0b83（docs/paper2/）· このページ：<a href="https://github.com/koshikai/bn-edge-removal-public" target="_blank" rel="noopener noreferrer">https://github.com/koshikai/bn-edge-removal-public</a></p>
     <p>最終更新：2026-11-08</p>
     <p><a href="../">← 研究ラインの地図へ戻る</a> · <a href="../#numbers">数値の一覧</a> · <a href="../#lines">ライン一覧</a></p>
     <p class="pager"><a href="paper1.html">← 本体 Paper 1</a> · <a href="setab.html">設定 A/B →</a></p>

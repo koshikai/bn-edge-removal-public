@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>卒論・学会ライン · 研究ラインの地図</title>
-  <meta name="description" content="STL で書いた入力仕様をフラグ状態に記録し、行動マスキングで違反を出さずに辺除去を学習するライン。">
+  <meta name="description" content="時間入力の仕様（単調性・休薬期間）の下で、辺の除去を Q 学習で選ぶ実験。Cortical 32状態と Wnt5a 128状態を全数評価。">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -12,117 +12,235 @@
   <nav class="crumbs"><a href="../">地図</a> / <span>卒論・学会ライン</span></nav>
   <p class="eyebrow mono">LINE 09 · 全状態評価</p>
   <h1>卒論・学会ライン</h1>
-  <p class="lede">入力の仕様を守ったまま、辺の除去を Q 学習で選ぶ。</p>
-  <p class="badges"><span class="badge empirical">empirical</span><span class="badge exact">exact（目標別の表）</span></p>
+  <p class="lede">実験。時間入力の仕様（単調性・休薬期間）の下で、辺の除去を Q 学習で選ぶ。Cortical 32状態と Wnt5a 128状態を全数評価する。</p>
+  <p class="badges"><span class="badge empirical">empirical</span><span class="badge exact">exact</span><span class="badge closed">閉じた</span></p>
 
   <figure>
-    <svg viewBox="0 0 640 270" role="img" aria-labelledby="fig-cap">
+    <svg class="fig-wide" width="100%" viewBox="0 0 360 400" role="img" aria-labelledby="ug-f1-cap">
       <defs>
-        <marker id="a-f" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path class="mk-fixed" d="M0 0 L10 5 L0 10 z"/></marker>
-        <marker id="a-r" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path class="mk-rem" d="M0 0 L10 5 L0 10 z"/></marker>
-        <marker id="a-c" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path class="mk-cut" d="M0 0 L10 5 L0 10 z"/></marker>
+        <marker id="uga" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path class="mk-fixed" d="M0 0 L10 5 L0 10 z"/></marker>
       </defs>
-      <!-- state -->
-      <rect class="box" x="10" y="40" width="130" height="70" rx="6"/>
-      <text class="lbl-b mid" x="75" y="66">状態 (x, h)</text>
-      <text class="lbl-s mid" x="75" y="88">h：フラグ状態</text>
-      <path class="e e-fixed" d="M140 75 L188 75" marker-end="url(#a-f)"/>
-      <!-- mask -->
-      <rect class="box-u" x="190" y="30" width="150" height="90" rx="6"/>
-      <text class="lbl-b mid lbl-cut" x="265" y="56">行動マスキング</text>
-      <text class="lbl-s mid" x="265" y="78">違反する行動を</text>
-      <text class="lbl-s mid" x="265" y="94">選択肢から外す</text>
-      <path class="e e-rem" d="M340 75 L388 75" marker-end="url(#a-r)"/>
-      <!-- agent -->
-      <rect class="box-a" x="390" y="40" width="100" height="70" rx="6"/>
-      <text class="lbl-b mid" x="440" y="70">Q 学習</text>
-      <text class="lbl-s mid" x="440" y="90">切る辺を選ぶ</text>
-      <path class="e e-fixed" d="M490 75 L528 75" marker-end="url(#a-f)"/>
-      <!-- BN -->
-      <rect class="box" x="530" y="40" width="100" height="70" rx="6"/>
-      <text class="lbl-b mid" x="580" y="66">BN</text>
-      <text class="lbl-s mid" x="580" y="88">同期更新</text>
-      <!-- monitor -->
-      <path class="e e-fixed" d="M580 110 L580 180 L470 180" marker-end="url(#a-f)"/>
-      <rect class="box" x="250" y="155" width="218" height="50" rx="6"/>
-      <text class="lbl-b mid" x="359" y="177">STL の仕様で h を更新</text>
-      <text class="lbl-s mid" x="359" y="195">単調性・休薬期間</text>
-      <path class="e e-fixed" d="M250 180 L75 180 L75 112" marker-end="url(#a-f)"/>
-      <!-- h latch -->
-      <text class="lbl-s" x="10" y="236">h の時間変化</text>
-      <rect class="sq" x="100" y="224" width="22" height="18" rx="3"/>
-      <rect class="sq" x="126" y="224" width="22" height="18" rx="3"/>
-      <rect class="sq" x="152" y="224" width="22" height="18" rx="3"/>
-      <rect class="sq on" x="178" y="224" width="22" height="18" rx="3"/>
-      <rect class="sq on" x="204" y="224" width="22" height="18" rx="3"/>
-      <rect class="sq on" x="230" y="224" width="22" height="18" rx="3"/>
-      <rect class="sq on" x="256" y="224" width="22" height="18" rx="3"/>
-      <rect class="sq on" x="282" y="224" width="22" height="18" rx="3"/>
-      <text class="lbl-s" x="314" y="238">一度立つと戻らない</text>
+      <rect class="box" x="30" y="10" width="300" height="52" rx="8"/>
+      <text class="lbl-b mid" x="180" y="32">入力：全初期状態</text>
+      <text class="lbl mid" x="180" y="51">Cortical 32 ／ Wnt5a 128</text>
+      <path class="e e-fixed" d="M180 62 L180 84" marker-end="url(#uga)"/>
+      <rect class="box" x="30" y="86" width="300" height="52" rx="8"/>
+      <text class="lbl-b mid" x="180" y="108">仕様をフラグ h に落とす</text>
+      <text class="lbl mid" x="180" y="127">単調性 ／ 休薬期間 τ</text>
+      <path class="e e-fixed" d="M180 138 L180 160" marker-end="url(#uga)"/>
+      <rect class="box-u" x="30" y="162" width="140" height="60" rx="8"/>
+      <text class="lbl-b mid lbl-cut" x="100" y="186">行動マスキング</text>
+      <text class="lbl mid" x="100" y="206">違反を外す</text>
+      <path class="e e-fixed" d="M170 192 L188 192" marker-end="url(#uga)"/>
+      <rect class="box-a" x="190" y="162" width="140" height="60" rx="8"/>
+      <text class="lbl-b mid" x="260" y="186">Q 学習</text>
+      <text class="lbl mid" x="260" y="206">除去する辺を選ぶ</text>
+      <path class="e e-fixed" d="M180 222 L180 244" marker-end="url(#uga)"/>
+      <rect class="box" x="30" y="246" width="300" height="60" rx="8"/>
+      <text class="lbl-b mid" x="180" y="269">判定：H までに初到達</text>
+      <text class="lbl mid" x="180" y="291">T まで滞在・違反なし</text>
+      <path class="e e-fixed" d="M180 306 L180 328" marker-end="url(#uga)"/>
+      <rect class="box-g" x="30" y="330" width="300" height="60" rx="8"/>
+      <text class="lbl-b mid" x="180" y="353">集計：5 シード</text>
+      <text class="lbl mid" x="180" y="375">介入なしの成功数と比べる</text>
     </svg>
-    <figcaption id="fig-cap">STL で書いた入力仕様を、フラグ状態 h に記録する。h を含む状態から、違反する行動を先に外し、残った行動から Q 学習が選ぶ。そのため学習中も違反が出ない。</figcaption>
+    <figcaption id="ug-f1-cap">図1 実験の流れ。入力仕様をフラグ状態 h に記録し、違反する行動を先に外す。残った行動から Q 学習が除去する辺を選ぶ。学習後の貪欲方策を全初期状態から評価し、介入なしと比べる。</figcaption>
   </figure>
 
   <h2><span class="no">01</span>問い</h2>
-  <p>単調性や休薬期間のような入力の仕様を、学習中も破らずに守れるか。そのうえで目標に到達し、維持できるか。</p>
+  <p><span class="badge empirical">empirical</span> 問いは「時間入力の仕様を守りながら、到達と維持を両立できるか」である。時間入力の仕様とは、辺の除去をいつ始め、いつやめてよいかの決まりである。ここでは単調性と休薬期間の2つを扱う。</p>
+  <p>到達と維持は、有限時間の動作仕様として書く。時刻 H までに目標集合へ初めて到達し、その後時刻 T まで目標集合の中に留まる。これを初到達後維持と呼ぶ。</p>
+  <p>結果は、Cortical の全32初期状態と Wnt5a の全128初期状態で、5シードすべてが入力違反なしに初到達後維持に成功した。<b>介入なしでも、Cortical は 32 状態中 10 状態、Wnt5a は 128 状態中 108 状態が同じ基準で成功する。</b>介入が必要だった初期状態は、その差の分である。</p>
+  <span class="cite mono">tex/zemi2/main.tex:273@4b5277a</span>
+  <span class="cite mono">tex/zemi2/main.tex:518@4b5277a</span>
+  <span class="cite mono">tex/zemi2/main.tex:597@4b5277a</span>
+  <span class="cite mono">tex/zemi2/main.tex:601@4b5277a</span>
 
-  <h2><span class="no">02</span>モデルと規模</h2>
-  <ul>
-    <li>Cortical（5ノード）と Wnt5a。どちらも同期更新。</li>
-    <li>Cortical は全32状態、Wnt5a は全128状態を初期状態として評価する。5 seed。</li>
-  </ul>
-
-  <h2><span class="no">03</span>何を動かすか</h2>
-  <p>辺を除去する。どの時刻にどの辺を切るかを Q 学習で選ぶ。</p>
-
-  <h2><span class="no">04</span>実験の設計</h2>
-  <ul>
-    <li>単調性と休薬期間を STL で書き、フラグ状態 h に記録する。h は一度立つと戻らない。</li>
-    <li><b>行動マスキングで、違反する行動を選択肢から外す。</b>そのため学習中も違反が出ない。</li>
-    <li>全状態から始めて評価する。比べる基準として、介入なしでの成否も数える。</li>
-  </ul>
-
-  <h2><span class="no">05</span>結果</h2>
-  <div class="kpi">
-    <div><span class="v mono">100%</span><span class="k">成功率（Cortical 全32状態、Wnt5a 全128状態、5 seed）</span></div>
-    <div><span class="v mono">0</span><span class="k">離脱</span></div>
-    <div><span class="v mono">0</span><span class="k">仕様違反</span></div>
-  </div>
-  <p>Cortical は全32状態、Wnt5a は全128状態で、5 seed で成功率 100%、離脱 0、仕様違反 0 だった。</p>
-  <p>介入なしでは、Cortical の 32 状態中 10 状態だけが同じ基準で成功する（H = 5、T = 10）。</p>
-
-  <h3><span class="badge exact">exact</span> 目標別の厳密値</h3>
-  <p class="small muted">条件は H = 7、T = 10、制約なし。費用は見ていない。</p>
+  <h2><span class="no">02</span>設定</h2>
+  <p><span class="badge exact">exact</span> 2つのブーリアンネットワーク（Boolean network）を使う。Cortical は5ノードの皮質野発生モデルで、除去できる辺は6本である。Wnt5a は7ノードのシグナル伝達経路モデルで、除去できる辺は8本である。Wnt5a の無制御の系は4つの固定点を持ち、それ以外のアトラクタを持たない。</p>
   <div class="table-wrap">
   <table class="t">
-    <thead>
-      <tr><th>目標</th><th class="num">初期状態</th><th class="num">制御できる</th><th class="num">j*</th><th class="num">t_off*</th><th class="num">単調性で失う</th></tr>
-    </thead>
+    <caption class="small muted" style="caption-side: top; text-align: left;">表1 両モデルの設定</caption>
+    <thead><tr><th>項目</th><th>Cortical</th><th>Wnt5a</th></tr></thead>
     <tbody>
-      <tr><td>cell_cycle10 アトラクタ</td><td class="num">1,024</td><td class="num">512</td><td class="num">0</td><td class="num">5</td><td class="num">0</td></tr>
-      <tr><td>s_pombe アトラクタ</td><td class="num">1,024</td><td class="num">1,000</td><td class="num">0</td><td class="num">7</td><td class="num">0</td></tr>
-      <tr><td>yeast アトラクタ</td><td class="num">262,144</td><td class="num">262,144</td><td class="num">0</td><td class="num">5</td><td class="num">0</td></tr>
-      <tr><td>tumor アトラクタ</td><td class="num">262,144</td><td class="num">262,144</td><td class="num">0</td><td class="num">4</td><td class="num">0</td></tr>
-      <tr><td>tumor 浸潤なし</td><td class="num">262,144</td><td class="num">262,144</td><td class="num">10</td><td class="num">10</td><td class="num">0</td></tr>
-      <tr><td>tumor 細胞周期停止</td><td class="num">262,144</td><td class="num">238,336</td><td class="num">3</td><td class="num">4</td><td class="num">0</td></tr>
-      <tr><td>EMT スイッチ</td><td class="num">4,096</td><td class="num">672</td><td class="num">2</td><td class="num">2</td><td class="num">0</td></tr>
-      <tr><td>T-LGL</td><td class="num">262,144</td><td class="num">262,144</td><td class="num">0</td><td class="num">2</td><td class="num">0</td></tr>
-      <tr><td>HCC</td><td class="num">524,288</td><td class="num">393,216</td><td class="num">1</td><td class="num">2</td><td class="num">0</td></tr>
-      <tr><td>哺乳類細胞周期</td><td class="num">524,288</td><td class="num">268,096</td><td class="num">1</td><td class="num">3</td><td class="num">80,704</td></tr>
+      <tr><td>ノード数 n</td><td class="num">5</td><td class="num">7</td></tr>
+      <tr><td>初期状態</td><td class="num">32（全数）</td><td class="num">128（全数）</td></tr>
+      <tr><td>除去可能辺 m</td><td class="num">6</td><td class="num">8</td></tr>
+      <tr><td>目標集合</td><td class="mono">{(1,0,1,0,1), (0,1,0,1,0)}</td><td>x<sup>(7)</sup> = 1 の固定点2つ</td></tr>
+      <tr><td>入力仕様</td><td>単調性（h ∨ u）</td><td>休薬期間 τ = 2</td></tr>
+      <tr><td>到達期限 H</td><td class="num">5</td><td class="num">7</td></tr>
+      <tr><td>保持の終わり T</td><td class="num">10</td><td class="num">10</td></tr>
+      <tr><td>エピソード数</td><td class="num">15,000</td><td class="num">24,000</td></tr>
+      <tr><td>報酬</td><td>r_step = 2.0、R_goal = 80.0</td><td>資料に記載なし</td></tr>
+      <tr><td>c_edge</td><td class="num">1.0</td><td class="num">2.0</td></tr>
+      <tr><td>割引</td><td class="num">0.99</td><td>資料に記載なし</td></tr>
+      <tr><td>シード</td><td>11–15</td><td>11–15</td></tr>
     </tbody>
   </table>
   </div>
-  <p>表の見方。j* は、目標に到達したあとも除去を続ける必要がある最小のステップ数である。j* = 0 の目標は、到達すれば除去を止めてよい。到達後も除去を続ける必要がある目標もある。たとえば tumor 浸潤なしは 10、tumor 細胞周期停止は 3 である。</p>
-  <p>単調性の代償が出るのは哺乳類細胞周期だけである。その 80,704 は、到達前に除去を戻す必要から来る。</p>
+  <p>Cortical の目標集合は前極と後極の発現パターンに対応する。Wnt5a の学習では、初期状態を128状態すべてに巡回させる。</p>
+  <span class="cite mono">tex/zemi2/main.tex:466@4b5277a</span>
+  <span class="cite mono">tex/zemi2/main.tex:500@4b5277a</span>
+  <span class="cite mono">tex/zemi2/main.tex:514@4b5277a</span>
+  <span class="cite mono">tex/zemi2/main.tex:510@4b5277a</span>
+  <span class="cite mono">tex/zemi2/main.tex:534@4b5277a</span>
+  <span class="cite mono">tex/zemi2/main.tex:577@4b5277a</span>
+  <span class="cite mono">tex/zemi2/main.tex:589@4b5277a</span>
 
-  <h2><span class="no">06</span>読むときの注意</h2>
-  <div class="note">
-    <p><b>目標別の表は、10 目標、条件1通りだけの結果である。</b>モデル一般の性質ではない。</p>
-    <p>成功率 100% は empirical（学習と seed を含む）、目標別の表は exact である。型が違うので、同じ物差しで比べない。</p>
+  <h2><span class="no">03</span>介入の意味</h2>
+  <p>介入は辺の除去である。辺 k を除去する入力を u<sub>k</sub> ∈ {0, 1} とする。除去した辺は、更新式の中で入力の値を固定する。活性化の辺と抑制の辺で、固定する値が違う。</p>
+  <p class="eq">活性化入力：(¬u) ∧ x　　抑制入力：u ∨ ¬x</p>
+  <p>具体例を書く。遺伝子 A が遺伝子 B を活性化する辺を考える。u = 1 なら (¬u) ∧ x は x によらず 0 になり、A が発現していても B への活性化は届かない。抑制の辺なら u ∨ ¬x が 1 になり、抑制が外れた状態と同じになる。u = 0 なら、どちらの式も元の入力 x、¬x に戻る。</p>
+  <p>制御費用は除去した辺の本数に比例する。<span class="m">r<sub>control</sub>(u<sub>t</sub>) = −c<sub>edge</sub>‖u<sub>t</sub>‖<sub>1</sub></span> である。</p>
+  <p>他のラインとの違い。<a href="paper1.html">Paper 1</a> の主比較は、各時刻に NoOp か辺1本を選ぶ。このラインは複数の辺を同時に除去でき、その本数に費用がかかる。さらに、除去の時間的な並びに仕様がつく。</p>
+  <span class="cite mono">tex/zemi2/main.tex:450@4b5277a</span>
+
+  <h2><span class="no">04</span>実験の手順</h2>
+  <p><span class="badge exact">exact</span> 入力仕様は信号時相論理（STL）で書き、学習が扱えるフラグ状態に落とす。手順は次の順である。</p>
+  <ol class="steps">
+    <li><b>仕様を書く。</b>単調性は、除去を始めた辺は戻さないことを全期間で求める。休薬期間は、除去した辺を τ ステップのあいだ再除去しないことを求める。<span class="cite mono">tex/zemi2/main.tex:302@4b5277a</span><span class="cite mono">tex/zemi2/main.tex:303@4b5277a</span></li>
+    <li>フラグの更新式を決める。単調性は h ∨ u で更新し、初期値は 0 である。休薬は、u = 1 なら τ、それ以外は max(0, h − 1) で更新する。<span class="cite mono">tex/zemi2/main.tex:320@4b5277a</span></li>
+    <li>違反関数を決める。単調性では、h = 1 かつ u = 0 のときを違反とする。<span class="cite mono">tex/zemi2/main.tex:510@4b5277a</span></li>
+    <li>行動マスキングを置く。行動を選ぶ前に、各辺のフラグとその辺への行動を照らし合わせ、仕様に違反する行動を選択肢から外す。マスクは BN の遷移を予測しない。<span class="cite mono">tex/zemi2/main.tex:331@4b5277a</span></li>
+    <li>監視状態を3値で持つ。s = 0 は未到達、s = 1 は初到達後に維持中、s = 2 は維持の失敗が確定、を表す。監視状態は離脱を禁じない。軌道の状況を記録するだけである。<span class="cite mono">tex/zemi2/main.tex:365@4b5277a</span><span class="cite mono">tex/zemi2/main.tex:377@4b5277a</span></li>
+    <li>学習する。ε-greedy で、許容行動の集合 U(h<sub>t</sub>) の中から探索する。更新式の最大化も次状態の許容行動 U(h<sub>t+1</sub>) に限る。軌道が仕様を満たす（s<sub>T</sub> = 1）とき、最終遷移の報酬に終端ボーナス R_goal を足す。<span class="cite mono">tex/zemi2/main.tex:404@4b5277a</span><span class="cite mono">tex/zemi2/main.tex:446@4b5277a</span></li>
+    <li>評価する。学習後の貪欲方策を全初期状態から動かす。5シード（11–15）で繰り返す。比べる基準として、介入なしでの成功数も数える。<span class="cite mono">tex/zemi2/main.tex:518@4b5277a</span></li>
+  </ol>
+  <p>初期状態は全数を使い、標本は取らない。</p>
+
+  <h2><span class="no">05</span>指標の定義</h2>
+  <p><span class="badge exact">exact</span> <b>成功率</b>は、次の3条件をすべて満たす初期状態の割合である。分母は初期状態の数（Cortical 32、Wnt5a 128）である。</p>
+  <ul>
+    <li>初到達が時刻 H 以下である。</li>
+    <li>その後 T = 10 まで目標集合を出ない。</li>
+    <li>入力仕様に違反しない。</li>
+  </ul>
+  <p>成功は監視状態 s<sub>T</sub> = 1 と同じで、s<sub>T</sub> = 2 なら失敗である。違反は、違反関数が真になる時刻が1つでもあることを指す。</p>
+  <p>目標別の厳密値では3つの量を使う。単調性で失う数は、制約なしで制御できる初期状態の数から、単調性を課したときの数を引いたものである。分母は各目標の初期状態数である。j* は、到達後に除去を許すステップ数 j を動かしたとき、制御できる状態が制約なしと同じになる最小の j である。t_off* は、治療の終了時刻 t_off を 0〜10 で動かしたとき、同じになる最小の t_off である。</p>
+  <span class="cite mono">tex/zemi2/main.tex:612@4b5277a</span>
+  <span class="cite mono">tex/zemi2/main.tex:377@4b5277a</span>
+  <span class="cite mono">docs/experiments/2026-11-03_hold_curve.md:9@4b5277a</span>
+  <span class="cite mono">docs/experiments/2026-11-03_hold_curve.md:11@4b5277a</span>
+
+  <h2><span class="no">06</span>結果</h2>
+  <div class="kpi">
+    <div><span class="v mono">160 / 160</span><span class="k">Cortical の成功</span><span class="unit">32 状態 × 5 シード</span></div>
+    <div><span class="v mono">640 / 640</span><span class="k">Wnt5a の成功</span><span class="unit">128 状態 × 5 シード</span></div>
+    <div><span class="v mono">0</span><span class="k">離脱（両モデル）</span><span class="unit">表2の平均 ± 値</span></div>
   </div>
+  <p><span class="badge empirical">empirical</span> 主結果を表2に示す。成功率は両モデルとも 100.0 ± 0.0 だった。初到達の時刻は Cortical が 2.43 ± 0.11、Wnt5a が 2.83 ± 0.08 である。離脱は両方とも 0.00 ± 0.00 だった。介入の列は Cortical が 46.3 ± 5.0、Wnt5a が 1.8 ± 0.9 である。この列の単位はこのページの資料に無い。</p>
+  <div class="table-wrap">
+  <table class="t">
+    <caption class="small muted" style="caption-side: top; text-align: left;">表2 主結果（5 シード、値は資料の表のまま）</caption>
+    <thead><tr><th>モデル</th><th class="num">初期状態</th><th class="num">成功率 (%)</th><th class="num">初到達</th><th class="num">離脱</th><th class="num">介入</th><th class="num">介入なしの成功</th></tr></thead>
+    <tbody>
+      <tr><td>Cortical</td><td class="num">32</td><td class="num mono">100.0 ± 0.0</td><td class="num mono">2.43 ± 0.11</td><td class="num mono">0.00 ± 0.00</td><td class="num mono">46.3 ± 5.0</td><td class="num">10 / 32</td></tr>
+      <tr><td>Wnt5a</td><td class="num">128</td><td class="num mono">100.0 ± 0.0</td><td class="num mono">2.83 ± 0.08</td><td class="num mono">0.00 ± 0.00</td><td class="num mono">1.8 ± 0.9</td><td class="num">108 / 128</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <span class="cite mono">tex/zemi2/main.tex:624@4b5277a</span>
+  <span class="cite mono">tex/zemi2/main.tex:625@4b5277a</span>
+  <span class="cite mono">tex/zemi2/appendix_state_comparison.tex:41@4b5277a</span>
+  <p>図2は、成功した初期状態の数を学習後と介入なしで並べたものである。学習後の値は5シードのどれでも同じだった。Wnt5a では介入なしの成功が多く、学習で上積みされたのは残りの状態である。</p>
+  <span class="cite mono">tex/zemi2/main.tex:518@4b5277a</span>
+  <span class="cite mono">tex/zemi2/main.tex:597@4b5277a</span>
+
+  <figure>
+    <svg class="fig-wide" width="100%" viewBox="0 0 360 280" role="img" aria-labelledby="ug-f2-cap">
+      <text class="lbl" x="10" y="16">成功した初期状態の数（状態）</text>
+      <text class="lbl-b mid" x="110" y="40">Cortical</text>
+      <line class="ax" x1="50" y1="50" x2="50" y2="210"/>
+      <line class="ax" x1="50" y1="210" x2="170" y2="210"/>
+      <line class="ax-d" x1="50" y1="50" x2="170" y2="50"/>
+      <line class="ax-d" x1="50" y1="130" x2="170" y2="130"/>
+      <text class="lbl" x="44" y="54" text-anchor="end">32</text>
+      <text class="lbl" x="44" y="134" text-anchor="end">16</text>
+      <text class="lbl" x="44" y="214" text-anchor="end">0</text>
+      <rect x="62" y="50" width="40" height="160" fill="var(--accent)"/>
+      <rect x="118" y="160" width="40" height="50" fill="var(--edge-fixed)"/>
+      <text class="lbl mid" x="82" y="70" style="fill: var(--on-ink)">32</text>
+      <text class="lbl mid" x="138" y="154">10</text>
+      <text class="lbl mid" x="82" y="228">学習後</text>
+      <text class="lbl mid" x="138" y="228">介入なし</text>
+      <text class="lbl-b mid" x="280" y="40">Wnt5a</text>
+      <line class="ax" x1="220" y1="50" x2="220" y2="210"/>
+      <line class="ax" x1="220" y1="210" x2="340" y2="210"/>
+      <line class="ax-d" x1="220" y1="50" x2="340" y2="50"/>
+      <line class="ax-d" x1="220" y1="130" x2="340" y2="130"/>
+      <text class="lbl" x="214" y="54" text-anchor="end">128</text>
+      <text class="lbl" x="214" y="134" text-anchor="end">64</text>
+      <text class="lbl" x="214" y="214" text-anchor="end">0</text>
+      <rect x="232" y="50" width="40" height="160" fill="var(--accent)"/>
+      <rect x="288" y="75" width="40" height="135" fill="var(--edge-fixed)"/>
+      <text class="lbl mid" x="252" y="70" style="fill: var(--on-ink)">128</text>
+      <text class="lbl mid" x="308" y="95" style="fill: var(--on-ink)">108</text>
+      <text class="lbl mid" x="252" y="228">学習後</text>
+      <text class="lbl mid" x="308" y="228">介入なし</text>
+      <text class="lbl mid" x="180" y="262">縦軸の上端は各モデルの初期状態数</text>
+    </svg>
+    <figcaption id="ug-f2-cap">図2 初到達後維持に成功した初期状態の数。左は Cortical（32 状態中）、右は Wnt5a（128 状態中）。学習後は5シード（11–15）のすべてで全状態が成功した。縦軸の目盛はモデルごとに違う。</figcaption>
+  </figure>
+
+  <h2><span class="no">07</span>内訳と副次</h2>
+  <p><span class="badge exact">exact</span> 10の目標について、仕様が制御できる初期状態の数をどれだけ減らすかを厳密に数えた。設定は H = 7、T = 10、初到達判定である。数えたのは制御できる初期状態の数だけで、費用は見ていない。下の表は、このページの資料に値がある分だけを載せる。他の目標の初期状態数、制御できる数、各目標の t_off* は資料に無い。</p>
+  <div class="table-wrap">
+  <table class="t">
+    <caption class="small muted" style="caption-side: top; text-align: left;">表3 目標別の厳密値（資料にある分）</caption>
+    <thead><tr><th>目標</th><th class="num">初期状態</th><th class="num">制約なしで制御できる</th><th class="num">到達後の除去を禁じて失う</th><th class="num">j*</th><th class="num">単調性で失う</th></tr></thead>
+    <tbody>
+      <tr><td>哺乳類細胞周期</td><td class="num">524,288</td><td class="num">268,096</td><td class="num">4,464</td><td class="num">—</td><td class="num">80,704</td></tr>
+      <tr><td>HCC</td><td class="num">524,288</td><td class="num">—</td><td class="num">65,792</td><td class="num">1</td><td class="num">0</td></tr>
+      <tr><td>残りの目標（HCC と哺乳類細胞周期を除く）</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num">0</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <span class="cite mono">docs/experiments/2026-11-03_hold_curve.md:22@4b5277a</span>
+  <span class="cite mono">docs/experiments/2026-11-03_hold_curve.md:10@4b5277a</span>
+  <span class="cite mono">docs/experiments/2026-11-03_hold_curve.md:13@4b5277a</span>
+  <span class="cite mono">docs/experiments/2026-11-03_release_need.md:36@4b5277a</span>
+  <span class="cite mono">docs/experiments/2026-11-03_release_need.md:11@4b5277a</span>
+  <p>j* の分布は、10目標のうち5目標が 0 で、残りが 1、1、2、3、10 だった。j* = 0 の目標は、到達したら除去をやめてよい。HCC は到達後の除去を禁じると 65,792 状態を失うが、到達後に1ステップだけ除去を続ければすべて保てる。t_off* は 0〜10 の範囲で求めた。</p>
+  <span class="cite mono">docs/experiments/2026-11-03_hold_curve.md:9@4b5277a</span>
+  <span class="cite mono">docs/experiments/2026-11-03_hold_curve.md:10@4b5277a</span>
+  <span class="cite mono">docs/experiments/2026-11-03_hold_curve.md:11@4b5277a</span>
+  <p><b>単調性の代償が出るのは哺乳類細胞周期だけである。</b>単調性は、到達後に除去を加えることは許すが、到達前に除去を戻すことを許さない。哺乳類細胞周期では、単調性を全期間に課しても到達前だけに課しても、制御できる状態は 187,392 になった。到達後だけに課すと 268,096 のままだった。だから代償 80,704 は、すべて到達前に除去を戻す必要から来る。この代償は、到達後の除去を禁じて失う 4,464 よりずっと大きい。他の9目標では、どの位相に課しても単調性の代償は 0 だった。</p>
+  <span class="cite mono">docs/experiments/2026-11-03_hold_curve.md:13@4b5277a</span>
+  <span class="cite mono">docs/experiments/2026-11-03_release_need.md:36@4b5277a</span>
+  <span class="cite mono">docs/experiments/2026-11-03_release_need.md:10@4b5277a</span>
+  <span class="cite mono">docs/experiments/2026-11-03_release_need.md:11@4b5277a</span>
+
+  <h2><span class="no">08</span>届かなかったこと</h2>
+  <p><span class="badge closed">閉じた</span> 卒論版は、入力仕様をハード制約ではなく違反ペナルティとして扱った（soft constraint）。だから厳密な充足を保証しない。報酬は安定化・制御・違反の3項からなり、違反のときに罰を与える。学会版（資料2）では、違反行動をマスクで選択肢から外す方式に替えた。</p>
+  <span class="cite mono">tex/sotsuron/main.tex:287@4b5277a</span>
+  <span class="cite mono">tex/sotsuron/main.tex:361@4b5277a</span>
+  <span class="cite mono">tex/zemi2/appendix_state_comparison.tex:52@4b5277a</span>
+  <p>維持は保証ではなく、報酬で促されるだけである。監視状態は離脱を禁じず、軌道が仕様を満たしたときに終端ボーナスが足される。Q 表には時刻を入れていない。資料1の Q 表には監視状態も含めないが、終端報酬の判定には軌道全体を使う。</p>
+  <span class="cite mono">tex/zemi2/main.tex:377@4b5277a</span>
+  <span class="cite mono">tex/zemi2/main.tex:446@4b5277a</span>
+  <span class="cite mono">tex/zemi2/appendix_state_comparison.tex:50@4b5277a</span>
+  <p>Wnt5a の c_edge = 2.0 は、評価と同じ5シードで選んだ。独立した検証ではない。</p>
+  <span class="cite mono">tex/zemi2/main.tex:589@4b5277a</span>
+  <p>資料間で数値が一致しない箇所がある。資料1の Wnt5a は96状態・36,000 エピソード、資料2は128状態・24,000 エピソードである。資料1は96状態を代表的な初期状態集合として使った。資料1の違反ペナルティ係数は 200.0 で、資料2ではペナルティの代わりにマスクを使う。安定化仕様も違う。卒論版は F<sub>[0,H]</sub> G<sub>[0,T−H]</sub> で、期限内のある時点から T − H ステップの維持を求める。学会版は初到達の後、T まで出ないことを求める。</p>
+  <span class="cite mono">tex/zemi2/appendix_state_comparison.tex:43@4b5277a</span>
+  <span class="cite mono">tex/sotsuron/main.tex:585@4b5277a</span>
+  <span class="cite mono">tex/zemi2/appendix_state_comparison.tex:50@4b5277a</span>
+  <span class="cite mono">tex/sotsuron/main.tex:283@4b5277a</span>
+
+  <h2><span class="no">09</span>読むときの注意</h2>
+  <div class="note">
+    <p><b>成功率 100% は、2つの小さなモデルと条件1通りでの empirical な結果である。</b>介入なしでも Cortical は 32 状態中 10 状態、Wnt5a は 128 状態中 108 状態が成功する。100% をすべて学習の寄与として読まない。</p>
+    <p>目標別の表（表3）は exact で、学習もシードも含まない。表2とは型が違うので、同じ物差しで比べない。</p>
+    <p>表3は10目標、H = 7、T = 10 の1条件だけの結果である。モデル一般の性質ではない。</p>
+  </div>
+  <p>資料1と資料2は初期状態、エピソード数、仕様の扱いが違う。2つの資料の数値を混ぜて読まない。このページの主結果は資料2（tex/zemi2）の値である。</p>
+
+  <h2><span class="no">10</span>再現の手がかり</h2>
+  <p>リポジトリは bn_edge_removal、commit は 4b5277a である。学会版（資料2）は <span class="mono" style="overflow-wrap: anywhere;">tex/zemi2/main.tex</span> と <span class="mono" style="overflow-wrap: anywhere;">tex/zemi2/appendix_state_comparison.tex</span>、卒論版（資料1）は <span class="mono" style="overflow-wrap: anywhere;">tex/sotsuron/main.tex</span> にある。目標別の厳密値は <span class="mono" style="overflow-wrap: anywhere;">docs/experiments/2026-11-03_hold_curve.md</span> と <span class="mono" style="overflow-wrap: anywhere;">docs/experiments/2026-11-03_release_need.md</span> にある。</p>
+  <p>このリポジトリの <span class="mono" style="overflow-wrap: anywhere;">scripts/run_cortical.py</span> と <span class="mono" style="overflow-wrap: anywhere;">scripts/run_wnt5a.py</span> は、名前から両モデルの実行スクリプトと見られるが、上の数値との対応は確かめていない。シードは 11–15。実行時間はこのページの資料に無い。</p>
 
   <footer>
-    <p>出典：<a href="https://github.com/koshikai/bn-edge-removal-public" target="_blank" rel="noopener noreferrer">https://github.com/koshikai/bn-edge-removal-public</a> · 既存の解説ページ <a href="../zemi2.html">zemi2</a></p>
+    <p>出典：bn_edge_removal @ 4b5277a（tex/zemi2/、tex/sotsuron/、docs/experiments/）· このページ：<a href="https://github.com/koshikai/bn-edge-removal-public" target="_blank" rel="noopener noreferrer">https://github.com/koshikai/bn-edge-removal-public</a> · 既存の解説ページ <a href="../zemi2.html">zemi2</a></p>
     <p>最終更新：2026-11-08</p>
     <p><a href="../">← 研究ラインの地図へ戻る</a> · <a href="../#numbers">数値の一覧</a> · <a href="../#lines">ライン一覧</a></p>
     <p class="pager"><a href="c2d.html">← 旧 C2D / BBM</a></p>

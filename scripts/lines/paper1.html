@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>本体 Paper 1 · 研究ラインの地図</title>
-  <meta name="description" content="遷移数の予算を揃えたとき、経験から学ぶ制御器と固定データから作る制御器のどちらが oracle に近いかを確かめた確認研究。">
+  <meta name="description" content="遷移数の予算を揃えたとき、経験から学ぶ制御器（Q 学習）と固定データから作る制御器（オフライン）のどちらがオラクルに近いかを比べた確認研究。243 ファミリー、6予算点。">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -12,93 +12,246 @@
   <nav class="crumbs"><a href="../">地図</a> / <span>本体 Paper 1</span></nav>
   <p class="eyebrow mono">LINE 01 · 確認研究</p>
   <h1>本体 Paper 1</h1>
-  <p class="lede">予算を揃えて、学ぶ制御器と固定データの制御器を oracle と比べる。</p>
-  <p class="badges"><span class="badge confirm">確認研究</span><span class="badge confirm">事前登録あり</span></p>
+  <p class="lede">確認研究。遷移数の予算を揃えたとき、経験から学ぶ制御器（Q 学習）と、固定データから作る制御器（オフライン）のどちらがオラクル（oracle）に近いかを比べる。243 ファミリー、6予算点。主要な推定対象は曲線全体の曲線下面積（AUC）である。</p>
+  <p class="badges"><span class="badge confirm">確認研究</span><span class="badge exact">exact</span><span class="badge empirical">empirical</span><span class="badge exploratory">exploratory</span><span class="badge closed">閉じた</span></p>
 
   <figure>
-    <svg viewBox="0 0 640 260" role="img" aria-labelledby="fig-cap">
+    <svg class="fig-wide" width="100%" viewBox="0 0 360 400" role="img" aria-labelledby="p1-f1-cap">
       <defs>
-        <marker id="a-f" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path class="mk-fixed" d="M0 0 L10 5 L0 10 z"/></marker>
-        <marker id="a-c" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path class="mk-cut" d="M0 0 L10 5 L0 10 z"/></marker>
+        <marker id="p1a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path class="mk-fixed" d="M0 0 L10 5 L0 10 z"/></marker>
       </defs>
-      <!-- budget -->
-      <rect class="box" x="10" y="100" width="120" height="60" rx="6"/>
-      <text class="lbl-b mid" x="70" y="125">遷移数の予算</text>
-      <text class="lbl-m mid" x="70" y="145">同じ値を両方へ</text>
-      <path class="e e-fixed" d="M130 120 L188 70" marker-end="url(#a-f)"/>
-      <path class="e e-fixed" d="M130 140 L188 190" marker-end="url(#a-f)"/>
-      <!-- controllers -->
-      <rect class="box-a" x="190" y="40" width="170" height="60" rx="6"/>
-      <text class="lbl-b mid" x="275" y="65">経験から学ぶ</text>
-      <text class="lbl-m mid" x="275" y="85">reset へアクセス</text>
-      <rect class="box" x="190" y="160" width="170" height="60" rx="6"/>
-      <text class="lbl-b mid" x="275" y="185">固定データから作る</text>
-      <text class="lbl-m mid" x="275" y="205">offline</text>
-      <path class="e e-fixed" d="M360 70 L428 115" marker-end="url(#a-f)"/>
-      <path class="e e-fixed" d="M360 190 L428 145" marker-end="url(#a-f)"/>
-      <!-- evaluation -->
-      <rect class="box" x="430" y="90" width="200" height="80" rx="6"/>
-      <text class="lbl-b mid" x="530" y="115">H = 20 の occupancy</text>
-      <text class="lbl mid" x="530" y="137">oracle との差を測る</text>
-      <text class="lbl-m mid" x="530" y="157">243 family で集計</text>
-      <rect class="box-g" x="470" y="20" width="120" height="40" rx="6"/>
-      <text class="lbl-b mid lbl-goal" x="530" y="45">oracle</text>
-      <path class="e e-goal e-dash" d="M530 60 L530 88"/>
-      <!-- matched-k1 inset -->
-      <text class="lbl-s" x="10" y="20">介入：1遷移で1辺だけ除去（matched-k1）</text>
-      <circle class="nd" cx="30" cy="52" r="12"/><text class="nt" x="30" y="52">x</text>
-      <circle class="nd" cx="110" cy="52" r="12"/><text class="nt" x="110" y="52">y</text>
-      <path class="e e-cut" d="M43 52 L96 52" marker-end="url(#a-c)"/>
-      <text class="lbl-s lbl-cut mid" x="70" y="76">t → t+1 だけ</text>
-      <text class="lbl-s" x="10" y="245">比較の軸：予算（横）× oracle との差（縦）。宣言した予算範囲で平均する</text>
+      <rect class="box" x="30" y="10" width="300" height="52" rx="8"/>
+      <text class="lbl-b mid" x="180" y="32">入力</text>
+      <text class="lbl mid" x="180" y="51">243 ファミリー・729 タスク</text>
+      <path class="e e-fixed" d="M180 62 L180 84" marker-end="url(#p1a)"/>
+      <rect class="box" x="30" y="86" width="300" height="52" rx="8"/>
+      <text class="lbl-b mid" x="180" y="108">予算を揃える</text>
+      <text class="lbl mid" x="180" y="127">beta = 0.5, 1, 2, 4, 8, 12</text>
+      <path class="e e-fixed" d="M180 138 L180 160" marker-end="url(#p1a)"/>
+      <rect class="box-a" x="30" y="162" width="68" height="56" rx="8"/>
+      <text class="lbl-b mid" x="64" y="186">Q1</text>
+      <text class="lbl mid" x="64" y="205">学ぶ</text>
+      <rect class="box" x="107" y="162" width="68" height="56" rx="8"/>
+      <text class="lbl-b mid" x="141" y="186">O1</text>
+      <text class="lbl mid" x="141" y="205">固定</text>
+      <rect class="box" x="184" y="162" width="68" height="56" rx="8"/>
+      <text class="lbl-b mid" x="218" y="186">O2</text>
+      <text class="lbl mid" x="218" y="205">固定</text>
+      <rect class="box" x="262" y="162" width="68" height="56" rx="8"/>
+      <text class="lbl-b mid" x="296" y="186">A1</text>
+      <text class="lbl mid" x="296" y="205">固定</text>
+      <path class="e e-fixed" d="M180 218 L180 240" marker-end="url(#p1a)"/>
+      <rect class="box" x="30" y="242" width="300" height="60" rx="8"/>
+      <text class="lbl-b mid" x="180" y="265">判定：オラクルとの差 G</text>
+      <text class="lbl mid" x="180" y="287">返さないときは NoOp の値</text>
+      <path class="e e-fixed" d="M180 302 L180 324" marker-end="url(#p1a)"/>
+      <rect class="box-g" x="30" y="326" width="300" height="60" rx="8"/>
+      <text class="lbl-b mid" x="180" y="349">集計：6点の AUC</text>
+      <text class="lbl mid" x="180" y="371">ファミリー単位のブートストラップ</text>
     </svg>
-    <figcaption id="fig-cap">同じ遷移数の予算を、経験から学ぶ制御器と、固定データから作る制御器に与える。どちらも H = 20 の occupancy で oracle と比べる。介入は1遷移に1辺の即時除去である。</figcaption>
+    <figcaption id="p1-f1-cap">図1 実験の流れ。同じ予算を4手法に与え、H = 20 の標的占有でオラクルとの差を測る。手法が制御器を返さないときは NoOp の値を充てる。最後に6予算点の曲線全体を AUC にまとめる。</figcaption>
   </figure>
 
   <h2><span class="no">01</span>問い</h2>
-  <p>遷移数の予算を揃える。そのとき、経験から学ぶ制御器と、固定データから作る制御器のどちらが oracle に近いか。</p>
+  <p><span class="badge confirm">確認研究</span> 比べたのは2種類の制御器である。1つは経験から学ぶ制御器で、表形式の有限時間 Q 学習（Q1）を使う。もう1つは固定データから作る制御器で、オフライン解法を使う（O1・O2・A1 の3条件）。両者に同じ遷移数の予算を与え、どちらがオラクルに近いかを測った。</p>
+  <p>主要な推定対象は、ある1つの予算での差ではない。<b>6予算点の曲線全体をまとめた AUC の差</b>である。単一の予算点は主要な端点にしないと事前に決めた。</p>
+  <p>結果を先に書く。可用性調整済みオラクルギャップの AUC 差は Delta_AUC = +0.01933、95% 信頼区間 [+0.01259, +0.02662] だった。正の値は Q1 有利を意味する。区間はゼロを含まない。</p>
+  <span class="cite mono">docs/paper1/manuscript_ja.md:331@29b0b83</span>
+  <span class="cite mono">docs/decisions/0047-study-one-confirmatory-preregistration.md:60@29b0b83</span>
 
-  <h2><span class="no">02</span>モデルと規模</h2>
-  <ul>
-    <li>benchmark 集団の 243 family を使う。統計単位は family である。</li>
-    <li>目的関数は H = 20 の occupancy。</li>
-    <li>経験から学ぶ制御器には、reset へのアクセスがあると宣言した。</li>
-  </ul>
+  <h2><span class="no">02</span>設定</h2>
+  <p><span class="badge exact">exact</span> 母集団は3層から作った。各層82ファミリー、各ファミリー3タスクを計画した。計画246ファミリーのうち243が実現した。生成上限に達した3シードは置換していない。3件はすべて n = 12 の層で、実現配分は 82 / 82 / 79 である。</p>
+  <div class="table-wrap">
+  <table class="t">
+    <thead><tr><th>項目</th><th>値</th></tr></thead>
+    <tbody>
+      <tr><td>層 (n, m)</td><td class="mono">(8,4), (10,6), (12,8)</td></tr>
+      <tr><td>ファミリー数</td><td>計画 246（82 / 82 / 82）、実現 243（82 / 82 / 79）</td></tr>
+      <tr><td>タスク</td><td>各ファミリー3タスク、計 729 タスク</td></tr>
+      <tr><td>手法シード</td><td>各タスク3つの入れ子シード</td></tr>
+      <tr><td>手法</td><td>Q1（Q 学習）、O1・O2・A1（オフライン解法の3条件）</td></tr>
+      <tr><td>予算の刻み</td><td class="mono">beta ∈ {0.5, 1, 2, 4, 8, 12}</td></tr>
+      <tr><td>予算の式</td><td class="mono">B = 20 · ceil(beta · N / 20)</td></tr>
+      <tr><td>目的</td><td class="mono">J_occ = Σ_{t=0..H-1} 1{x(t+1) ∈ T}、H = 20</td></tr>
+      <tr><td>行動集合</td><td>matched-k1（NoOp か除去可能辺1本）、M = 1 + m</td></tr>
+      <tr><td>記録数</td><td>52,488（243 × 3 × 3 × 4 × 6）</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p>予算は状態数 N に比例させ、エピソード単位（20遷移）に丸める。全手法で同じ6つのチェックポイントを使う。目的には早期終了も介入費用もない。時間幅 H は 20 に固定した。</p>
+  <span class="cite mono">docs/paper1/manuscript_ja.md:146@29b0b83</span>
+  <span class="cite mono">docs/paper1/manuscript_ja.md:21@29b0b83</span>
+  <span class="cite mono">docs/studies/v3_study1_confirmatory_report.md:193@29b0b83</span>
+  <span class="cite mono">docs/paper1/manuscript_ja.md:249@29b0b83</span>
+  <span class="cite mono">docs/paper1/manuscript_ja.md:104@29b0b83</span>
+  <span class="cite mono">docs/studies/v3_study1_confirmatory_report.md:13@29b0b83</span>
 
-  <h2><span class="no">03</span>何を動かすか</h2>
-  <p>辺を動かす。<b>1遷移ごとに1本だけ即時に除去する</b>（matched-k1）。除去はその遷移にだけ使い、次の遷移には残らない。</p>
+  <h2><span class="no">03</span>介入の意味</h2>
+  <p><span class="badge exact">exact</span> 主比較の行動集合は matched-k1 である。各時刻に、NoOp か、除去可能辺をちょうど1本選ぶ。除去可能辺が m 本あれば、行動数は次の式になる。</p>
+  <p class="eq">M = 1 + m</p>
+  <p>具体例を1つ置く。層 (8,4) では除去可能辺が4本なので、行動は NoOp を含めて5通りである。制御器はこの5通りから1つを各時刻に選び、20時刻のあいだに標的集合 T を占有した回数 J_occ を数える。</p>
+  <p>辺の全部分集合を行動にする条件（native 条件）もある。ただし、この条件は構造の確認だけに使い、主比較には入れていない。</p>
+  <p>他のラインとの違いを書く。このラインは制御器の作り方を比べる研究で、介入の型は固定している。何を動かすかではなく、同じ遷移数から誰がよい制御器を作るかを問う。転移による使い回しの損得は <a href="paper2.html">Paper 2</a> が扱う。</p>
+  <span class="cite mono">docs/paper1/manuscript_ja.md:97@29b0b83</span>
 
-  <h2><span class="no">04</span>実験の設計</h2>
-  <ul>
-    <li>予算をいくつか宣言し、各予算で両方の制御器を作る。</li>
-    <li>各予算で oracle との差を測り、宣言した予算範囲で平均して ΔAUC を出す。</li>
-    <li>比較の範囲は先に宣言した（事前登録）。</li>
-  </ul>
+  <h2><span class="no">04</span>実験の手順</h2>
+  <p><span class="badge exploratory">exploratory</span> 母集団と目的は、確認実験の前に5段で設計した。各段に判定条件を置いた。</p>
+  <ol class="steps">
+    <li><b>到達可能性。</b>標的を無条件に抽出すると、90タスク中4件だけが実行可能だった。そこで一般的な制御到達可能性で条件付けた。<span class="cite mono">docs/paper1/manuscript_ja.md:151@29b0b83</span></li>
+    <li>1ステップ不変性。この段の判定条件の細部は、このページの資料に無い。</li>
+    <li>有限時間占有。目的を J_occ（H = 20）に固定した。<span class="cite mono">docs/paper1/manuscript_ja.md:104@29b0b83</span></li>
+    <li>到着と滞在の分離。R3-2D の段階では H = 20 も H = 50 も通らなかった。失敗はどちらも滞在の判定条件 H3 の1項目だけだった。<span class="cite mono">docs/decisions/0044-horizon-independent-residence-gate.md:13@29b0b83</span></li>
+    <li>時間幅に依存しない滞在基準。滞在の判定条件を固定窓 L = 10 の基準 H3_prime に置き換えた。タスク全体の中央値 V_res_star(L = 10) / 10 が 0.10 以上であることを求める。母集団 F の候補のうち、H = 20 だけが通った。<span class="cite mono">docs/decisions/0044-horizon-independent-residence-gate.md:29@29b0b83</span></li>
+  </ol>
+  <p><span class="badge exact">exact</span> 確認実験そのものは次の順で進めた。</p>
+  <ol class="steps">
+    <li>生成前に、246ファミリーシードと6,642個の実現手法シードの分離を機械的に検証した。設計段階で見えていた範囲 1,000,000–9,999,999 は除外した。<span class="cite mono">docs/paper1/manuscript_ja.md:159@29b0b83</span></li>
+    <li>Q1 のハイパーパラメータを母集団の結果を見る前に固定した。探索率は 1.0 から 0.05 まで予算前半で減衰させる。学習率 0.5、割引なし、初期値ゼロ、同値時は最小添字を選ぶ。<span class="cite mono">docs/paper1/manuscript_ja.md:193@29b0b83</span></li>
+    <li>各タスク・各シード・各予算で4手法を実行した。手法が制御器を返さないときは、運用規則として J_operational = J_NoOp を充てる。これは欠測補完とは呼ばない。<span class="cite mono">docs/paper1/manuscript_ja.md:231@29b0b83</span></li>
+    <li>除外規則。生成上限に達したシードは置換せず記録した。精度目標に届かなかったが、ファミリーは追加していない。<span class="cite mono">docs/paper1/manuscript_ja.md:22@29b0b83</span></li>
+    <li>区間はファミリー単位のブートストラップで出す。タスクとシードは反復に数えない。<span class="cite mono">docs/decisions/0047-study-one-confirmatory-preregistration.md:76@29b0b83</span></li>
+  </ol>
+  <p>実行時間の上限は6時間（21,600秒）と事前に決めた。超過は停止条件であり、設計を縮める理由にはしない。精度目標は半幅 0.00625 G 単位で、占有1ステップの8分の1を H = 20 で割った値である。</p>
+  <span class="cite mono">docs/decisions/0048-study-one-confirmatory-execution-authorization.md:148@29b0b83</span>
+  <span class="cite mono">docs/decisions/0048-study-one-confirmatory-execution-authorization.md:18@29b0b83</span>
 
-  <h2><span class="no">05</span>結果</h2>
+  <h2><span class="no">05</span>指標の定義</h2>
+  <p><span class="badge exact">exact</span> <b>オラクルギャップ G</b> は、オラクルの目的値と、手法が運用で出した目的値の差を表す。単位は「G 単位」で、精度目標 0.00625 = (1/8) / 20 もこの尺度で書かれている。小さいほどオラクルに近い。制御器を返さないセルでは J_NoOp を使うので、これを可用性調整済みと呼ぶ。</p>
+  <p>AUC は、G を6予算点の曲線として見たときの面積である。積分の細部はこのページの資料に無い。Delta_AUC は O1 と Q1 の AUC の差で、正の値は Q1 有利を意味する。分母はファミリーで、n = 243 である。</p>
+  <p>閾値の副次指標は tau = 0.10 を使う。最大予算で、オラクルと NoOp の機会差の10%以内に入った試行の割合である。分母は正規化ガードを通った適格試行 1,281 run である。到達しなかった試行は B_max で右打切りにする。成功例だけで平均時間を出すことはしない。</p>
+  <p>同定可能性は、データからモデルが一意に決まるかを表す。オフライン解法が解ける必要十分条件は rank(X_p) = N、つまり全状態で少なくとも1つの後続状態が観測されることである。状態被覆は、データがどれだけの状態を覆うかを表し、1.000 で全体を覆う。</p>
+  <span class="cite mono">docs/decisions/0048-study-one-confirmatory-execution-authorization.md:18@29b0b83</span>
+  <span class="cite mono">docs/paper1/manuscript_ja.md:231@29b0b83</span>
+  <span class="cite mono">docs/paper1/manuscript_ja.md:363@29b0b83</span>
+  <span class="cite mono">docs/decisions/0047-study-one-confirmatory-preregistration.md:111@29b0b83</span>
+  <span class="cite mono">docs/paper1/manuscript_ja.md:176@29b0b83</span>
+
+  <h2><span class="no">06</span>結果</h2>
   <div class="kpi">
-    <div><span class="v mono">+0.01933</span><span class="k">ΔAUC（243 family）</span></div>
-    <div><span class="v mono">[+0.01259, +0.02662]</span><span class="k">95% CI</span></div>
-    <div><span class="v mono">0.39</span><span class="k">宣言した予算範囲の平均で、占有ステップ換算</span></div>
+    <div><span class="v mono">+0.01933</span><span class="k">Delta_AUC（O1 − Q1）</span><span class="unit">243 ファミリー、正は Q1 有利</span></div>
+    <div><span class="v mono">[+0.01259, +0.02662]</span><span class="k">95% 信頼区間</span><span class="unit">ゼロを含まない</span></div>
+    <div><span class="v mono">52,488</span><span class="k">手法記録</span><span class="unit">243 × 3 × 3 × 4 × 6</span></div>
   </div>
-  <p>主結果は ΔAUC +0.01933、95% CI [+0.01259, +0.02662] である。宣言した予算範囲の平均で、占有ステップ 0.39 相当にあたる。</p>
+  <p><span class="badge confirm">確認研究</span> 手法別の AUC を表1に示す。O1 は 0.14937、Q1 は 0.13004 だった。O2 と A1 はともに 0.17318 で、母集団の NoOp ギャップと同じ値である。O2 と A1 は制御器を一度も返さなかったので、NoOp の値がそのまま残った。</p>
+  <div class="table-wrap">
+  <table class="t">
+    <caption class="small muted" style="caption-side: top; text-align: left;">表1 手法別の AUC と対比（243 ファミリー）</caption>
+    <thead><tr><th>手法・対比</th><th class="num">値</th><th class="num">95% 信頼区間</th></tr></thead>
+    <tbody>
+      <tr><td>O1 の AUC</td><td class="num mono">0.14937</td><td class="num">—</td></tr>
+      <tr><td>Q1 の AUC</td><td class="num mono">0.13004</td><td class="num">—</td></tr>
+      <tr><td>O2 の AUC</td><td class="num mono">0.17318</td><td class="num">—</td></tr>
+      <tr><td>A1 の AUC</td><td class="num mono">0.17318</td><td class="num">—</td></tr>
+      <tr><td>Delta_AUC（正は Q1 有利）</td><td class="num mono">+0.01933</td><td class="num mono">[+0.01259, +0.02662]</td></tr>
+      <tr><td>O1 − O2</td><td class="num mono">−0.02381</td><td class="num mono">[−0.02679, −0.02105]</td></tr>
+      <tr><td>O2 − A1</td><td class="num mono">+0.00000</td><td class="num mono">[+0.00000, +0.00000]</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <span class="cite mono">docs/paper1/manuscript_ja.md:337@29b0b83</span>
+  <span class="cite mono">docs/paper1/manuscript_ja.md:331@29b0b83</span>
+  <span class="cite mono">docs/paper1/manuscript_ja.md:289@29b0b83</span>
+  <span class="cite mono">docs/studies/v3_study1_confirmatory_report.md:155@29b0b83</span>
+  <p>予算別に見ると、O1 と Q1 の差は格子上で符号を変える（表2、図2）。小さい4予算点では正で、Q1 の方がオラクルに近い。大きい2予算点では負で、O1 の方が近い。資料は、全点で区間がゼロを含まなかったと書いている。各点の区間の値はこのページの資料に無い。</p>
+  <p>O1 の制御器返却率は、状態被覆が 0.406 から 1.000 へ上がるのに追従した。返却率が0に近い予算では、O1 の値は NoOp と同じになる。表2では、返却率が大きくなる beta = 8 の列で符号が負に変わっている。</p>
+  <div class="table-wrap">
+  <table class="t">
+    <caption class="small muted" style="caption-side: top; text-align: left;">表2 予算別の O1 返却率と差（243 ファミリー × 6予算点）</caption>
+    <thead><tr><th>beta</th><th class="num">0.5</th><th class="num">1</th><th class="num">2</th><th class="num">4</th><th class="num">8</th><th class="num">12</th></tr></thead>
+    <tbody>
+      <tr><td>O1 返却率</td><td class="num mono">0.000</td><td class="num mono">0.000</td><td class="num mono">0.000</td><td class="num mono">0.005</td><td class="num mono">0.625</td><td class="num mono">0.995</td></tr>
+      <tr><td>G(O1) − G(Q1)</td><td class="num mono">+0.020</td><td class="num mono">+0.029</td><td class="num mono">+0.041</td><td class="num mono">+0.053</td><td class="num mono">−0.024</td><td class="num mono">−0.085</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <span class="cite mono">docs/paper1/manuscript_ja.md:372@29b0b83</span>
+  <span class="cite mono">docs/paper1/manuscript_ja.md:285@29b0b83</span>
 
-  <h3>副次の結果</h3>
-  <ul>
-    <li>offline が制御器を返した 13,122 cell のうち 3,553 cell では、oracle との差が −0.07827（95% CI [−0.08778, −0.06929]）だった。この cell では offline の方が oracle に近い。</li>
-    <li>最大予算で oracle の 10% 以内に入った割合は、offline が 70.5%、経験から学ぶ制御器が 8.6%。</li>
-    <li>予算ごとの差は +0.020、+0.029、+0.041、+0.053、−0.024、−0.085 と符号が変わる。予算の端点だけを見ると、見出しが逆になる。</li>
-    <li>識別可能性はどの予算でも 0 のままだった。それでも、返された offline 制御器の 75.3%（2,675 / 3,553）は oracle 最適だった。</li>
-  </ul>
+  <figure>
+    <svg class="fig-wide" width="100%" viewBox="0 0 360 290" role="img" aria-labelledby="p1-f2-cap">
+      <text class="lbl" x="10" y="16">G(O1) − G(Q1)（G 単位）</text>
+      <line class="ax" x1="60" y1="30" x2="60" y2="230"/>
+      <line class="ax-d" x1="60" y1="55" x2="340" y2="55"/>
+      <line class="ax" x1="60" y1="105" x2="340" y2="105"/>
+      <line class="ax-d" x1="60" y1="155" x2="340" y2="155"/>
+      <line class="ax-d" x1="60" y1="205" x2="340" y2="205"/>
+      <text class="lbl" x="54" y="59" text-anchor="end">+0.04</text>
+      <text class="lbl" x="54" y="109" text-anchor="end">0</text>
+      <text class="lbl" x="54" y="159" text-anchor="end">−0.04</text>
+      <text class="lbl" x="54" y="209" text-anchor="end">−0.08</text>
+      <rect x="70" y="80" width="27" height="25" fill="var(--accent)"/>
+      <rect x="117" y="68.75" width="27" height="36.25" fill="var(--accent)"/>
+      <rect x="163" y="53.75" width="27" height="51.25" fill="var(--accent)"/>
+      <rect x="210" y="38.75" width="27" height="66.25" fill="var(--accent)"/>
+      <rect x="257" y="105" width="27" height="30" fill="var(--cut)"/>
+      <rect x="303" y="105" width="27" height="106.25" fill="var(--cut)"/>
+      <text class="lbl mid" x="83" y="74">+0.020</text>
+      <text class="lbl mid" x="130" y="63">+0.029</text>
+      <text class="lbl mid" x="177" y="48">+0.041</text>
+      <text class="lbl mid" x="223" y="33">+0.053</text>
+      <text class="lbl mid" x="270" y="150">−0.024</text>
+      <text class="lbl mid" x="317" y="226">−0.085</text>
+      <text class="lbl mid" x="83" y="248">0.5</text>
+      <text class="lbl mid" x="130" y="248">1</text>
+      <text class="lbl mid" x="177" y="248">2</text>
+      <text class="lbl mid" x="223" y="248">4</text>
+      <text class="lbl mid" x="270" y="248">8</text>
+      <text class="lbl mid" x="317" y="248">12</text>
+      <text class="lbl mid" x="200" y="270">予算 beta（B = 20·ceil(beta·N/20) 遷移）</text>
+    </svg>
+    <figcaption id="p1-f2-cap">図2 予算別の差 G(O1) − G(Q1)。正（青）は Q1 がオラクルに近く、負（橙）は O1 が近い。243 ファミリー。各点の区間はこのページの資料に無いため描いていない。</figcaption>
+  </figure>
 
-  <h2><span class="no">06</span>読むときの注意</h2>
+  <h2><span class="no">07</span>内訳と副次</h2>
+  <p><span class="badge confirm">確認研究</span> 母集団の性質から書く。729 確認タスクのうち 95.2% は何らかの制御で実行可能だった。オラクルと NoOp の平均差は占有 3.46 ステップである。117 タスク（16.0%）はギャップがゼロの退化タスクだった。302 タスク（41.4%）は閾値の副次解析で使う正規化ガードの対象外だった。時間変化する行動列は、61.3% のタスクで最良の定数行動を厳密に上回った。上回った幅の平均は 2.21、最大は占有 19.0 ステップである。<span class="badge empirical">empirical</span> この割合は n = 8 の 44.7% から n = 12 の 75.1% まで上がった。</p>
+  <span class="cite mono">docs/paper1/manuscript_ja.md:264@29b0b83</span>
+  <span class="cite mono">docs/paper1/manuscript_ja.md:265@29b0b83</span>
+  <span class="cite mono">docs/paper1/manuscript_ja.md:269@29b0b83</span>
+  <span class="cite mono">docs/paper1/manuscript_ja.md:270@29b0b83</span>
+  <p><b>10% 到達率は主結果と逆向きである。</b>tau = 0.10 では、最大予算での到達率は O1 が 70.5%、Q1 が 8.6% だった。分母は適格試行 1,281 run である。条件付き品質も同じ向きを示す。O1 が制御器を返したのは 13,122 セル中 3,553 セルで、そのセルに限ると G(O1) − G(Q1) = −0.07827、95% 信頼区間 [−0.08778, −0.06929] だった。区間はゼロを含まない。</p>
+  <span class="cite mono">docs/paper1/manuscript_ja.md:363@29b0b83</span>
+  <span class="cite mono">docs/paper1/manuscript_ja.md:350@29b0b83</span>
+  <span class="cite mono">docs/paper1/manuscript_ja.md:352@29b0b83</span>
+  <p>モデルは一度も同定できなかった。測定した3つのオフライン条件の 39,366 記録で、同定可能性は 0/39,366 である。オンライン条件ではこの指標を報告していない。それでも、返却されたオフライン制御器 3,553 本のうち 2,675 本（75.3%）は、固定した目的に対して厳密にオラクル最適だった。</p>
+  <span class="cite mono">docs/paper1/manuscript_ja.md:318@29b0b83</span>
+  <span class="cite mono">docs/paper1/manuscript_ja.md:319@29b0b83</span>
+  <p>規模別に見ると、Q1 有利の差はネットワーク規模とともに大きくなった。n = 8、10、12 でそれぞれ +0.00035、+0.01702、+0.04141 である。ファミリー数は 82 / 82 / 79。n = 8 では区間がゼロを含む。n = 10 と n = 12 の区間の値はこのページの資料に無い。</p>
+  <span class="cite mono">docs/paper1/manuscript_ja.md:380@29b0b83</span>
+  <p><span class="badge empirical">empirical</span> Q1 は最大予算でも強い標本不足のままだった。時間添字付きの表（H·N·M 要素）1要素あたりの遷移は 0.0912 件、表の訪問率は 1.6% である。<span class="badge exploratory">exploratory</span> 設計限定の追加解析では、エピソード型収集で情報が足りる最初の予算を予測式と比べた。3層の予測 122、150、178 に対し、観測中央値は 120、160、200 だった（各層 20 run）。いずれも予測以上となる最初の格子点である。</p>
+  <span class="cite mono">docs/paper1/manuscript_ja.md:384@29b0b83</span>
+  <span class="cite mono">docs/paper1/manuscript_ja.md:293@29b0b83</span>
+
+  <h2><span class="no">08</span>届かなかったこと</h2>
+  <p><span class="badge closed">閉じた</span> <b>精度目標に届かなかった。</b>実現半幅は 0.00701 で、事前登録の目標 0.00625 を満たさない。原因は計画に使ったファミリー間標準偏差の見積もりで、実現値 0.05565 が計画値 0.04991 を上回った。事後計算では約 305 ファミリーが必要だった。規則どおり、ファミリーは追加していない。</p>
+  <span class="cite mono">docs/paper1/manuscript_ja.md:22@29b0b83</span>
+  <span class="cite mono">docs/paper1/manuscript_ja.md:341@29b0b83</span>
+  <span class="cite mono">docs/studies/v3_study1_confirmatory_report.md:45@29b0b83</span>
+  <p>O2 と A1 は制御器を一度も返さなかった。O2 の状態被覆は最大予算でも 0.536 にとどまった。A1 も最大予算で 0.526 で、O2 と同程度である。O2 − A1 の対比は完全なゼロだった。適応的な行動選択は、状態被覆の制約を解かなかった。</p>
+  <span class="cite mono">docs/paper1/manuscript_ja.md:288@29b0b83</span>
+  <span class="cite mono">docs/paper1/manuscript_ja.md:310@29b0b83</span>
+  <span class="cite mono">docs/studies/v3_study1_confirmatory_report.md:155@29b0b83</span>
+  <p>検定はしていない。帰無仮説検定も同等性マージンも定義していないので、統計的有意性、同等性、非劣性は主張しない。オンライン適応条件は標本不足の表形式 Q 学習1種類だけで、情報軸の一点しか表さない。</p>
+  <span class="cite mono">docs/paper1/manuscript_ja.md:441@29b0b83</span>
+  <span class="cite mono">docs/paper1/manuscript_ja.md:435@29b0b83</span>
+
+  <h2><span class="no">09</span>読むときの注意</h2>
   <div class="note">
-    <p><b>「Q 学習が上」という主張ではない。</b>宣言した予算範囲の平均で、oracle との差が小さい、という主張である。</p>
-    <p>主結果（範囲の平均）と、10% 以内への到達は別の問いである。片方の数値で、もう片方を説明しない。</p>
+    <p><b>「Q 学習が一般にオフライン制御より優れる」という主張ではない。</b>この主張は禁止主張の一覧に入っており、原稿に現れない。言えるのは、宣言した6予算点の曲線全体で、可用性調整済みのギャップが Q1 の方で小さかったことだけである。</p>
+    <p>O1 が制御器を返さないセルでは、運用規則により NoOp の値が入る。制御器が返ったセルに限ると、符号は主結果と逆になる。2つの数値は別の問いに答えている。</p>
+    <p>単一の予算点だけを抜き出すと、見出しが逆になりうる。表2の端点を主結果として読まない。</p>
   </div>
+  <p>確認研究の型は主結果と事前登録した副次解析に限る。設計段階の数値（90 タスク中4件など）と設計限定の追加解析は exploratory である。Q1 の表の訪問率は empirical で、区間を持たない。</p>
+  <span class="cite mono">docs/paper1/claims_audit.md:55@29b0b83</span>
+  <span class="cite mono">docs/decisions/0047-study-one-confirmatory-preregistration.md:60@29b0b83</span>
+
+  <h2><span class="no">10</span>再現の手がかり</h2>
+  <p><span class="badge empirical">empirical</span> リポジトリは bn-transfer-edge-control、commit は 29b0b83 である。原稿は <span class="mono" style="overflow-wrap: anywhere;">docs/paper1/manuscript_ja.md</span>、主張の監査は <span class="mono" style="overflow-wrap: anywhere;">docs/paper1/claims_audit.md</span> にある。設計判断は <span class="mono" style="overflow-wrap: anywhere;">docs/decisions/</span> の 0044、0047、0048 に記録されている。確認キャンペーンの報告は <span class="mono" style="overflow-wrap: anywhere;">docs/studies/v3_study1_confirmatory_report.md</span> である。</p>
+  <p>実行時間は1回 2,417 秒で、上限 21,600 秒の内側に収まった。再現実行を含めると 4,888 秒である。2回目の完全実行でも内容ダイジェスト <span class="mono">d8e4b329bfe6a975…</span> がビット単位で一致した。</p>
+  <span class="cite mono">docs/studies/v3_study1_confirmatory_report.md:12@29b0b83</span>
+  <span class="cite mono">docs/studies/v3_study1_confirmatory_report.md:11@29b0b83</span>
 
   <footer>
-    <p>出典：<a href="https://github.com/koshikai/bn-edge-removal-public" target="_blank" rel="noopener noreferrer">https://github.com/koshikai/bn-edge-removal-public</a></p>
+    <p>出典：bn-transfer-edge-control @ 29b0b83（docs/paper1/、docs/decisions/、docs/studies/）· このページ：<a href="https://github.com/koshikai/bn-edge-removal-public" target="_blank" rel="noopener noreferrer">https://github.com/koshikai/bn-edge-removal-public</a></p>
     <p>最終更新：2026-11-08</p>
     <p><a href="../">← 研究ラインの地図へ戻る</a> · <a href="../#numbers">数値の一覧</a> · <a href="../#lines">ライン一覧</a></p>
     <p class="pager"><a href="paper2.html">本体 Paper 2 →</a></p>

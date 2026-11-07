@@ -73,7 +73,8 @@ a { color: var(--accent); text-decoration: none; }
 a:hover { text-decoration: underline; }
 a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
-main { max-width: 46rem; margin: 0 auto; padding: 40px 16px 56px; line-height: 1.9; }
+main {
+  line-break: strict; max-width: 46rem; margin: 0 auto; padding: 40px 16px 56px; line-height: 1.9; }
 
 .mono { font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace; }
 .m { font-family: "Times New Roman", "Noto Serif JP", serif; font-style: italic; white-space: nowrap; }
@@ -268,3 +269,11 @@ a.more:hover { border-bottom-color: var(--accent); }
   nav.crumbs { display: none; }
   a { color: inherit; }
 }
+
+/* deep line pages: citations, ordered steps, wide figures, KPI units */
+.cite { display: block; margin-top: 8px; color: var(--ink-mute); font-size: 0.72rem; font-family: ui-monospace, Menlo, Consolas, monospace; word-break: break-all; }
+.steps { counter-reset: s; list-style: none; padding: 0; margin: 18px 0; }
+.steps li { counter-increment: s; position: relative; padding-left: 34px; margin: 14px 0; }
+.steps li::before { content: counter(s); position: absolute; left: 0; top: 2px; width: 22px; height: 22px; border: 1px solid var(--line); border-radius: 50%; text-align: center; font-size: 0.74rem; line-height: 21px; color: var(--ink-mute); }
+.fig-wide { width: 100%; }
+.kpi .unit { display: block; font-size: 0.7rem; color: var(--ink-mute); font-weight: 400; }

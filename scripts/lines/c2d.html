@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>旧 C2D / BBM · 研究ラインの地図</title>
-  <meta name="description" content="脳腫瘍モデル（BBM）で、節点介入と不可逆の辺除去という2つの行動空間を分けて扱ったライン。一部閉鎖。">
+  <meta name="description" content="同じ生物機構の粗いモデルから細かいモデルへ制御知識を移すライン。軸A はノード介入、軸B は不可逆の辺除去。軸B の学習路線は2026-10-11に閉じた。">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -12,93 +12,204 @@
   <nav class="crumbs"><a href="../">地図</a> / <span>旧 C2D / BBM</span></nav>
   <p class="eyebrow mono">LINE 08 · 一部閉鎖</p>
   <h1>旧 C2D / BBM</h1>
-  <p class="lede">脳腫瘍モデルで、節点介入と辺除去を別々の行動空間として扱う。</p>
-  <p class="badges"><span class="badge closed">一部閉鎖</span></p>
+  <p class="lede">一部閉鎖。同じ生物機構の粗いモデルから細かいモデルへ制御知識を移す。軸A はノード介入、軸B は不可逆の辺除去。軸B の学習路線は2026-10-11に閉じた。</p>
+  <p class="badges"><span class="badge closed">閉じた（軸B の学習路線、2026-10-11）</span><span class="badge closed">一部閉鎖</span><span class="badge exploratory">exploratory</span></p>
 
   <figure>
-    <svg viewBox="0 0 640 270" role="img" aria-labelledby="fig-cap">
+    <svg class="fig-wide" width="100%" viewBox="0 0 360 470" role="img" aria-labelledby="cd-f1-cap">
       <defs>
-        <marker id="a-f" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path class="mk-fixed" d="M0 0 L10 5 L0 10 z"/></marker>
-        <marker id="a-c" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path class="mk-cut" d="M0 0 L10 5 L0 10 z"/></marker>
+        <marker id="cda" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path class="mk-fixed" d="M0 0 L10 5 L0 10 z"/></marker>
       </defs>
-      <!-- Axis A -->
-      <text class="lbl-b" x="10" y="22">Axis A　状態に条件づけた節点介入</text>
-      <circle class="nd" cx="50" cy="80" r="18"/><text class="nt" x="50" y="80">a</text>
-      <circle class="nd pin" cx="150" cy="80" r="18"/><text class="nt" x="150" y="80">b</text>
-      <circle class="nd" cx="250" cy="80" r="18"/><text class="nt" x="250" y="80">c</text>
-      <path class="e e-fixed" d="M68 80 L130 80" marker-end="url(#a-f)"/>
-      <path class="e e-fixed" d="M168 80 L230 80" marker-end="url(#a-f)"/>
-      <text class="lbl-s mid lbl-cut" x="150" y="118">状態を見て値を固定</text>
-
-      <!-- Axis B -->
-      <text class="lbl-b" x="340" y="22">Axis B　不可逆の制御辺除去</text>
-      <circle class="nd" cx="380" cy="80" r="18"/><text class="nt" x="380" y="80">a</text>
-      <circle class="nd" cx="480" cy="80" r="18"/><text class="nt" x="480" y="80">b</text>
-      <circle class="nd" cx="580" cy="80" r="18"/><text class="nt" x="580" y="80">c</text>
-      <path class="e e-cut" d="M398 80 L460 80" marker-end="url(#a-c)"/>
-      <path class="e e-fixed" d="M498 80 L560 80" marker-end="url(#a-f)"/>
-      <text class="lbl-s mid lbl-cut" x="430" y="118">一度切ると戻らない</text>
-
-      <!-- timelines -->
-      <text class="lbl-s" x="10" y="160">介入の時刻</text>
-      <rect class="sq" x="10" y="170" width="22" height="18" rx="3"/>
-      <rect class="sq cut" x="36" y="170" width="22" height="18" rx="3"/>
-      <rect class="sq" x="62" y="170" width="22" height="18" rx="3"/>
-      <rect class="sq cut" x="88" y="170" width="22" height="18" rx="3"/>
-      <rect class="sq cut" x="114" y="170" width="22" height="18" rx="3"/>
-      <rect class="sq" x="140" y="170" width="22" height="18" rx="3"/>
-      <rect class="sq" x="166" y="170" width="22" height="18" rx="3"/>
-      <rect class="sq cut" x="192" y="170" width="22" height="18" rx="3"/>
-      <rect class="sq" x="218" y="170" width="22" height="18" rx="3"/>
-      <rect class="sq" x="244" y="170" width="22" height="18" rx="3"/>
-      <text class="lbl-s" x="10" y="206">状態しだいで入れたり外したりする</text>
-
-      <text class="lbl-s" x="340" y="160">介入の時刻</text>
-      <rect class="sq" x="340" y="170" width="22" height="18" rx="3"/>
-      <rect class="sq" x="366" y="170" width="22" height="18" rx="3"/>
-      <rect class="sq cut" x="392" y="170" width="22" height="18" rx="3"/>
-      <rect class="sq cut" x="418" y="170" width="22" height="18" rx="3"/>
-      <rect class="sq cut" x="444" y="170" width="22" height="18" rx="3"/>
-      <rect class="sq cut" x="470" y="170" width="22" height="18" rx="3"/>
-      <rect class="sq cut" x="496" y="170" width="22" height="18" rx="3"/>
-      <rect class="sq cut" x="522" y="170" width="22" height="18" rx="3"/>
-      <rect class="sq cut" x="548" y="170" width="22" height="18" rx="3"/>
-      <rect class="sq cut" x="574" y="170" width="22" height="18" rx="3"/>
-      <text class="lbl-s" x="340" y="206">切った時刻から最後まで続く</text>
-
-      <rect class="box-x" x="330" y="228" width="300" height="32" rx="5"/>
-      <text class="lbl-s mid" x="480" y="248">Axis B の学習路線は 2026-10 に閉じた</text>
+      <rect class="box" x="30" y="10" width="300" height="56" rx="8"/>
+      <text class="lbl-b mid" x="180" y="33">入力：粗いモデルと細かいモデル</text>
+      <text class="lbl mid" x="180" y="53">apoptosis と MAPK の2組</text>
+      <path class="e e-fixed" d="M180 66 L180 88" marker-end="url(#cda)"/>
+      <rect class="box" x="30" y="90" width="300" height="56" rx="8"/>
+      <text class="lbl-b mid" x="180" y="113">対応づけ：ノードを明示的に結ぶ</text>
+      <text class="lbl mid" x="180" y="133">高信頼の部分集合か、整えた全対応</text>
+      <path class="e e-fixed" d="M120 146 L80 168" marker-end="url(#cda)"/>
+      <path class="e e-fixed" d="M240 146 L280 168" marker-end="url(#cda)"/>
+      <rect class="box-a" x="10" y="170" width="164" height="92" rx="8"/>
+      <text class="lbl-b mid" x="92" y="193">軸A</text>
+      <text class="lbl mid" x="92" y="214">ノード介入</text>
+      <text class="lbl mid" x="92" y="233">教師から GNN へ蒸留</text>
+      <text class="lbl mid" x="92" y="252">n=30、3 seed</text>
+      <rect class="box-x" x="186" y="170" width="164" height="92" rx="8"/>
+      <text class="lbl-b mid" x="268" y="193">軸B</text>
+      <text class="lbl mid" x="268" y="214">不可逆の辺除去</text>
+      <text class="lbl mid" x="268" y="233">学習で転移の優位</text>
+      <text class="lbl mid" x="268" y="252">2026-10-11 に閉鎖</text>
+      <path class="e e-fixed" d="M92 262 L150 284" marker-end="url(#cda)"/>
+      <path class="e e-fixed" d="M268 262 L210 284" marker-end="url(#cda)"/>
+      <rect class="box-u" x="30" y="286" width="300" height="92" rx="8"/>
+      <text class="lbl-b mid" x="180" y="309">判定：3層の検証器</text>
+      <text class="lbl mid" x="180" y="329">到達（reach）</text>
+      <text class="lbl mid" x="180" y="348">到達して維持（stay-k）</text>
+      <text class="lbl mid" x="180" y="367">basin の代理指標（basin-proxy）</text>
+      <path class="e e-fixed" d="M180 378 L180 400" marker-end="url(#cda)"/>
+      <rect class="box-g" x="30" y="402" width="300" height="58" rx="8"/>
+      <text class="lbl-b mid" x="180" y="425">集計：軸ごとに別の表</text>
+      <text class="lbl mid" x="180" y="445">2軸の成功率を同じ順位表に並べない</text>
     </svg>
-    <figcaption id="fig-cap">左が Axis A、右が Axis B。A は状態を見て節点の値を固定する。B は制御辺を一度切ると戻さない。節点と時刻の並びは説明用で、BBM の実際の節点ではない。</figcaption>
+    <figcaption id="cd-f1-cap">図1 実験の流れ。粗いモデルと細かいモデルのノードを明示的に対応づけ、軸ごとに制御を移す。結果は3層の検証器で測り、軸ごとに別の表へまとめる。破線の枠は閉じた部分である。</figcaption>
   </figure>
 
   <h2><span class="no">01</span>問い</h2>
-  <p>同じ脳腫瘍モデルで、2種類の介入をそれぞれどう制御するか。節点介入と辺除去を、同じ行動空間に混ぜずに扱う。</p>
+  <p><span class="badge closed">閉じた</span> このラインの問いは、粗いモデルで得た制御知識を、同じ生物機構の細かいモデルへ移せるか、である。粗から細への転移（coarse-to-detailed transfer）と呼ぶ。粗いモデルで学んだ制御が細かいモデルでも通じれば、細かいモデルで最初から学ぶ手間を減らせる。</p>
+  <p>移し方は2つの軸に分けた。軸A はノードへの介入を移す。軸B は不可逆の辺除去を移す。行動の種類が違うので、2つの軸の結果は別々に読む。</p>
+  <p>軸B で「学習によって転移の優位を示す」路線は、2026年10月11日に閉じた。軸A の結果は記録として残っている。どちらの数値も、現在進んでいるラインの結果ではない。</p>
+  <span class="cite mono">document/46_axisb_learning_line_closure_2026-10-11.md:5@f438ede0</span>
 
-  <h2><span class="no">02</span>モデルと規模</h2>
-  <p>脳腫瘍モデル（BBM）を使う。規模の数値はこのページに載せない。</p>
-
-  <h2><span class="no">03</span>何を動かすか</h2>
-  <ul>
-    <li>Axis A：状態に条件づけて、節点に介入する。</li>
-    <li>Axis B：制御辺を不可逆に除去する。</li>
-  </ul>
-  <p>2つは<b>別々の行動空間</b>である。</p>
-
-  <h2><span class="no">04</span>実験の設計</h2>
-  <p>Axis A と Axis B は、行動空間を分けたまま扱う。Axis B の学習路線は 2026-10 に閉じた。</p>
-
-  <h2><span class="no">05</span>結果</h2>
-  <p>数値は載せない。閉じた部分を含むため、このページでは結果の値を扱わない。</p>
-
-  <h2><span class="no">06</span>読むときの注意</h2>
-  <div class="note">
-    <p><b>閉じたラインの数値を、現行ラインの結果として引用しない。</b></p>
-    <p>閉じたのは Axis B の学習路線である。ライン全体を閉じたわけではない。</p>
+  <h2><span class="no">02</span>設定</h2>
+  <p><span class="badge exploratory">exploratory</span> 2つの軸の違いを表1にまとめた。共有するのは生物ペアで、行動の空間と主張の中身が違う。</p>
+  <div class="table-wrap">
+  <table class="t" style="min-width: 0; font-size: 0.84rem;">
+    <caption class="small muted" style="caption-side: top; text-align: left;">表1 2つの軸と評価の層</caption>
+    <thead><tr><th>項目</th><th>軸A</th><th>軸B</th></tr></thead>
+    <tbody>
+      <tr><td>行動の空間</td><td>ノード介入</td><td>不可逆の辺除去</td></tr>
+      <tr><td>主張</td><td>明示的な対応づけと蒸留で転移する</td><td>学習で転移の優位を示す（閉じた）</td></tr>
+      <tr><td>生物ペア</td><td colspan="2">apoptosis と MAPK の2組（共有）</td></tr>
+      <tr><td>apoptosis のモデル</td><td colspan="2">n25 と n39（ゼロショットの記録は n39 → n25）</td></tr>
+      <tr><td>MAPK のモデル</td><td colspan="2">規模はこのページの資料に無い</td></tr>
+      <tr><td>評価の層</td><td colspan="2">教師（teacher）との比較、到達（reach）、到達と維持（stay-k）、basin の代理指標（basin-proxy）</td></tr>
+      <tr><td>評価の数</td><td>n=30、3 seed</td><td>120構成、主段は5 seed</td></tr>
+    </tbody>
+  </table>
   </div>
+  <span class="cite mono">document/09_coarse_to_detailed_transfer.md:123@f438ede0</span>
+  <span class="cite mono">plan.md:198@f438ede0</span>
+  <span class="cite mono">plan.md:464@f438ede0</span>
+  <span class="cite mono">document/46_axisb_learning_line_closure_2026-10-11.md:115@f438ede0</span>
+  <span class="cite mono">document/46_axisb_learning_line_closure_2026-10-11.md:157@f438ede0</span>
+  <p>検証器は3層で、到達だけでなく、維持と basin の代理指標まで見る。stay-k と basin-proxy はすべての原稿に加え、3層の検証器を確かめた。</p>
+  <p>生物ペアは apoptosis と MAPK の2組しかない。2026年6月4日に8系統の候補を調べたが、使える3組目は見つからなかった。</p>
+  <span class="cite mono">plan.md:466@f438ede0</span>
+
+  <h2><span class="no">03</span>介入の意味</h2>
+  <p><span class="badge exploratory">exploratory</span> 軸A のノード介入は、ノードの値そのものを動かす。どのノードに介入するかを、粗いモデルの知識から選ぶ。介入の細かな形（固定する時間や値の決め方）は、このページの資料に無い。</p>
+  <p>軸B の不可逆の辺除去は、ノードの値ではなく、ノードの間の辺を無効にする。一度除去した辺は戻せない。だから、どの順で除去するかが結果を左右する。</p>
+  <p class="eq">軸A：x_v ← 介入で決めた値　　軸B：辺 (u→v) を除去し、以後ずっと戻さない</p>
+  <p>具体例で言うと、軸A では「ノード v を動かす」が1つの行動になる。軸B では「辺 u→v を除去する」が1つの行動で、その行動はやり直せない。同じ生物ペアでも、2つの軸は選べる行動の集合が違う。だから成功率の意味も違う。</p>
+  <p>他のラインとの違い。<a href="setab.html">設定 A/B</a> も小さいモデルから大きいモデルへ知識を移す。このラインは、合成した BN ではなく、同じ生物機構を粗さの違う2つのモデルで書いたペアを使う。</p>
+  <span class="cite mono">document/14_control_axis_boundaries.md:69@f438ede0</span>
+
+  <h2><span class="no">04</span>実験の手順</h2>
+  <ol class="steps">
+    <li>対応づけを作る。粗いモデルと細かいモデルのノードを、明示的に結ぶ。対応づけには、高信頼の部分集合と、整えた全対応（curated full）の2通りがある。<span class="cite mono">plan.md:462@f438ede0</span></li>
+    <li>蒸留する（軸A）。教師の制御を、対応づけを通して GNN へ蒸留する。評価は n=30で、seed を3つ使う。<span class="cite mono">document/09_coarse_to_detailed_transfer.md:123@f438ede0</span></li>
+    <li>比べる対象を置く。教師そのもの、乱択、対応づけを使わないゼロショットを並べる。ゼロショットは15 run で評価した。<span class="cite mono">plan.md:198@f438ede0</span></li>
+    <li>検証器で測る。到達、到達と維持、basin の代理指標の3層で測る。<span class="cite mono">plan.md:464@f438ede0</span></li>
+    <li>軸B では判定を2段にする。ラベル集合を凍結し、主段で5 seed のうち3 seed の合格を求める。主段を通れば確認段階へ進む。<span class="cite mono">document/46_axisb_learning_line_closure_2026-10-11.md:115@f438ede0</span></li>
+    <li>適応の効果を確かめる（軸B）。合格した構成について、転移腕がゼロショットより上かを見る。同じ値やそれ以下なら、適応の効果はないと数える。<span class="cite mono">document/46_axisb_learning_line_closure_2026-10-11.md:157@f438ede0</span></li>
+  </ol>
+  <p>除外規則と実行時間は、このページの資料に無い。</p>
+
+  <h2><span class="no">05</span>指標の定義</h2>
+  <p><span class="badge exploratory">exploratory</span> 成功率は、目標を満たした試行の数を、評価した試行の数で割ったものである。軸A の蒸留の比較では分母が30である。3 seed の結果は、平均と seed ごとの値を両方書く。</p>
+  <p class="eq">成功率 = 目標を満たした試行の数 ÷ 評価した試行の数（軸A は30）</p>
+  <p>到達（reach）は、目標の状態にいつか着いたかを見る。到達と維持（stay-k）は、着いたあと k ステップ目標に留まったかまで見る。basin の代理指標（basin-proxy）は、目標の吸引域（basin）に入ったかを近似で見る。k の値と近似の作り方は、このページの資料に無い。</p>
+  <p>差は「ポイント」で書く。ポイントは2つの成功率の差で、比ではない。ゼロショットの −46.7ポイントは、15 run の記録である。</p>
+  <p><b>到達で測るか、維持まで測るかで、同じ制御の成績は大きく変わる。</b>このラインでは、成功率を読むときに、どの層の値かを必ず確かめる。</p>
+
+  <h2><span class="no">06</span>結果</h2>
+  <div class="kpi">
+    <div><span class="v mono">93.3%</span><span class="k">軸A 蒸留（3 seed 平均）</span><span class="unit">apoptosis、n=30</span></div>
+    <div><span class="v mono">46.7%</span><span class="k">乱択</span><span class="unit">apoptosis、n=30</span></div>
+    <div><span class="v mono">−46.7pp</span><span class="k">ゼロショット</span><span class="unit">n39 → n25、15 run</span></div>
+  </div>
+  <p><span class="badge exploratory">exploratory</span> 明示的な対応づけと蒸留で、apoptosis の転移は93.3%に達した。seed ごとには96.7%、83.3%、100.0%である。教師は73.3%、乱択は46.7%だった。この比較に区間は付いていないので、優位とは書かない。</p>
+  <span class="cite mono">document/09_coarse_to_detailed_transfer.md:123@f438ede0</span>
+  <p>明示的な対応づけを使わないゼロショットは失敗した。n39 → n25 の向きで、差は −46.7ポイントだった。</p>
+  <span class="cite mono">plan.md:198@f438ede0</span>
+  <div class="table-wrap">
+  <table class="t" style="min-width: 0;">
+    <caption class="small muted" style="caption-side: top; text-align: left;">表2 軸A の主な結果（apoptosis）</caption>
+    <thead><tr><th>方式</th><th style="text-align: right;">値</th><th style="text-align: right;">n</th></tr></thead>
+    <tbody>
+      <tr><td>GNN 蒸留（3 seed 平均）</td><td class="num mono">93.3%</td><td class="num mono">30</td></tr>
+      <tr><td>　seed ごと</td><td class="num mono">96.7 / 83.3 / 100.0%</td><td class="num mono">30</td></tr>
+      <tr><td>高信頼の部分集合</td><td class="num mono">86.7%</td><td class="num mono">30</td></tr>
+      <tr><td>整えた全対応</td><td class="num mono">73.3%</td><td class="num mono">30</td></tr>
+      <tr><td>教師</td><td class="num mono">73.3%</td><td class="num mono">30</td></tr>
+      <tr><td>乱択</td><td class="num mono">46.7%</td><td class="num mono">30</td></tr>
+      <tr><td>ゼロショット（n39 → n25）</td><td class="num mono">−46.7pp</td><td class="num mono">15 run</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <span class="cite mono">document/09_coarse_to_detailed_transfer.md:123@f438ede0</span>
+  <span class="cite mono">plan.md:462@f438ede0</span>
+  <span class="cite mono">plan.md:198@f438ede0</span>
+
+  <figure>
+    <svg class="fig-wide" width="100%" viewBox="0 0 360 230" role="img" aria-labelledby="cd-f2-cap">
+      <text class="lbl" x="8" y="16">apoptosis の成功率（%）</text>
+      <line class="ax" x1="120" y1="28" x2="120" y2="180"/>
+      <line class="ax-d" x1="170" y1="28" x2="170" y2="180"/>
+      <line class="ax-d" x1="220" y1="28" x2="220" y2="180"/>
+      <line class="ax-d" x1="270" y1="28" x2="270" y2="180"/>
+      <line class="ax-d" x1="320" y1="28" x2="320" y2="180"/>
+      <text class="lbl" x="8" y="50">蒸留（平均）</text>
+      <rect x="120" y="36" width="186.6" height="20" fill="var(--accent)"/>
+      <text class="lbl" x="311" y="50">93.3</text>
+      <text class="lbl" x="8" y="78">高信頼の部分集合</text>
+      <rect x="120" y="64" width="173.4" height="20" fill="var(--accent)" fill-opacity="0.7"/>
+      <text class="lbl" x="298" y="78">86.7</text>
+      <text class="lbl" x="8" y="106">整えた全対応</text>
+      <rect x="120" y="92" width="146.6" height="20" fill="var(--accent)" fill-opacity="0.45"/>
+      <text class="lbl" x="271" y="106">73.3</text>
+      <text class="lbl" x="8" y="134">教師</text>
+      <rect x="120" y="120" width="146.6" height="20" fill="var(--ink-mute)"/>
+      <text class="lbl" x="271" y="134">73.3</text>
+      <text class="lbl" x="8" y="162">乱択</text>
+      <rect x="120" y="148" width="93.4" height="20" fill="var(--ink-mute)" fill-opacity="0.6"/>
+      <text class="lbl" x="218" y="162">46.7</text>
+      <text class="lbl mid" x="120" y="198">0</text>
+      <text class="lbl mid" x="170" y="198">25</text>
+      <text class="lbl mid" x="220" y="198">50</text>
+      <text class="lbl mid" x="270" y="198">75</text>
+      <text class="lbl mid" x="320" y="198">100</text>
+      <text class="lbl mid" x="220" y="220">成功率（%、n=30）</text>
+    </svg>
+    <figcaption id="cd-f2-cap">図2 軸A の apoptosis の成功率。青の3本は明示的な対応づけを使った転移、灰色は教師と乱択である。区間は記録に無いので描いていない。</figcaption>
+  </figure>
+
+  <h2><span class="no">07</span>内訳と副次</h2>
+  <p><span class="badge exploratory">exploratory</span> 対応づけの質が成績を変える。高信頼の部分集合を使うと86.7%で、整えた全対応の73.3%を上回った（n=30）。cIAP と BAX を単純に落とす変更や、BCL2 を戻す変更では改善しなかった。信頼度の低い相互作用どうしが影響し合っていることを示している。</p>
+  <span class="cite mono">plan.md:462@f438ede0</span>
+  <p>到達だけでなく維持まで見ると、成績は大きく下がる。stay-k の値は apoptosis で72%、MAPK で7.2%だった。basin-proxy は MAPK で14.5%だった。MAPK では、維持まで満たす試行が少ない。</p>
+  <span class="cite mono">plan.md:464@f438ede0</span>
+  <p>この低下は、到達の数値だけを見ていると見えない。蒸留の93.3%と stay-k の72%は、層が違う値なので、差を取って比べない。どの値も、どの層の検証器で測ったかと一緒に読む。</p>
+  <p>軸B では、凍結したラベル集合の正例が少なかった。main 層のラベル集合は全7176行で、支持が非空の正例は90行だけである。学習で転移の優位を示せる範囲は、もともと狭かった。</p>
+  <span class="cite mono">document/46_axisb_learning_line_closure_2026-10-11.md:188@f438ede0</span>
+
+  <h2><span class="no">08</span>届かなかったこと</h2>
+  <p><span class="badge closed">閉じた</span> 軸B の学習路線は2026-10-11に閉じた。本番1は主段を通ったが、確認段階で保留になり、全予算層の条件は満たさなかった。希少ラベルの本番2は、主段の合格 seed が1/5で、必要な3に届かず不成立だった。</p>
+  <span class="cite mono">document/46_axisb_learning_line_closure_2026-10-11.md:115@f438ede0</span>
+  <p><b>合格した21件のうち20件は、適応の効果を示していない。</b>17件は転移腕がゼロショットと同じ値にとどまり、3件はゼロショットより低かった。120構成を調べた結果である。合格は出ていても、それは学習による転移の優位ではなかった。</p>
+  <span class="cite mono">document/46_axisb_learning_line_closure_2026-10-11.md:157@f438ede0</span>
+  <p>生物ペアが2組しかないことも残った制約である。8系統の候補を調べたが、3組目は見つからなかった。2組だけで、粗から細への転移が一般に成り立つかは分からない。</p>
+  <span class="cite mono">plan.md:466@f438ede0</span>
+  <p>MAPK の維持の成績（stay-k 7.2%）は低いままで、これを改善する方法は示されていない。</p>
+
+  <h2><span class="no">09</span>読むときの注意</h2>
+  <div class="note">
+    <p><b>2軸の成功率を同じ順位表に並べない。</b>軸A のノード介入と軸B の辺除去は、選べる行動の集合が違う。</p>
+    <p>閉じた数値を、現行ラインの結果として引用しない。軸B の記録は主張を立てない exploratory の記録である。</p>
+    <p>93.3%は到達の層の値で、apoptosis の1組だけのものである。維持まで見た値（stay-k）とは別に読む。</p>
+    <p>区間や検定の記録が無いので、蒸留が教師や乱択より「優位」とは書かない。</p>
+  </div>
+  <span class="cite mono">document/14_control_axis_boundaries.md:69@f438ede0</span>
+  <span class="cite mono">document/46_axisb_learning_line_closure_2026-10-11.md:5@f438ede0</span>
+  <p>型の整理。軸A の数値は n=30の empirical な記録で、ライン全体としては exploratory である。軸B の学習路線は閉じた。</p>
+
+  <h2><span class="no">10</span>再現の手がかり</h2>
+  <p>リポジトリは transfer、commit は f438ede0 である。全体の計画と変更の記録は <span class="mono" style="overflow-wrap: anywhere;">plan.md</span> にある。</p>
+  <p>軸A の転移の結果は <span class="mono" style="overflow-wrap: anywhere;">document/09_coarse_to_detailed_transfer.md</span>、2軸の境界は <span class="mono" style="overflow-wrap: anywhere;">document/14_control_axis_boundaries.md</span>、軸B の閉鎖は <span class="mono" style="overflow-wrap: anywhere;">document/46_axisb_learning_line_closure_2026-10-11.md</span> にある。</p>
+  <p>実行時間と実行に使った設定ファイルは、このページの資料に無い。</p>
 
   <footer>
-    <p>出典：<a href="https://github.com/koshikai/bn-edge-removal-public" target="_blank" rel="noopener noreferrer">https://github.com/koshikai/bn-edge-removal-public</a></p>
+    <p>出典：transfer @ f438ede0 · このページ：<a href="https://github.com/koshikai/bn-edge-removal-public" target="_blank" rel="noopener noreferrer">https://github.com/koshikai/bn-edge-removal-public</a></p>
     <p>最終更新：2026-11-08</p>
     <p><a href="../">← 研究ラインの地図へ戻る</a> · <a href="../#numbers">数値の一覧</a> · <a href="../#lines">ライン一覧</a></p>
     <p class="pager"><a href="drqn.html">← DQN</a> · <a href="undergrad.html">卒論・学会ライン →</a></p>

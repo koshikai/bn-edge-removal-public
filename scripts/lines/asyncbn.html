@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>非同期 BN · 研究ラインの地図</title>
-  <meta name="description" content="非同期更新のブーリアンネットワークで、辺の mask と保持時間を選ぶ制御。定理と評価を分けて書く。">
+  <meta name="description" content="非同期更新のブーリアンネットワークで、辺の除去を保持時間つきのマスクとして選ぶ制御。定理と評価を分けて書く。">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -12,115 +12,208 @@
   <nav class="crumbs"><a href="../">地図</a> / <span>非同期 BN</span></nav>
   <p class="eyebrow mono">LINE 05 · 定理と評価</p>
   <h1>非同期 BN</h1>
-  <p class="lede">非同期更新の下で、辺の mask とその保持時間を観測ごとに選ぶ。</p>
-  <p class="badges"><span class="badge exact">exact</span><span class="badge empirical">empirical</span></p>
+  <p class="lede">定理と評価の両方。非同期更新の BN で、辺の除去を保持時間つきのマスクとして選ぶ。</p>
+  <p class="badges"><span class="badge exact">定理は exact</span><span class="badge empirical">評価は empirical</span><span class="badge exploratory">十分条件だけ</span></p>
 
   <figure>
-    <svg viewBox="0 0 640 270" role="img" aria-labelledby="fig-cap">
-      <text class="lbl-b" x="10" y="22">マイクロステップの列（1ステップで1ノードだけ再計算）</text>
-      <!-- axis of microsteps -->
-      <g>
-        <text class="lbl-s" x="10" y="62">mask</text>
-        <!-- mask A held T=4 -->
-        <rect class="sq cut" x="60" y="48" width="34" height="22" rx="3"/>
-        <rect class="sq cut" x="98" y="48" width="34" height="22" rx="3"/>
-        <rect class="sq cut" x="136" y="48" width="34" height="22" rx="3"/>
-        <rect class="sq cut" x="174" y="48" width="34" height="22" rx="3"/>
-        <!-- mask B held T=2 -->
-        <rect class="sq alt" x="212" y="48" width="34" height="22" rx="3"/>
-        <rect class="sq alt" x="250" y="48" width="34" height="22" rx="3"/>
-        <!-- no mask T=3 -->
-        <rect class="sq" x="288" y="48" width="34" height="22" rx="3"/>
-        <rect class="sq" x="326" y="48" width="34" height="22" rx="3"/>
-        <rect class="sq" x="364" y="48" width="34" height="22" rx="3"/>
-        <!-- mask A again T=5 -->
-        <rect class="sq cut" x="402" y="48" width="34" height="22" rx="3"/>
-        <rect class="sq cut" x="440" y="48" width="34" height="22" rx="3"/>
-        <rect class="sq cut" x="478" y="48" width="34" height="22" rx="3"/>
-        <rect class="sq cut" x="516" y="48" width="34" height="22" rx="3"/>
-        <rect class="sq cut" x="554" y="48" width="34" height="22" rx="3"/>
-
-        <text class="lbl-s" x="10" y="98">更新</text>
-        <text class="lbl-m mid" x="77" y="98">x3</text><text class="lbl-m mid" x="115" y="98">x1</text>
-        <text class="lbl-m mid" x="153" y="98">x3</text><text class="lbl-m mid" x="191" y="98">x2</text>
-        <text class="lbl-m mid" x="229" y="98">x4</text><text class="lbl-m mid" x="267" y="98">x1</text>
-        <text class="lbl-m mid" x="305" y="98">x2</text><text class="lbl-m mid" x="343" y="98">x2</text>
-        <text class="lbl-m mid" x="381" y="98">x4</text><text class="lbl-m mid" x="419" y="98">x1</text>
-        <text class="lbl-m mid" x="457" y="98">x3</text><text class="lbl-m mid" x="495" y="98">x4</text>
-        <text class="lbl-m mid" x="533" y="98">x2</text><text class="lbl-m mid" x="571" y="98">x1</text>
-
-        <!-- observations -->
-        <path class="dot" d="M77 40 l-5 -8 h10 z"/>
-        <path class="dot" d="M229 40 l-5 -8 h10 z"/>
-        <path class="dot" d="M305 40 l-5 -8 h10 z"/>
-        <path class="dot" d="M419 40 l-5 -8 h10 z"/>
-
-        <line class="ax" x1="60" y1="118" x2="208" y2="118"/><text class="lbl-s mid" x="134" y="134">T = 4</text>
-        <line class="ax" x1="212" y1="118" x2="284" y2="118"/><text class="lbl-s mid" x="248" y="134">T = 2</text>
-        <line class="ax" x1="288" y1="118" x2="398" y2="118"/><text class="lbl-s mid" x="343" y="134">T = 3</text>
-        <line class="ax" x1="402" y1="118" x2="588" y2="118"/><text class="lbl-s mid" x="495" y="134">T = 5</text>
-      </g>
-      <text class="lbl-s" x="10" y="160">▾ 観測。観測のたびに mask と T を選ぶ。濃い色と薄い色は別の mask、灰色は mask なし</text>
-
-      <line class="ax-d" x1="10" y1="178" x2="630" y2="178"/>
-
-      <!-- two controllers -->
-      <rect class="box-a" x="10" y="194" width="300" height="64" rx="6"/>
-      <text class="lbl-b mid" x="160" y="218">保持時間を状態依存にする</text>
-      <text class="lbl-m mid" x="160" y="240">mask と T を状態で選ぶ</text>
-      <rect class="box" x="330" y="194" width="300" height="64" rx="6"/>
-      <text class="lbl-b mid" x="480" y="218">mask だけを変える</text>
-      <text class="lbl-m mid" x="480" y="240">保持時間は状態で変えない</text>
+    <svg class="fig-wide" width="100%" viewBox="0 0 360 450" role="img" aria-labelledby="as-f1-cap">
+      <defs>
+        <marker id="asa" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path class="mk-fixed" d="M0 0 L10 5 L0 10 z"/></marker>
+      </defs>
+      <rect class="box" x="30" y="10" width="300" height="56" rx="8"/>
+      <text class="lbl-b mid" x="180" y="33">入力：BN と目標 x*</text>
+      <text class="lbl mid" x="180" y="53">94 ネットワーク × 初期状態3</text>
+      <path class="e e-fixed" d="M180 66 L180 88" marker-end="url(#asa)"/>
+      <rect class="box-a" x="30" y="90" width="300" height="56" rx="8"/>
+      <text class="lbl-b mid" x="180" y="113">条件：(マスク, 保持時間 T) の候補</text>
+      <text class="lbl mid" x="180" y="133">STC22 / STC200 / LA22 × 重み5</text>
+      <path class="e e-fixed" d="M180 146 L180 168" marker-end="url(#asa)"/>
+      <rect class="box-u" x="30" y="170" width="300" height="74" rx="8"/>
+      <text class="lbl-b mid" x="180" y="193">判定：U_T ≤ V − 1 なら受理</text>
+      <text class="lbl mid" x="180" y="213">棄却なら u_B を1マイクロステップ</text>
+      <text class="lbl mid" x="180" y="232">実行する組はすべて厳密に再認証</text>
+      <path class="e e-fixed" d="M180 244 L180 266" marker-end="url(#asa)"/>
+      <rect class="box" x="30" y="268" width="300" height="56" rx="8"/>
+      <text class="lbl-b mid" x="180" y="291">実行：T マイクロステップ</text>
+      <text class="lbl mid" x="180" y="311">毎回1ノードだけ確率 p_i で更新</text>
+      <path class="e e-fixed" d="M180 324 L180 346" marker-end="url(#asa)"/>
+      <rect class="box-g" x="30" y="348" width="300" height="92" rx="8"/>
+      <text class="lbl-b mid" x="180" y="371">集計：費用 J_w の差 Δ</text>
+      <text class="lbl mid" x="180" y="391">Δ = J(X) − J(STC22)</text>
+      <text class="lbl mid" x="180" y="410">ネットワーク単位のブートストラップ</text>
+      <text class="lbl mid" x="180" y="428">95%、2000 回</text>
     </svg>
-    <figcaption id="fig-cap">上は1本のエピソードの模式図。各マイクロステップで1ノードだけ再計算する。観測のたびに mask と保持時間 T を選び、T マイクロステップ同じ mask を使う。下は比べる制御器のうち2つ。T の値とノードの並びは説明用で、実験の値ではない。</figcaption>
+    <figcaption id="as-f1-cap">図1 実験の流れ。観測のたびに、辺のマスクと保持時間 T の組を選ぶ。組は受理規則を満たすときだけ使い、満たさなければフォールバック u_B を1マイクロステップだけ使う。費用の差は基準の制御器 STC22 と比べて出す。</figcaption>
   </figure>
 
   <h2><span class="no">01</span>問い</h2>
-  <p>非同期に更新するネットワークで、辺の mask をいつまで保つかを状態で選ぶと、差が出るか。また、目標の固定点を保ったまま切れる辺はどれか。</p>
+  <p><span class="badge exact">exact</span> このラインの問いは2つある。非同期更新の下で、辺の除去をどう意味づけるか。除去した辺を、いつ戻すか。同期更新では全ノードが同時に動くが、非同期では1回に1ノードしか動かない。だから「どの辺を切るか」に加えて「どれだけの間切っておくか」が制御の中身になる。</p>
+  <p>このラインは制御を、マスクと保持時間の組として扱う。観測のたびに、許された辺の部分集合（マスク）と保持時間 T を選ぶ。同じマスクを次の T マイクロステップの間かけ続け、次の観測で選び直す。マスクは次の観測で戻せると仮定する。</p>
+  <p>ページは定理と評価に分かれる。<b>定理の部分は exact、評価の部分は empirical である。</b>定理は目標へ着くことを保証する十分条件を与える。評価は、その保証の下でどの制御器の費用が低いかを測る。</p>
+  <span class="cite mono">README.md:12@bb1fa91</span>
 
-  <h2><span class="no">02</span>モデルと規模</h2>
-  <ul>
-    <li>各マイクロステップで、確率に従って1ノードだけ再計算する。</li>
-    <li>評価は 94 ネットワーク（n=50 が 46、n=100 が 48）を使う。</li>
-  </ul>
+  <h2><span class="no">02</span>設定</h2>
+  <p><span class="badge exact">exact</span> 状態は x ∈ {0,1}<sup>n</sup>、目標は x* である。各マイクロステップで、固定の確率 p_i に従ってノード i を1つだけ選ぶ。p_i は正で、和は1である。選ばれたノードの値だけを再計算する。</p>
+  <div class="table-wrap">
+  <table class="t" style="min-width: 0;">
+    <caption class="small muted" style="caption-side: top; text-align: left;">表1 モデルと制御の設定</caption>
+    <thead><tr><th>項目</th><th>値</th></tr></thead>
+    <tbody>
+      <tr><td>更新則</td><td>各マイクロステップで1ノード、確率 p_i（p_i &gt; 0、和は1）</td></tr>
+      <tr><td>辺 j→i の除去</td><td>規則 i の中の x_j の入力をリテラル0に置き換える（NOT の下でも0）</td></tr>
+      <tr><td>制御</td><td>マスクと保持時間 T の組。観測のたびに選び直す</td></tr>
+      <tr><td>保持時間の候補</td><td class="mono">{1, 2, 4, 8, 16, 32}</td></tr>
+      <tr><td>打ち切り</td><td class="mono">20·n²</td></tr>
+      <tr><td>目標の条件</td><td>すべてのマスクの下で x* が吸収状態</td></tr>
+      <tr><td>厳密計算</td><td>n ≤ 6 は分数、n ≤ 12 は数値ソルバ</td></tr>
+      <tr><td>評価の規模</td><td>94 ネットワーク（n=50 が46、n=100 が48）× 初期状態3 × 制御器3 × 重み5</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p>制御に使うマスクは、x* を固定点のまま保たなければならない。つまり、どのマスクをかけても x* は吸収状態である。一度 x* に着けば、その後どのマスクを選んでも離れない。</p>
+  <p>保持時間の候補は6種で、エピソードの打ち切りはノード数の2乗の20倍である。評価では高速なエンジンを使い、実行する行動はすべて厳密に再認証する。n ≤ 6 の厳密ソルバは分数で計算し、n ≤ 12 は数値ソルバで全状態のマルコフ連鎖を調べる。数値ソルバの結果は形式的な証明ではない。</p>
+  <span class="cite mono">README.md:10@bb1fa91</span>
+  <span class="cite mono">README.md:11@bb1fa91</span>
+  <span class="cite mono">README.md:13@bb1fa91</span>
+  <span class="cite mono">README.md:34@bb1fa91</span>
+  <span class="cite mono">prereg/Headroom_2026-10-29.md:24@bb1fa91</span>
 
-  <h2><span class="no">03</span>何を動かすか</h2>
-  <p>辺の mask と、その保持時間 T を動かす。観測のたびに両方を選び、T マイクロステップ同じ mask を使う。<b>次の観測で mask を戻せる。</b></p>
+  <h2><span class="no">03</span>介入の意味</h2>
+  <p><span class="badge exact">exact</span> 辺 j→i の除去は、規則 i の中で x_j に当たる入力だけをリテラル0に置き換える。その入力が NOT の下で使われていても0を入れる。始点 j の値と規則は変わらない。</p>
+  <p class="eq">f_i′(x) = f_i(x) |<sub>x_j の入力 = 0</sub></p>
+  <p>仮の例で書く。f_i = x_k AND NOT x_j のとき、j→i を除去すると f_i′ = x_k AND NOT 0 = x_k になる。抑制がなくなり、i は x_k だけに従う。f_i = x_j OR x_k なら、f_i′ = x_k になる。この例はモデルの実際の規則ではなく、式の読み方を示すためのものである。</p>
+  <p>同期更新との違いは、置き換えた規則が使われる時刻にある。同期更新では、マスクをかけた次の時刻に全ノードが新しい規則で動く。非同期更新では、ノード i が選ばれたマイクロステップでだけ f_i′ が使われる。どのマイクロステップで i が選ばれるかは確率 p_i で決まる。だから、同じマスクでも保持時間 T によって効果が変わる。</p>
+  <p>他のラインとの違い。<a href="sfgpi.html">SF + GPI</a> のラインは抑制辺に1を代入し、抑制が常にかかる状態にする。このラインは NOT の下でも0を入れるので、抑制が消える。どちらも「辺の除去」と呼ばれるが、抑制辺での意味が逆になる。</p>
+  <span class="cite mono">README.md:11@bb1fa91</span>
 
-  <h2><span class="no">04</span>実験の設計</h2>
-  <ul>
-    <li>94 ネットワーク × 初期状態3 × 制御器3 × 重み5 = 4230 エピソード。</li>
-    <li>制御器のうち2つは、保持時間を状態依存にするものと、mask だけを変えるもの。</li>
-    <li>判定は費用を見る前に固定した（事前登録）。</li>
-  </ul>
+  <h2><span class="no">04</span>実験の手順</h2>
+  <p><span class="badge exact">exact</span> 手順の1〜3は定理、4〜6は評価である。定理の部分は十分条件で、必要条件ではない。</p>
+  <ol class="steps">
+    <li>フォールバックを作る。x* が元の BN の固定点であるとする。許された除去可能辺のうち、x*_j = 0 の始点から出る辺をすべて切ったものを u_B とする。残る辺のグラフが、自己ループも閉路として数えた上で DAG なら、u_B は x* を固定点のまま保ち、大域的にほとんど確実に（almost surely）安定化するフォールバックになる。<span class="cite mono">README.md:17@bb1fa91</span></li>
+    <li>ポテンシャルを作る。DAG の逆順に a_j = 1 + Σ a_i（残る辺 (j,i) について）を定め、w_j = a_j / p_j とする。ポテンシャルは V(x) = Σ w_i 1{x_i ≠ x*_i} である。この重みは厳密な有理数だが、グラフの深さに対してビット長が指数的になりうる。<span class="cite mono">README.md:19@bb1fa91</span></li>
+    <li>受理規則を課す。提案した組 (u, T) について、x* が不変であることと、T マイクロステップ後の V の期待値の上界 U_T が U_T ≤ V − 1 を満たすことを求める。満たさないときは u_B を1マイクロステップだけかける。T に上限があるので、ほとんど確実に吸収され、期待到達時間は E[τ] ≤ T_max V(x_0) / ε（ε は受理規則の減少幅）で抑えられる。<span class="cite mono">README.md:21@bb1fa91</span></li>
+    <li>制御器を3つ用意する。基準は22個の候補から選ぶ STC22 である。仮説 B は候補を200個に増やした STC200、仮説 A は同じ22個の候補の上で先読みをする LA22 である。<span class="cite mono">docs/decisions/ADR-004.md:5@bb1fa91</span></li>
+    <li>判定条件を固定する。費用を見る前に、Δ の平均の95%区間の上限が0未満であることを判定条件として固定した。5つの重みは同じネットワークを共有し、多重性の補正はしない。<span class="cite mono">prereg/Headroom_2026-10-29.md:64@bb1fa91</span><span class="cite mono">prereg/Headroom_2026-10-29.md:67@bb1fa91</span></li>
+    <li>実行して集計する。94 ネットワーク × 初期状態3 × 制御器3 × 重み5 の 4230 エピソードを実行した。実行する組はすべて厳密に再認証した。<span class="cite mono">docs/Headroom_eval_report_2026-10-30.md:11@bb1fa91</span></li>
+  </ol>
+  <p>除外規則。フォールバックがないモデルは失敗として記録し、都合のよいモデルに置き換えない。すべてのモデルが最後の段階まで進む必要はない。</p>
+  <span class="cite mono">prereg/Headroom_2026-10-29.md:93@bb1fa91</span>
 
-  <h2><span class="no">05</span>結果</h2>
-  <h3><span class="badge exact">exact</span> 定理</h3>
-  <p>目標が固定点で、残る辺のグラフが自己ループを含めて DAG であるとする。このとき、x*<sub>j</sub> = 0 の辺を除去しても、その固定点を保てる。</p>
-  <p class="eq">目標 x* が固定点 ∧ 残る辺のグラフが DAG（自己ループを含む）<br>⇒ x*_j = 0 の辺の除去で x* を保てる</p>
-  <p>これは十分条件で、必要条件ではない。</p>
+  <h2><span class="no">05</span>指標の定義</h2>
+  <p><span class="badge exact">exact</span> エピソードの費用 J_w は4つの項の和である。観測の回数、辺の時間、切り替えの回数、経過時間 τ に、それぞれ重みを掛ける。</p>
+  <p class="eq">J_w = c_o·観測数 + c_e·辺時間 + c_s·切替数 + c_t·τ</p>
+  <p>重みは w = (c_o, c_e, c_s, c_t) の5組で、単位は「辺1本を1マイクロステップ除去する」を1とする。分母はなく、エピソードごとの合計である。</p>
+  <p>差 Δ は、各ネットワークで制御器 X の費用を基準 STC22 と比べたものである。ネットワークごとに平均をとり、それをネットワーク全体で平均する。分母は94ネットワークである。負なら X の費用が低い。</p>
+  <p class="eq">Δ = J(X) − J(STC22)　　相対差 = (J(STC22) − J(X)) / J(STC22)</p>
+  <p>区間は、<b>ネットワークを単位とする対応ブートストラップ</b>の95%区間である。反復は2000回、seed は 12345 である。相対差の分母は J(STC22) で、正なら X の費用が低い。</p>
+  <span class="cite mono">prereg/PaperA_costST_2026-10-29.md:43@bb1fa91</span>
+  <span class="cite mono">prereg/PaperA_costST_2026-10-29.md:33@bb1fa91</span>
+  <span class="cite mono">docs/Headroom_eval_report_2026-10-30.md:21@bb1fa91</span>
 
-  <h3><span class="badge empirical">empirical</span> 評価</h3>
+  <h2><span class="no">06</span>結果</h2>
   <div class="kpi">
-    <div><span class="v mono">4230 / 4230</span><span class="k">完走したエピソード</span></div>
-    <div><span class="v mono">5 / 5</span><span class="k">保持時間を状態依存にする制御器：平均差の 95% 区間が 0 を除いた重み</span></div>
-    <div><span class="v mono">0 / 5</span><span class="k">mask だけを変える制御器：同じ</span></div>
+    <div><span class="v mono">4230 / 4230</span><span class="k">完走したエピソード</span><span class="unit">打ち切り・フォールバック・再認証失敗 0</span></div>
+    <div><span class="v mono">5 / 5</span><span class="k">B：候補を増やす</span><span class="unit">相対差 7.41〜17.25%</span></div>
+    <div><span class="v mono">0 / 5</span><span class="k">A：先読み</span><span class="unit">伸びしろなし</span></div>
   </div>
-  <ul>
-    <li>完走は 4230/4230。</li>
-    <li><b>保持時間を状態依存にする制御器は、5つの重みすべてで平均差の 95% 区間が 0 を除いた。</b>例：W1 で −1839.23、区間 [−2719.88, −1107.84]。</li>
-    <li>mask だけを変える制御器は 0/5。</li>
-  </ul>
+  <p><span class="badge empirical">empirical</span> 4230 エピソードはすべて完走した。打ち切り、フォールバック、厳密再認証の失敗は、どれも0だった。</p>
+  <span class="cite mono">docs/Headroom_eval_report_2026-10-30.md:12@bb1fa91</span>
+  <p>候補を増やす方向（B）では、5つの重みすべてで判定条件を満たした。相対差は7.41〜17.25%だった。先読みを入れる方向（A）では、5つの重みのどれでも伸びしろが出なかった。</p>
+  <div class="table-wrap">
+  <table class="t" style="min-width: 0;">
+    <caption class="small muted" style="caption-side: top; text-align: left;">表2 仮説ごとの判定（94 ネットワーク、重み5組）</caption>
+    <thead><tr><th>仮説</th><th>比較</th><th style="text-align: right;">判定条件を満たした重み</th><th style="text-align: right;">相対差</th></tr></thead>
+    <tbody>
+      <tr><td>B：候補を増やす</td><td>STC200 対 STC22</td><td class="num mono">5 / 5</td><td class="num mono">7.41〜17.25%</td></tr>
+      <tr><td>A：先読み</td><td>LA22 対 STC22</td><td class="num mono">0 / 5</td><td class="num">—</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <span class="cite mono">docs/decisions/ADR-004.md:5@bb1fa91</span>
+  <p>B の1行を例として表3に写す。重み W4 で、平均 Δ は −941.79、95%区間は [−1619.57, −371.95] で、上限が0未満である。</p>
+  <div class="table-wrap">
+  <table class="t" style="min-width: 0;">
+    <caption class="small muted" style="caption-side: top; text-align: left;">表3 B の重み W4 の行（94 ネットワーク）</caption>
+    <thead><tr><th>項目</th><th class="num">値</th></tr></thead>
+    <tbody>
+      <tr><td>平均 J(STC22)</td><td class="num mono">12703.35</td></tr>
+      <tr><td>平均 J(STC200)</td><td class="num mono">11761.55</td></tr>
+      <tr><td>平均 Δ</td><td class="num mono">−941.79</td></tr>
+      <tr><td>中央値 Δ</td><td class="num mono">−362.83</td></tr>
+      <tr><td>95% 区間</td><td class="num mono">[−1619.57, −371.95]</td></tr>
+      <tr><td>相対差</td><td class="num mono">7.41%</td></tr>
+      <tr><td>判定</td><td class="num">あり</td></tr>
+      <tr><td>1決定あたりの時間比</td><td class="num mono">8.51</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <span class="cite mono">docs/Headroom_eval_report_2026-10-30.md:33@bb1fa91</span>
 
-  <h2><span class="no">06</span>読むときの注意</h2>
+  <figure>
+    <svg class="fig-wide" width="100%" viewBox="0 0 360 290" role="img" aria-labelledby="as-f2-cap">
+      <text class="lbl" x="8" y="16">B（STC200 − STC22）の Δ、94 ネットワーク</text>
+      <line class="ax-d" x1="60" y1="30" x2="60" y2="240"/>
+      <line class="ax-d" x1="180" y1="30" x2="180" y2="240"/>
+      <line class="ax" x1="300" y1="30" x2="300" y2="240"/>
+      <text class="lbl" x="60" y="50">W1 平均 Δ</text>
+      <rect x="79.29" y="56" width="220.71" height="18" fill="var(--accent)"/>
+      <text class="lbl" x="304" y="70">−1839.23</text>
+      <text class="lbl" x="60" y="98">W1 中央値 Δ</text>
+      <rect x="233.06" y="104" width="66.94" height="18" fill="var(--ink-mute)"/>
+      <text class="lbl" x="304" y="118">−557.83</text>
+      <text class="lbl" x="60" y="146">W4 平均 Δ</text>
+      <rect x="186.99" y="152" width="113.01" height="18" fill="var(--accent)"/>
+      <line x1="105.65" y1="161" x2="255.37" y2="161" stroke="var(--ink)" stroke-width="1.4"/>
+      <line x1="105.65" y1="155" x2="105.65" y2="167" stroke="var(--ink)" stroke-width="1.4"/>
+      <line x1="255.37" y1="155" x2="255.37" y2="167" stroke="var(--ink)" stroke-width="1.4"/>
+      <text class="lbl" x="304" y="166">−941.79</text>
+      <text class="lbl" x="60" y="194">W4 中央値 Δ</text>
+      <rect x="256.46" y="200" width="43.54" height="18" fill="var(--ink-mute)"/>
+      <text class="lbl" x="304" y="214">−362.83</text>
+      <text class="lbl mid" x="60" y="256">−2000</text>
+      <text class="lbl mid" x="180" y="256">−1000</text>
+      <text class="lbl mid" x="300" y="256">0</text>
+      <text class="lbl mid" x="180" y="278">Δ（費用の単位、左ほど STC200 が低い）</text>
+    </svg>
+    <figcaption id="as-f2-cap">図2 候補を増やす方向（B）の費用差。W1 と W4 の平均 Δ と中央値 Δ を並べた。W4 の平均の横線は95%区間 [−1619.57, −371.95]。ほかの重みの行と W1 の区間は、このページの資料に無いので描いていない。</figcaption>
+  </figure>
+
+  <h2><span class="no">07</span>内訳と副次</h2>
+  <p><span class="badge empirical">empirical</span> 候補を増やすと、計算時間が増える。STC200 の1決定あたりの時間比（ネットワークごとの比の中央値）は、5つの重みで7.08〜8.54だった。費用は下がったが、1回の判断にかかる時間は STC22 の7.08〜8.54倍である。</p>
+  <span class="cite mono">docs/Headroom_eval_report_2026-10-30.md:50@bb1fa91</span>
+  <p>費用を下げた STC200 は、22個の候補の外にあるマスクを多く選んだ。22集合の外のマスクを選んだ決定は、168124 決定中 90272 決定だった。追加した候補が、実際の選択に使われていたことになる。</p>
+  <span class="cite mono">docs/Headroom_eval_report_2026-10-30.md:45@bb1fa91</span>
+  <p><b>平均 Δ は、どの重みでも中央値 Δ より絶対値が大きい。</b>例えば W1 では平均 −1839.23 に対して中央値 −557.83 である。少数のネットワークの大きな差が平均を押し上げている。分布そのものは分析していない。</p>
+  <span class="cite mono">docs/Headroom_eval_report_2026-10-30.md:56@bb1fa91</span>
+  <p>ネットワークの内訳は、n=50 が46個、n=100 が48個である。このうち random_kin（ランダムな配線）の族は4ネットワークだけで、一般化はできない。族ごとの数値の引用番号は、このページの資料に無い。</p>
+  <span class="cite mono">docs/Headroom_eval_report_2026-10-30.md:11@bb1fa91</span>
+
+  <h2><span class="no">08</span>届かなかったこと</h2>
+  <p><span class="badge exact">exact</span> 定理は十分条件で、必要条件ではない。フォールバックが作れないことは「安定化できない」を意味しない。その場合の答えは不確定である。十分条件では安定化できることを証明できない、というだけである。</p>
+  <span class="cite mono">docs/theory/T2_sufficient_baseline.md:33@bb1fa91</span>
+  <p><span class="badge empirical">empirical</span> 評価の判定は、事前登録した開発上の決定規則である。5つの重みは同じネットワークを共有し、多重性の補正をしていない。一般的な優位を主張するものではない。</p>
+  <span class="cite mono">prereg/Headroom_2026-10-29.md:67@bb1fa91</span>
+  <p>評価に使ったネットワークのうち、random_kin は4件だけである。ランダムな配線の BN にこの結果が当てはまるかは、分かっていない。</p>
+  <p><span class="badge exact">exact</span> 証明書の重み w_j は厳密な有理数だが、グラフの深さに対してビット長が指数的になりうる。深いグラフでは、厳密な算術での証明書の計算が重くなりうる。</p>
+  <span class="cite mono">README.md:19@bb1fa91</span>
+
+  <h2><span class="no">09</span>読むときの注意</h2>
   <div class="note">
-    <p>定理（exact）と評価（empirical）は別の結果である。評価の数値で定理を裏づけたことにはしない。</p>
-    <p>先行研究に同じ定理がある。このラインの新しい主張として読まない。</p>
-    <p>判定は費用を見る前に固定した（事前登録）。</p>
+    <p><b>DAG のフォールバック定理は、このラインの新しい結果ではない。</b>Li, Li, Yang（2023）の先行研究にある。このラインは、その定理の新規性を主張しない。</p>
+    <p>B の5/5は、候補を200個に増やすと、この94ネットワークで費用が下がったことを示す。先読み（A）の0/5は、今回の先読みが STC22 より低費用にならなかったことだけを示す。先読み一般が役に立たないことは示さない。</p>
+    <p>平均 Δ は少数のネットワークに引っ張られている。中央値 Δ も合わせて読む。</p>
+    <p>4230/4230 の完走は、この94ネットワークでのことである。フォールバックのないモデルが一般にどれだけあるかは、この評価からは分からない。</p>
   </div>
+  <span class="cite mono">README.md:23@bb1fa91</span>
+  <p>型の整理。更新則、除去の定義、フォールバックの十分条件、ポテンシャルと到達時間の上界は exact である。費用、Δ、相対差、時間比、22集合外の選択は empirical として読む。</p>
+
+  <h2><span class="no">10</span>再現の手がかり</h2>
+  <p>リポジトリは async-bn-edge-removal-research、commit は bb1fa91 である。モデルと定理は <span class="mono" style="overflow-wrap: anywhere;">README.md</span>、評価の報告は <span class="mono" style="overflow-wrap: anywhere;">docs/Headroom_eval_report_2026-10-30.md</span>、事前登録は <span class="mono" style="overflow-wrap: anywhere;">prereg/Headroom_2026-10-29.md</span> と <span class="mono" style="overflow-wrap: anywhere;">prereg/PaperA_costST_2026-10-29.md</span> にある。</p>
+  <p>小さい厳密ソルバは <span class="mono" style="overflow-wrap: anywhere;">src/async_edge_removal/exact.py</span> にある。ブートストラップの seed は 12345、反復は2000回である。実行時間の合計はこのページの資料に無い。</p>
+  <span class="cite mono">README.md:34@bb1fa91</span>
 
   <footer>
-    <p>出典：<a href="https://github.com/koshikai/bn-edge-removal-public" target="_blank" rel="noopener noreferrer">https://github.com/koshikai/bn-edge-removal-public</a></p>
+    <p>出典：async-bn-edge-removal-research @ bb1fa91 · このページ：<a href="https://github.com/koshikai/bn-edge-removal-public" target="_blank" rel="noopener noreferrer">https://github.com/koshikai/bn-edge-removal-public</a></p>
     <p>最終更新：2026-11-08</p>
     <p><a href="../">← 研究ラインの地図へ戻る</a> · <a href="../#numbers">数値の一覧</a> · <a href="../#lines">ライン一覧</a></p>
     <p class="pager"><a href="sfgpi.html">← SF + GPI</a> · <a href="swarm.html">ロボット群の通信リンク →</a></p>

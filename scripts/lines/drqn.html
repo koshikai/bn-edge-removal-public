@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>DQN（閉じたライン） · 研究ラインの地図</title>
-  <meta name="description" content="DQN で状態依存の辺除去制御を学習したライン。2026-10-27 に運用上の区切りとして閉じた。">
+  <meta name="description" content="状態に応じた辺除去を DQN の閉ループで学ばせ、3段の判定条件で評価したライン。2026-10-27 に運用上の区切りで停止した。">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -12,88 +12,198 @@
   <nav class="crumbs"><a href="../">地図</a> / <span>DQN（閉じたライン）</span></nav>
   <p class="eyebrow mono">LINE 07 · 閉鎖</p>
   <h1>DQN（閉じたライン）</h1>
-  <p class="lede">状態に応じて切る辺を DQN で選ぶ。2026-10-27 に閉じた。</p>
-  <p class="badges"><span class="badge closed">閉鎖 2026-10-27</span><span class="badge closed">運用上の区切り</span></p>
+  <p class="lede">閉じたライン。状態に応じた辺除去を DQN の閉ループで学ばせ、3段の判定条件で評価した。2026-10-27 に運用上の区切りで停止した。</p>
+  <p class="badges"><span class="badge closed">閉じた（2026-10-27）</span><span class="badge empirical">empirical</span><span class="badge exploratory">exploratory</span></p>
 
   <figure>
-    <svg viewBox="0 0 640 260" role="img" aria-labelledby="fig-cap">
+    <svg class="fig-wide" width="100%" viewBox="0 0 360 470" role="img" aria-labelledby="dq-f1-cap">
       <defs>
-        <marker id="a-f" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path class="mk-fixed" d="M0 0 L10 5 L0 10 z"/></marker>
-        <marker id="a-r" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path class="mk-rem" d="M0 0 L10 5 L0 10 z"/></marker>
-        <marker id="a-c" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path class="mk-cut" d="M0 0 L10 5 L0 10 z"/></marker>
+        <marker id="dqa" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path class="mk-fixed" d="M0 0 L10 5 L0 10 z"/></marker>
+        <marker id="dqc" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path class="mk-cut" d="M0 0 L10 5 L0 10 z"/></marker>
       </defs>
-      <!-- Phase 1 -->
-      <rect class="box" x="10" y="30" width="180" height="90" rx="6"/>
-      <text class="lbl-b mid" x="100" y="55">Phase1</text>
-      <text class="lbl mid" x="100" y="78">basin の厳密計算</text>
-      <text class="lbl mid" x="100" y="100">と MC 推定の整合</text>
-      <path class="e e-fixed" d="M190 75 L238 75" marker-end="url(#a-f)"/>
-      <!-- Phase 2 loop -->
-      <rect class="box-a" x="240" y="30" width="200" height="90" rx="6"/>
-      <text class="lbl-b mid" x="340" y="55">Phase2</text>
-      <text class="lbl mid" x="340" y="78">DQN の閉ループ</text>
-      <text class="lbl-s mid" x="340" y="100">状態 → 切る辺 → 次の状態</text>
-      <path class="e e-rem" d="M300 120 C300 150 380 150 380 122" marker-end="url(#a-r)"/>
-      <path class="e e-fixed" d="M440 75 L488 75" marker-end="url(#a-f)"/>
-      <!-- checks -->
-      <rect class="box" x="490" y="30" width="140" height="90" rx="6"/>
-      <text class="lbl-b mid" x="560" y="55">判定</text>
-      <text class="lbl-s mid" x="560" y="78">condition gate</text>
-      <text class="lbl-s mid" x="560" y="96">全体検証</text>
-      <!-- mammalian unmet -->
-      <rect class="box-x" x="240" y="170" width="390" height="70" rx="6"/>
-      <text class="lbl-b mid" x="435" y="195">mammalian：sweep と独立 oracle 18 policy の比較</text>
-      <text class="lbl-s mid lbl-cut" x="435" y="220">condition gate と timing dependency gate の同時通過は未達</text>
-      <path class="e e-cut" d="M560 120 L560 168" marker-end="url(#a-c)"/>
-      <rect class="box" x="10" y="170" width="180" height="70" rx="6"/>
-      <text class="lbl-b mid" x="100" y="195">yeast 3本</text>
-      <text class="lbl-s mid" x="100" y="220">research_gate = false</text>
+      <rect class="box" x="30" y="10" width="300" height="56" rx="8"/>
+      <text class="lbl-b mid" x="180" y="33">入力：BN と目標</text>
+      <text class="lbl mid" x="180" y="53">cortical、yeast、tumor、mammalian</text>
+      <path class="e e-fixed" d="M180 66 L180 88" marker-end="url(#dqa)"/>
+      <rect class="box-a" x="30" y="90" width="300" height="74" rx="8"/>
+      <text class="lbl-b mid" x="180" y="113">条件：DQN の閉ループ</text>
+      <text class="lbl mid" x="180" y="133">状態 → 除去する辺 → 次の状態</text>
+      <text class="lbl mid" x="180" y="152">制約は不可逆か cooldown</text>
+      <path class="e e-fixed" d="M180 164 L180 186" marker-end="url(#dqa)"/>
+      <rect class="box-u" x="30" y="188" width="300" height="92" rx="8"/>
+      <text class="lbl-b mid" x="180" y="211">判定：3段をすべて満たすか</text>
+      <text class="lbl mid" x="180" y="231">第1段 2048状態</text>
+      <text class="lbl mid" x="180" y="250">第2段 16384状態（別の集合）</text>
+      <text class="lbl mid" x="180" y="269">第3段 全 2^N 状態（N ≤ 10）</text>
+      <path class="e e-fixed" d="M180 280 L180 302" marker-end="url(#dqa)"/>
+      <rect class="box" x="30" y="304" width="300" height="56" rx="8"/>
+      <text class="lbl-b mid" x="180" y="327">集計：介入なしと同じ分母で比べる</text>
+      <text class="lbl mid" x="180" y="347">oracle との一致は別に数える</text>
+      <path class="e e-cut" d="M180 360 L180 382" marker-end="url(#dqc)"/>
+      <rect class="box-x" x="30" y="384" width="300" height="76" rx="8"/>
+      <text class="lbl-b mid" x="180" y="407">2026-10-27 に停止</text>
+      <text class="lbl mid" x="180" y="427">mammalian で2つの判定条件を</text>
+      <text class="lbl mid" x="180" y="446">同時には通らなかった</text>
     </svg>
-    <figcaption id="fig-cap">Phase1 で basin の厳密計算と MC 推定を突き合わせ、Phase2 で DQN の閉ループを作った。破線の枠は、判定条件を通らないまま閉じた部分である。</figcaption>
+    <figcaption id="dq-f1-cap">図1 実験の流れ。DQN が状態を見て除去する辺を選ぶ。結果は3段の判定条件で順に評価し、前の段で落ちれば後の段は評価しない。破線の枠は、判定条件を通らないまま止めた部分である。</figcaption>
   </figure>
 
   <h2><span class="no">01</span>問い</h2>
-  <p>状態を見て切る辺を変える制御を、DQN で学習できるか。学習した制御は、決めておいた判定条件を通るか。</p>
+  <p><span class="badge closed">閉じた</span> このラインの問いは2つある。1つ目は、学習によって辺除去の制御を獲得できるか。2つ目は、獲得できたかどうかを厳密に判定できるか、である。</p>
+  <p>制御器はブーリアンネットワーク（Boolean network、BN）の状態を見て、次に除去する辺を選ぶ。状態に応じて選び直すので、閉ループ（closed loop）の制御になる。学習器には DQN を使った。</p>
+  <p>2つ目の問いが、このラインの中心だった。学習した制御が介入なしより良いかを、標本の数を段階的に増やして確かめる。<b>判定の手続きを先に決め、あとから変えない</b>ことを重視した。</p>
+  <p>ラインは2026年10月27日に止めた。この停止は運用上の区切りで、研究上の結論ではない。</p>
+  <span class="cite mono">docs/experiments/2026-10-27_line_closure.md:3@aff23fb</span>
 
-  <h2><span class="no">02</span>モデルと規模</h2>
-  <ul>
-    <li>yeast 3本と mammalian を扱った。</li>
-    <li>規模の数値は、結果の節に載せる census だけを書く。</li>
-  </ul>
+  <h2><span class="no">02</span>設定</h2>
+  <p><span class="badge empirical">empirical</span> 扱った BN は4つの系である。規模は次の表にまとめた。資料に規模が書かれていない項目は「資料に無い」とした。</p>
+  <div class="table-wrap">
+  <table class="t" style="min-width: 0;">
+    <caption class="small muted" style="caption-side: top; text-align: left;">表1 モデルと条件</caption>
+    <thead><tr><th>項目</th><th>値</th></tr></thead>
+    <tbody>
+      <tr><td>cortical</td><td>第1段の表は32状態で数える</td></tr>
+      <tr><td>yeast</td><td>初期状態 262144 個（介入なしの全数集計の分母）</td></tr>
+      <tr><td>tumor</td><td>未認可の照合が 786,432 初期状態 × 3 checkpoint 残る</td></tr>
+      <tr><td>mammalian</td><td>10ノード</td></tr>
+      <tr><td>制約</td><td>不可逆の除去（<span class="mono">irreversible</span>）か cooldown</td></tr>
+      <tr><td>行動</td><td>次に除去する辺を選ぶ</td></tr>
+      <tr><td>状態特徴</td><td>BN の状態、除去マスク、cooldown の残り、進行度、維持の達成度</td></tr>
+      <tr><td>学習器</td><td>DQN（MLP、リプレイバッファ、target network、ε-greedy）</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <span class="cite mono">docs/experiments/2026-10-13_phase2_oracle_18policy_remaining_o3_results.md:100@aff23fb</span>
+  <span class="cite mono">docs/experiments/2026-10-13_phase2_oracle_parallel_results.md:81@aff23fb</span>
+  <span class="cite mono">docs/experiments/2026-10-09_phase2_next_decisions.md:36@aff23fb</span>
+  <span class="cite mono">docs/research_plan.md:104@aff23fb</span>
+  <p>履歴は再帰型ネットワーク（RNN）に持たせない。どの辺をもう除去したか、cooldown があと何ステップ残るかを、状態特徴に直接入れる。こうすると、履歴に依存する制約も、ふつうの状態として扱える。</p>
+  <span class="cite mono">docs/research_plan.md:32@aff23fb</span>
+  <p>学習器は DQN で、多層パーセプトロン（MLP）、リプレイバッファ（replay buffer）、目標ネットワーク（target network）、ε-greedy の探索を使った。学習の回数や割引率などの値は、このページの資料に無い。</p>
+  <span class="cite mono">docs/research_plan.md:52@aff23fb</span>
 
-  <h2><span class="no">03</span>何を動かすか</h2>
-  <p>辺を動かす。状態に応じて、切る辺を毎回選び直す（閉ループ）。</p>
+  <h2><span class="no">03</span>介入の意味</h2>
+  <p><span class="badge exact">exact</span> 介入は辺の除去である。辺を除去すると、その辺は無効になる。更新式の中で無効な辺をどう置き換えるかの規則は、このページの資料に無い。制約は2通り用意した。</p>
+  <p>不可逆の除去（irreversible）では、一度除去した辺は以後ずっと無効になる。戻す行動はない。cooldown では、除去のあとに待ち時間の残りが生じ、その残量を状態特徴に入れる。cooldown の細かな規則は、このページの資料に無い。どちらの制約でも、今どの辺に触れられるかは過去の行動で決まる。</p>
+  <p class="eq">マスク m(t+1) = m(t) ∪ {a(t)}　（不可逆の場合。a(t) は時刻 t に選んだ辺）</p>
+  <p>具体例で言うと、不可逆の場合、時刻0に辺 e を除去すれば、時刻1以降のマスクには必ず e が入る。制御器は、e を戻す選択肢を持たないまま次の辺を選ぶ。だから早い時刻の誤りは取り返せない。</p>
+  <span class="cite mono">docs/research_plan.md:16@aff23fb</span>
+  <p>他のラインとの違い。<a href="paper1.html">Paper 1</a> などのラインは、決まった規則か厳密な計算で除去する辺を決める。このラインは、その選択を学習で獲得させる。学習した制御が本当に良いかを確かめるため、判定条件を3段に分けた。</p>
 
-  <h2><span class="no">04</span>実験の設計</h2>
-  <ul>
-    <li>Phase1：basin の厳密計算と MC 推定の整合を確かめた。</li>
-    <li>Phase2：DQN で状態依存の辺除去制御を閉ループで学習した。condition gate と全体検証をつけた。</li>
-    <li>mammalian で sweep を行った。</li>
-    <li>独立な oracle 18 policy と比べた。</li>
-  </ul>
+  <h2><span class="no">04</span>実験の手順</h2>
+  <ol class="steps">
+    <li>学習する。DQN を閉ループで学習し、checkpoint を保存する。学習の予算はこのページの資料に無い。</li>
+    <li>第1段で評価する。2048個の初期状態を引き、閉ループと介入なし（<span class="mono">NO_OP</span>）を比べる。判定条件は、改善が0.02以上かつ区間分離が0以上である。<span class="cite mono">configs/phase2_closed_loop_ginsim_budding_yeast_cycle_n18.yaml:35@aff23fb</span></li>
+    <li>第2段で評価する。初期状態を16384個に増やす。seed は <span class="mono">initial_state_sampling.seed + 2</span> とし、第1段とは別の状態集合を引く。判定条件は、改善が0.10以上かつ区間分離が0.05以上である。<span class="cite mono">docs/specs/phase2_condition_gate.md:51@aff23fb</span><span class="cite mono">configs/phase2_closed_loop_ginsim_budding_yeast_cycle_n18.yaml:39@aff23fb</span></li>
+    <li>第3段で評価する。ノード数 N が10以下のとき、全 2^N 状態を調べる。</li>
+    <li>3段の結果を AND でまとめる。前の段が落ちれば、後の段は評価しない。<span class="cite mono">docs/specs/phase2_condition_gate.md:6@aff23fb</span></li>
+    <li>同じ分母で比べる。閉ループと介入なしは、同じ段の同じ状態集合を使う。分母を揃えないと、改善の値が状態の引き方で動くからである。<span class="cite mono">docs/specs/phase2_condition_gate.md:72@aff23fb</span></li>
+    <li>除外規則を当てる。再現に必要な記録（repro）が欠けた実行は不合格と数える。</li>
+  </ol>
+  <p>探索の段階を終える条件も先に決めた。2つの判定条件（<span class="mono">pass_condition_gate</span> と <span class="mono">pass_timing_dependency_gate</span>）がどちらも真になるか、通らない理由を構造的な制約で説明できるか、である。</p>
+  <span class="cite mono">docs/roadmap.md:82@aff23fb</span>
 
-  <h2><span class="no">05</span>結果</h2>
+  <h2><span class="no">05</span>指標の定義</h2>
+  <p><span class="badge empirical">empirical</span> 収束率は、目標へ収束した初期状態の数を、その段で使った初期状態の数で割ったものである。分母は段ごとに違う。第1段は2048、第2段は16384、第3段は 2^N である。cortical の第1段の表は分母が32で、yeast の介入なしの全数集計は分母が262144である。</p>
+  <p class="eq">収束率 = 目標へ収束した初期状態の数 ÷ その段の初期状態の数</p>
+  <p>改善量は、閉ループの収束率から介入なしの収束率を引いた値である。2つの収束率は同じ状態集合で計算するので、分母は同じである。負の値は、閉ループのほうが悪いことを示す。</p>
+  <p>区間分離は、閉ループと介入なしの区間がどれだけ離れているかを表す量である。区間の作り方の詳細は、このページの資料に無い。</p>
+  <p><b>研究判定と比較一致は別の量である。</b>研究判定（<span class="mono">research_gate</span>）は、制御が介入なしより良いかを3段で決める。比較一致は、実装の計算と独立に作った正解の計算（oracle）が同じ値を返すかを確かめる。oracle と実装が一致しても、制御が成功したことにはならない。</p>
+  <span class="cite mono">docs/experiments/2026-10-13_phase2_oracle_parallel_results.md:93@aff23fb</span>
+
+  <h2><span class="no">06</span>結果</h2>
   <div class="kpi">
-    <div><span class="v mono">182,584 / 262,144</span><span class="k">NO_OP の exact census</span></div>
-    <div><span class="v mono">false</span><span class="k">yeast 3本の research_gate</span></div>
-    <div><span class="v mono">未達</span><span class="k">mammalian の condition gate と timing dependency gate の同時通過</span></div>
+    <div><span class="v mono">5 / 18</span><span class="k">研究判定が真の本数</span><span class="unit">oracle 比較の18本</span></div>
+    <div><span class="v mono">0.6875</span><span class="k">cortical 第1段の改善</span><span class="unit">分母32</span></div>
+    <div><span class="v mono">3本とも不合格</span><span class="k">yeast の研究判定</span><span class="unit">3段すべて false</span></div>
   </div>
-  <h3>未達のまま残したもの</h3>
-  <ul>
-    <li>mammalian で、condition gate と timing dependency gate の同時通過は未達。</li>
-    <li>L08b は未承認のまま。</li>
-    <li>fatal_3 と fatal_4 は未解消。</li>
-  </ul>
+  <p><span class="badge empirical">empirical</span> cortical の第1段では、閉ループが32状態のうち32で収束し、介入なしは10で収束した。収束率は1.0と0.3125で、改善は0.6875だった。第1段の判定条件は真である。</p>
+  <p>yeast の3本は、3段すべてで研究判定が偽だった。oracle との比較は合格（PASS）している。つまり計算は正しいが、制御は介入なしより良くなかった。A_yeast_seed1 の第1段では、閉ループが1420、介入なしが1429で、改善は −0.00439453125 だった。別の本の改善は +0.00684 で、どちらも負か微小で閾値に届かない。</p>
+  <div class="table-wrap">
+  <table class="t" style="min-width: 0; font-size: 0.78rem;">
+    <caption class="small muted" style="caption-side: top; text-align: left;">表2 主な結果（値は資料の桁のまま）</caption>
+    <thead><tr><th>対象（分母）</th><th>値</th></tr></thead>
+    <tbody>
+      <tr><td>cortical 第1段（32）</td><td class="mono">閉ループ 32（1.0）<br>介入なし 10（0.3125）<br>改善 0.6875</td></tr>
+      <tr><td>A_yeast_seed1 第1段（2048）</td><td class="mono">閉ループ 1420（0.693359375）<br>介入なし 1429（0.69775390625）<br>改善 −0.00439453125</td></tr>
+      <tr><td>yeast 介入なし、全数（262144）</td><td class="mono">182584（0.696502685546875）</td></tr>
+      <tr><td>研究判定が真</td><td class="mono">5 本 / 18 本</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <span class="cite mono">docs/experiments/2026-10-13_phase2_oracle_18policy_remaining_o3_results.md:100@aff23fb</span>
+  <span class="cite mono">docs/experiments/2026-10-13_phase2_oracle_18policy_remaining_o3_results.md:108@aff23fb</span>
+  <span class="cite mono">docs/experiments/2026-10-13_phase2_oracle_parallel_results.md:81@aff23fb</span>
+  <span class="cite mono">docs/experiments/2026-10-13_phase2_oracle_parallel_results.md:103@aff23fb</span>
+  <span class="cite mono">docs/experiments/2026-10-13_phase2_oracle_18policy_remaining_o3_results.md:92@aff23fb</span>
+  <p>yeast では、介入なしでも262144個の初期状態のうち182584個が目標へ収束する。もともと収束しやすい系なので、閉ループが上積みできる余地は小さい。ただし、この全数集計を作ったときの設定（config）は確認できていない。</p>
 
-  <h2><span class="no">06</span>読むときの注意</h2>
+  <figure>
+    <svg class="fig-wide" width="100%" viewBox="0 0 360 240" role="img" aria-labelledby="dq-f2-cap">
+      <text class="lbl" x="8" y="16">第1段の収束率</text>
+      <line class="ax" x1="70" y1="28" x2="70" y2="186"/>
+      <line class="ax-d" x1="160" y1="28" x2="160" y2="186"/>
+      <line class="ax-d" x1="250" y1="28" x2="250" y2="186"/>
+      <text class="lbl-b" x="8" y="42">cortical（分母32）</text>
+      <text class="lbl" x="8" y="65">閉ループ</text>
+      <rect x="70" y="50" width="180" height="20" fill="var(--accent)"/>
+      <text class="lbl" x="255" y="65">1.0</text>
+      <text class="lbl" x="8" y="91">介入なし</text>
+      <rect x="70" y="76" width="56.25" height="20" fill="var(--ink-mute)"/>
+      <text class="lbl" x="131" y="91">0.3125</text>
+      <text class="lbl-b" x="8" y="122">A_yeast_seed1（分母2048）</text>
+      <text class="lbl" x="8" y="145">閉ループ</text>
+      <rect x="70" y="130" width="124.8" height="20" fill="var(--accent)"/>
+      <text class="lbl" x="200" y="145">0.693359375</text>
+      <text class="lbl" x="8" y="171">介入なし</text>
+      <rect x="70" y="156" width="125.6" height="20" fill="var(--ink-mute)"/>
+      <text class="lbl" x="200" y="171">0.69775390625</text>
+      <text class="lbl mid" x="70" y="204">0</text>
+      <text class="lbl mid" x="160" y="204">0.5</text>
+      <text class="lbl mid" x="250" y="204">1.0</text>
+      <text class="lbl mid" x="180" y="228">収束率（収束した数 ÷ 分母）</text>
+    </svg>
+    <figcaption id="dq-f2-cap">図2 第1段の収束率。青が閉ループ、灰色が介入なし。cortical では差が大きく、yeast ではほぼ重なり、閉ループのほうがわずかに低い。区間はこの図に描いていない。</figcaption>
+  </figure>
+
+  <h2><span class="no">07</span>内訳と副次</h2>
+  <p><span class="badge empirical">empirical</span> oracle との比較は12本を並列に実行した。実行時間の合計は56055.08320433699秒で、上限の74000秒の内側に収まった。4つの worker で動かした。</p>
+  <span class="cite mono">docs/experiments/2026-10-13_phase2_oracle_parallel_results.md:41@aff23fb</span>
+  <p>比較の記録によると、12本の並列実行の <span class="mono">B_cortical_seed2</span> と <span class="mono">B_cortical_seed3</span> を合わせて、18本のうち研究判定が真なのは5本だった。それ以外の本は、oracle との一致を確かめても、制御としては合格していない。</p>
+  <span class="cite mono">docs/experiments/2026-10-13_phase2_oracle_18policy_remaining_o3_results.md:92@aff23fb</span>
+  <p>oracle との一致と研究判定は、ずれることがある。yeast の <span class="mono">B_yeast_seed1</span> は、oracle との比較が PASS で、研究判定は3段とも false だった。一致は「計算が正しい」ことを示し、研究判定は「制御が良い」ことを示す。<b>前者だけを見て成功と書かない</b>ことが、このラインの記録の約束である。</p>
+  <span class="cite mono">docs/experiments/2026-10-13_phase2_oracle_parallel_results.md:103@aff23fb</span>
+  <p>系による差も大きい。cortical は介入なしの収束率が0.3125と低く、改善の余地が大きかった。yeast は介入なしで収束する状態が多く、改善の余地が小さい。規模や系を変えたときの傾向を一般化できるほどの本数はない。</p>
+
+  <h2><span class="no">08</span>届かなかったこと</h2>
+  <p><span class="badge closed">閉じた</span> mammalian（10ノード）では、2つの判定条件（condition と timing dependency）の同時通過に届かなかった。探索の段階を終える条件を満たさなかったことが、ラインを止めた直接の背景である。</p>
+  <span class="cite mono">docs/research_plan.md:104@aff23fb</span>
+  <p>未解決の重大な指摘が2つ残っている。fatal_3 は、同じ番号の seed が初期重みや乱数を共有することによる相関、固定した抽出の条件、差が10個しかないことを問題にしている。A を測っても、この指摘は FAIL のままである。fatal_4 は、BN の更新、目標と維持、判定条件の意味を、独立の oracle で確かめることを求めている。これも FAIL のままである。</p>
+  <span class="cite mono">docs/experiments/2026-10-08_phase2_ab_consistency_preregistration_rev1.md:47@aff23fb</span>
+  <span class="cite mono">docs/experiments/2026-10-08_phase2_ab_consistency_preregistration_rev1.md:209@aff23fb</span>
+  <p>照合も一部残っている。tumor の宣言外の786,432初期状態 × 3 checkpoint の逐次照合は、未認可（<span class="mono">NOT_AUTHORIZED</span>）のままである。未実施であることを、L08a の合格判定へ波及させないと決めている。</p>
+  <span class="cite mono">docs/experiments/2026-10-09_phase2_next_decisions.md:36@aff23fb</span>
+  <p>監査の記録も無い。実行記録（run log）に <span class="mono">audit</span> や <span class="mono">coverage</span> を含む行は0件で、監査の独立した成果物は残っていない。比較の null 条件も起動していない。<span class="mono">execution_result.json</span> と <span class="mono">manifest.json</span> の <span class="mono">null_started</span> はどちらも false である。</p>
+  <span class="cite mono">docs/experiments/2026-10-13_phase2_oracle_parallel_results.md:133@aff23fb</span>
+  <span class="cite mono">docs/experiments/2026-10-13_phase2_oracle_parallel_results.md:163@aff23fb</span>
+
+  <h2><span class="no">09</span>読むときの注意</h2>
   <div class="note">
-    <p>2026-10-27 の閉鎖は、研究上の結論ではない。運用上の区切りである。</p>
-    <p><b>未通過の判定条件を、達成と書かない。</b></p>
-    <p>このラインの数値を Paper 1 へ移さない。</p>
+    <p><b>このラインの数値を Paper 1 へ移さない。</b>本体の Paper 1（<span class="mono">bn-transfer-edge-control</span>）の結果として引用しない。</p>
+    <p>2026-10-27 の停止は運用上の区切りで、研究上の結論ではない。「DQN では辺除去を学習できない」とは読まない。</p>
+    <p>cortical の改善0.6875は第1段だけの値で、分母は32である。3段すべてを通った証拠ではない。</p>
+    <p>oracle との一致は計算の正しさを示すだけで、制御の成功を示さない。未通過の判定条件を達成と書かない。</p>
   </div>
+  <span class="cite mono">docs/experiments/2026-10-27_line_closure.md:40@aff23fb</span>
+  <p>型の整理。yeast の介入なしの集計（262144個）は標本ではなく全数である。学習した制御の成績は empirical である。ライン全体は探索の段階のまま閉じたので、exploratory として扱う。</p>
+
+  <h2><span class="no">10</span>再現の手がかり</h2>
+  <p>リポジトリは drqn、commit は aff23fb である。計画は <span class="mono" style="overflow-wrap: anywhere;">docs/research_plan.md</span> と <span class="mono" style="overflow-wrap: anywhere;">docs/roadmap.md</span>、判定条件の仕様は <span class="mono" style="overflow-wrap: anywhere;">docs/specs/phase2_condition_gate.md</span> にある。</p>
+  <p>結果は <span class="mono" style="overflow-wrap: anywhere;">docs/experiments/2026-10-13_phase2_oracle_parallel_results.md</span> と <span class="mono" style="overflow-wrap: anywhere;">docs/experiments/2026-10-13_phase2_oracle_18policy_remaining_o3_results.md</span>、未解決の指摘は <span class="mono" style="overflow-wrap: anywhere;">docs/experiments/2026-10-08_phase2_ab_consistency_preregistration_rev1.md</span> にある。停止の記録は <span class="mono" style="overflow-wrap: anywhere;">docs/experiments/2026-10-27_line_closure.md</span> である。</p>
+  <p>実行時間の目安は、並列12本の比較で合計56055.08320433699秒（4 workers）である。学習そのものにかかった時間は、このページの資料に無い。</p>
 
   <footer>
-    <p>出典：<a href="https://github.com/koshikai/bn-edge-removal-public" target="_blank" rel="noopener noreferrer">https://github.com/koshikai/bn-edge-removal-public</a></p>
+    <p>出典：drqn @ aff23fb · このページ：<a href="https://github.com/koshikai/bn-edge-removal-public" target="_blank" rel="noopener noreferrer">https://github.com/koshikai/bn-edge-removal-public</a></p>
     <p>最終更新：2026-11-08</p>
     <p><a href="../">← 研究ラインの地図へ戻る</a> · <a href="../#numbers">数値の一覧</a> · <a href="../#lines">ライン一覧</a></p>
     <p class="pager"><a href="swarm.html">← ロボット群の通信リンク</a> · <a href="c2d.html">旧 C2D / BBM →</a></p>
