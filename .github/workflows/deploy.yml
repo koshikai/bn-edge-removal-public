@@ -49,7 +49,8 @@ jobs:
           cp bn_edge_removal.zip dist/network_graph/
           rm bn_edge_removal.zip
           
-          cp scripts/portal_index.html dist/index.html
+          cp scripts/lines_index.html dist/index.html
+          cp scripts/portal_index.html dist/zemi2.html
           touch dist/.nojekyll
 
       - name: Setup Pages
