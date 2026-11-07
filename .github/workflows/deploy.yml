@@ -51,6 +51,8 @@ jobs:
           
           cp scripts/lines_index.html dist/index.html
           cp scripts/portal_index.html dist/zemi2.html
+          mkdir -p dist/lines
+          cp scripts/lines/*.html scripts/lines/style.css dist/lines/
           touch dist/.nojekyll
 
       - name: Setup Pages

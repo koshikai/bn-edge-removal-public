@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>卒論・学会ライン · 研究ラインの地図</title>
+  <meta name="description" content="STL で書いた入力仕様をフラグ状態に記録し、行動マスキングで違反を出さずに辺除去を学習するライン。">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<main>
+  <nav class="crumbs"><a href="../">地図</a> / <span>卒論・学会ライン</span></nav>
+  <p class="eyebrow mono">LINE 09 · 全状態評価</p>
+  <h1>卒論・学会ライン</h1>
+  <p class="lede">入力の仕様を守ったまま、辺の除去を Q 学習で選ぶ。</p>
+  <p class="badges"><span class="badge empirical">empirical</span><span class="badge exact">exact（目標別の表）</span></p>
+
+  <figure>
+    <svg viewBox="0 0 640 270" role="img" aria-labelledby="fig-cap">
+      <defs>
+        <marker id="a-f" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path class="mk-fixed" d="M0 0 L10 5 L0 10 z"/></marker>
+        <marker id="a-r" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path class="mk-rem" d="M0 0 L10 5 L0 10 z"/></marker>
+        <marker id="a-c" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path class="mk-cut" d="M0 0 L10 5 L0 10 z"/></marker>
+      </defs>
+      <!-- state -->
+      <rect class="box" x="10" y="40" width="130" height="70" rx="6"/>
+      <text class="lbl-b mid" x="75" y="66">状態 (x, h)</text>
+      <text class="lbl-s mid" x="75" y="88">h：フラグ状態</text>
+      <path class="e e-fixed" d="M140 75 L188 75" marker-end="url(#a-f)"/>
+      <!-- mask -->
+      <rect class="box-u" x="190" y="30" width="150" height="90" rx="6"/>
+      <text class="lbl-b mid lbl-cut" x="265" y="56">行動マスキング</text>
+      <text class="lbl-s mid" x="265" y="78">違反する行動を</text>
+      <text class="lbl-s mid" x="265" y="94">選択肢から外す</text>
+      <path class="e e-rem" d="M340 75 L388 75" marker-end="url(#a-r)"/>
+      <!-- agent -->
+      <rect class="box-a" x="390" y="40" width="100" height="70" rx="6"/>
+      <text class="lbl-b mid" x="440" y="70">Q 学習</text>
+      <text class="lbl-s mid" x="440" y="90">切る辺を選ぶ</text>
+      <path class="e e-fixed" d="M490 75 L528 75" marker-end="url(#a-f)"/>
+      <!-- BN -->
+      <rect class="box" x="530" y="40" width="100" height="70" rx="6"/>
+      <text class="lbl-b mid" x="580" y="66">BN</text>
+      <text class="lbl-s mid" x="580" y="88">同期更新</text>
+      <!-- monitor -->
+      <path class="e e-fixed" d="M580 110 L580 180 L470 180" marker-end="url(#a-f)"/>
+      <rect class="box" x="250" y="155" width="218" height="50" rx="6"/>
+      <text class="lbl-b mid" x="359" y="177">STL の仕様で h を更新</text>
+      <text class="lbl-s mid" x="359" y="195">単調性・休薬期間</text>
+      <path class="e e-fixed" d="M250 180 L75 180 L75 112" marker-end="url(#a-f)"/>
+      <!-- h latch -->
+      <text class="lbl-s" x="10" y="236">h の時間変化</text>
+      <rect class="sq" x="100" y="224" width="22" height="18" rx="3"/>
+      <rect class="sq" x="126" y="224" width="22" height="18" rx="3"/>
+      <rect class="sq" x="152" y="224" width="22" height="18" rx="3"/>
+      <rect class="sq on" x="178" y="224" width="22" height="18" rx="3"/>
+      <rect class="sq on" x="204" y="224" width="22" height="18" rx="3"/>
+      <rect class="sq on" x="230" y="224" width="22" height="18" rx="3"/>
+      <rect class="sq on" x="256" y="224" width="22" height="18" rx="3"/>
+      <rect class="sq on" x="282" y="224" width="22" height="18" rx="3"/>
+      <text class="lbl-s" x="314" y="238">一度立つと戻らない</text>
+    </svg>
+    <figcaption id="fig-cap">STL で書いた入力仕様を、フラグ状態 h に記録する。h を含む状態から、違反する行動を先に外し、残った行動から Q 学習が選ぶ。そのため学習中も違反が出ない。</figcaption>
+  </figure>
+
+  <h2><span class="no">01</span>問い</h2>
+  <p>単調性や休薬期間のような入力の仕様を、学習中も破らずに守れるか。そのうえで目標に到達し、維持できるか。</p>
+
+  <h2><span class="no">02</span>モデルと規模</h2>
+  <ul>
+    <li>Cortical（5ノード）と Wnt5a。どちらも同期更新。</li>
+    <li>Cortical は全32状態、Wnt5a は全128状態を初期状態として評価する。5 seed。</li>
+  </ul>
+
+  <h2><span class="no">03</span>何を動かすか</h2>
+  <p>辺を除去する。どの時刻にどの辺を切るかを Q 学習で選ぶ。</p>
+
+  <h2><span class="no">04</span>実験の設計</h2>
+  <ul>
+    <li>単調性と休薬期間を STL で書き、フラグ状態 h に記録する。h は一度立つと戻らない。</li>
+    <li><b>行動マスキングで、違反する行動を選択肢から外す。</b>そのため学習中も違反が出ない。</li>
+    <li>全状態から始めて評価する。比べる基準として、介入なしでの成否も数える。</li>
+  </ul>
+
+  <h2><span class="no">05</span>結果</h2>
+  <div class="kpi">
+    <div><span class="v mono">100%</span><span class="k">成功率（Cortical 全32状態、Wnt5a 全128状態、5 seed）</span></div>
+    <div><span class="v mono">0</span><span class="k">離脱</span></div>
+    <div><span class="v mono">0</span><span class="k">仕様違反</span></div>
+  </div>
+  <p>Cortical は全32状態、Wnt5a は全128状態で、5 seed で成功率 100%、離脱 0、仕様違反 0 だった。</p>
+  <p>介入なしでは、Cortical の 32 状態中 10 状態だけが同じ基準で成功する（H = 5、T = 10）。</p>
+
+  <h3><span class="badge exact">exact</span> 目標別の厳密値</h3>
+  <p class="small muted">条件は H = 7、T = 10、制約なし。費用は見ていない。</p>
+  <div class="table-wrap">
+  <table class="t">
+    <thead>
+      <tr><th>目標</th><th class="num">初期状態</th><th class="num">制御できる</th><th class="num">j*</th><th class="num">t_off*</th><th class="num">単調性で失う</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>cell_cycle10 アトラクタ</td><td class="num">1,024</td><td class="num">512</td><td class="num">0</td><td class="num">5</td><td class="num">0</td></tr>
+      <tr><td>s_pombe アトラクタ</td><td class="num">1,024</td><td class="num">1,000</td><td class="num">0</td><td class="num">7</td><td class="num">0</td></tr>
+      <tr><td>yeast アトラクタ</td><td class="num">262,144</td><td class="num">262,144</td><td class="num">0</td><td class="num">5</td><td class="num">0</td></tr>
+      <tr><td>tumor アトラクタ</td><td class="num">262,144</td><td class="num">262,144</td><td class="num">0</td><td class="num">4</td><td class="num">0</td></tr>
+      <tr><td>tumor 浸潤なし</td><td class="num">262,144</td><td class="num">262,144</td><td class="num">10</td><td class="num">10</td><td class="num">0</td></tr>
+      <tr><td>tumor 細胞周期停止</td><td class="num">262,144</td><td class="num">238,336</td><td class="num">3</td><td class="num">4</td><td class="num">0</td></tr>
+      <tr><td>EMT スイッチ</td><td class="num">4,096</td><td class="num">672</td><td class="num">2</td><td class="num">2</td><td class="num">0</td></tr>
+      <tr><td>T-LGL</td><td class="num">262,144</td><td class="num">262,144</td><td class="num">0</td><td class="num">2</td><td class="num">0</td></tr>
+      <tr><td>HCC</td><td class="num">524,288</td><td class="num">393,216</td><td class="num">1</td><td class="num">2</td><td class="num">0</td></tr>
+      <tr><td>哺乳類細胞周期</td><td class="num">524,288</td><td class="num">268,096</td><td class="num">1</td><td class="num">3</td><td class="num">80,704</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p>表の見方。j* は、目標に到達したあとも除去を続ける必要がある最小のステップ数である。j* = 0 の目標は、到達すれば除去を止めてよい。到達後も除去を続ける必要がある目標もある。たとえば tumor 浸潤なしは 10、tumor 細胞周期停止は 3 である。</p>
+  <p>単調性の代償が出るのは哺乳類細胞周期だけである。その 80,704 は、到達前に除去を戻す必要から来る。</p>
+
+  <h2><span class="no">06</span>読むときの注意</h2>
+  <div class="note">
+    <p><b>目標別の表は、10 目標、条件1通りだけの結果である。</b>モデル一般の性質ではない。</p>
+    <p>成功率 100% は empirical（学習と seed を含む）、目標別の表は exact である。型が違うので、同じ物差しで比べない。</p>
+  </div>
+
+  <footer>
+    <p>出典：<a href="https://github.com/koshikai/bn-edge-removal-public" target="_blank" rel="noopener noreferrer">https://github.com/koshikai/bn-edge-removal-public</a> · 既存の解説ページ <a href="../zemi2.html">zemi2</a></p>
+    <p>最終更新：2026-11-08</p>
+    <p><a href="../">← 研究ラインの地図へ戻る</a></p>
+  </footer>
+</main>
+</body>
+</html>

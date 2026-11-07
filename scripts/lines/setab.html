@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>設定 A/B · 研究ラインの地図</title>
+  <meta name="description" content="詳細モデルと小モデルの関係を2通りに置いて、制御計算の費用と性能を探る探索ライン。">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<main>
+  <nav class="crumbs"><a href="../">地図</a> / <span>設定 A/B</span></nav>
+  <p class="eyebrow mono">LINE 03 · 探索</p>
+  <h1>設定 A/B</h1>
+  <p class="lede">詳細モデルと小モデルを2通りに組み合わせ、制御の性能と費用を探る。</p>
+  <p class="badges"><span class="badge exploratory">exploratory</span></p>
+
+  <figure>
+    <svg viewBox="0 0 640 300" role="img" aria-labelledby="fig-cap">
+      <defs>
+        <marker id="a-f" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path class="mk-fixed" d="M0 0 L10 5 L0 10 z"/></marker>
+        <marker id="a-r" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path class="mk-rem" d="M0 0 L10 5 L0 10 z"/></marker>
+      </defs>
+      <!-- Setting A -->
+      <text class="lbl-b" x="10" y="22">設定A　詳細論理は既知</text>
+      <rect class="box" x="10" y="40" width="130" height="80" rx="6"/>
+      <text class="lbl-b mid" x="75" y="72">詳細論理</text>
+      <text class="lbl-m mid" x="75" y="94">既知</text>
+      <path class="e e-rem" d="M140 62 L218 62" marker-end="url(#a-r)"/>
+      <rect class="box-a" x="220" y="40" width="220" height="44" rx="6"/>
+      <text class="lbl mid" x="330" y="67">縮約：構築 → 選択 → 検証 → 合成</text>
+      <path class="e e-fixed" d="M140 104 L218 104" marker-end="url(#a-f)"/>
+      <rect class="box" x="220" y="90" width="220" height="30" rx="6"/>
+      <text class="lbl mid" x="330" y="110">直接計画</text>
+      <path class="e e-fixed" d="M440 62 L498 76" marker-end="url(#a-f)"/>
+      <path class="e e-fixed" d="M440 105 L498 92" marker-end="url(#a-f)"/>
+      <rect class="box" x="500" y="58" width="130" height="44" rx="6"/>
+      <text class="lbl mid" x="565" y="85">性能と費用を比べる</text>
+
+      <line class="ax-d" x1="10" y1="150" x2="630" y2="150"/>
+
+      <!-- Setting B -->
+      <text class="lbl-b" x="10" y="180">設定B　詳細モデルは未知</text>
+      <rect class="box-a" x="10" y="196" width="130" height="80" rx="6"/>
+      <text class="lbl-b mid" x="75" y="222">先行する小モデル</text>
+      <text class="lbl-s mid" x="75" y="244">source の来歴</text>
+      <text class="lbl-s mid" x="75" y="260">対応関係を明示</text>
+      <path class="e e-rem" d="M140 220 L218 220" marker-end="url(#a-r)"/>
+      <text class="lbl-s mid lbl-acc" x="180" y="212">事前知識</text>
+      <rect class="box-x" x="220" y="196" width="220" height="80" rx="6"/>
+      <text class="lbl-b mid" x="330" y="222">未知の詳細モデル</text>
+      <text class="lbl-s mid" x="330" y="244">同じ target 情報</text>
+      <text class="lbl-s mid" x="330" y="260">同じ取得予算</text>
+      <path class="e e-fixed" d="M440 236 L498 236" marker-end="url(#a-f)"/>
+      <rect class="box" x="500" y="214" width="130" height="44" rx="6"/>
+      <text class="lbl mid" x="565" y="241">知識の有無で比べる</text>
+    </svg>
+    <figcaption id="fig-cap">上が設定A、下が設定B。A では縮約の構築から合成までの費用を含めて、直接計画と比べる。B では target 情報と取得予算を揃え、小モデルの知識があるかないかで比べる。</figcaption>
+  </figure>
+
+  <h2><span class="no">01</span>問い</h2>
+  <p>小さなモデルを使うと、詳細モデルの制御は安く、またはよくなるか。設定を2つに分けて探る。</p>
+  <ul>
+    <li>設定A：詳細論理がわかっているとき、制御計算を縮約して得をするか。</li>
+    <li>設定B：詳細モデルがわからないとき、先行する小モデルの知識で得をするか。</li>
+  </ul>
+
+  <h2><span class="no">02</span>モデルと規模</h2>
+  <p>設定Aは、既知の詳細論理を出発点にする。設定Bは、先行する小モデルと、未知の詳細モデルの組を扱う。規模の数値はこのページに載せない。</p>
+
+  <h2><span class="no">03</span>何を動かすか</h2>
+  <p>制御計算に使うモデルを動かす。</p>
+  <ul>
+    <li>設定A：詳細論理から縮約したモデルで制御を計算する。</li>
+    <li>設定B：小モデルを、未知の詳細モデルへの事前知識として使う。</li>
+  </ul>
+
+  <h2><span class="no">04</span>実験の設計</h2>
+  <ul>
+    <li>設定A：<b>縮約の構築・選択・検証・合成をすべて費用に含める。</b>そのうえで直接計画と性能と費用を比べる。</li>
+    <li>設定B：source の来歴と対応関係を明示する。同じ target 情報と同じ取得予算で、知識の有無による差を測る。</li>
+    <li>平均成功、全候補保証、有限割引報酬、永久安定化は、分けて書く。</li>
+    <li>同じ公開情報で計算する oracle 診断と、配備できる方式を混同しない。</li>
+  </ul>
+
+  <h2><span class="no">05</span>結果</h2>
+  <p>探索のため、数値は載せない。</p>
+
+  <h2><span class="no">06</span>読むときの注意</h2>
+  <div class="note">
+    <p><b>探索の結果を、確認研究の有効性の根拠にしない。</b></p>
+    <p>このラインは確認研究へ自動では移らない。</p>
+  </div>
+
+  <footer>
+    <p>出典：<a href="https://github.com/koshikai/bn-edge-removal-public" target="_blank" rel="noopener noreferrer">https://github.com/koshikai/bn-edge-removal-public</a></p>
+    <p>最終更新：2026-11-08</p>
+    <p><a href="../">← 研究ラインの地図へ戻る</a></p>
+  </footer>
+</main>
+</body>
+</html>

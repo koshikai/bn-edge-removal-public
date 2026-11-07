@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>本体 Paper 1 · 研究ラインの地図</title>
+  <meta name="description" content="遷移数の予算を揃えたとき、経験から学ぶ制御器と固定データから作る制御器のどちらが oracle に近いかを確かめた確認研究。">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<main>
+  <nav class="crumbs"><a href="../">地図</a> / <span>本体 Paper 1</span></nav>
+  <p class="eyebrow mono">LINE 01 · 確認研究</p>
+  <h1>本体 Paper 1</h1>
+  <p class="lede">予算を揃えて、学ぶ制御器と固定データの制御器を oracle と比べる。</p>
+  <p class="badges"><span class="badge confirm">確認研究</span><span class="badge confirm">事前登録あり</span></p>
+
+  <figure>
+    <svg viewBox="0 0 640 260" role="img" aria-labelledby="fig-cap">
+      <defs>
+        <marker id="a-f" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path class="mk-fixed" d="M0 0 L10 5 L0 10 z"/></marker>
+        <marker id="a-c" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path class="mk-cut" d="M0 0 L10 5 L0 10 z"/></marker>
+      </defs>
+      <!-- budget -->
+      <rect class="box" x="10" y="100" width="120" height="60" rx="6"/>
+      <text class="lbl-b mid" x="70" y="125">遷移数の予算</text>
+      <text class="lbl-m mid" x="70" y="145">同じ値を両方へ</text>
+      <path class="e e-fixed" d="M130 120 L188 70" marker-end="url(#a-f)"/>
+      <path class="e e-fixed" d="M130 140 L188 190" marker-end="url(#a-f)"/>
+      <!-- controllers -->
+      <rect class="box-a" x="190" y="40" width="170" height="60" rx="6"/>
+      <text class="lbl-b mid" x="275" y="65">経験から学ぶ</text>
+      <text class="lbl-m mid" x="275" y="85">reset へアクセス</text>
+      <rect class="box" x="190" y="160" width="170" height="60" rx="6"/>
+      <text class="lbl-b mid" x="275" y="185">固定データから作る</text>
+      <text class="lbl-m mid" x="275" y="205">offline</text>
+      <path class="e e-fixed" d="M360 70 L428 115" marker-end="url(#a-f)"/>
+      <path class="e e-fixed" d="M360 190 L428 145" marker-end="url(#a-f)"/>
+      <!-- evaluation -->
+      <rect class="box" x="430" y="90" width="200" height="80" rx="6"/>
+      <text class="lbl-b mid" x="530" y="115">H = 20 の occupancy</text>
+      <text class="lbl mid" x="530" y="137">oracle との差を測る</text>
+      <text class="lbl-m mid" x="530" y="157">243 family で集計</text>
+      <rect class="box-g" x="470" y="20" width="120" height="40" rx="6"/>
+      <text class="lbl-b mid lbl-goal" x="530" y="45">oracle</text>
+      <path class="e e-goal e-dash" d="M530 60 L530 88"/>
+      <!-- matched-k1 inset -->
+      <text class="lbl-s" x="10" y="20">介入：1遷移で1辺だけ除去（matched-k1）</text>
+      <circle class="nd" cx="30" cy="52" r="12"/><text class="nt" x="30" y="52">x</text>
+      <circle class="nd" cx="110" cy="52" r="12"/><text class="nt" x="110" y="52">y</text>
+      <path class="e e-cut" d="M43 52 L96 52" marker-end="url(#a-c)"/>
+      <text class="lbl-s lbl-cut mid" x="70" y="76">t → t+1 だけ</text>
+      <text class="lbl-s" x="10" y="245">比較の軸：予算（横）× oracle との差（縦）。宣言した予算範囲で平均する</text>
+    </svg>
+    <figcaption id="fig-cap">同じ遷移数の予算を、経験から学ぶ制御器と、固定データから作る制御器に与える。どちらも H = 20 の occupancy で oracle と比べる。介入は1遷移に1辺の即時除去である。</figcaption>
+  </figure>
+
+  <h2><span class="no">01</span>問い</h2>
+  <p>遷移数の予算を揃える。そのとき、経験から学ぶ制御器と、固定データから作る制御器のどちらが oracle に近いか。</p>
+
+  <h2><span class="no">02</span>モデルと規模</h2>
+  <ul>
+    <li>benchmark 集団の 243 family を使う。統計単位は family である。</li>
+    <li>目的関数は H = 20 の occupancy。</li>
+    <li>経験から学ぶ制御器には、reset へのアクセスがあると宣言した。</li>
+  </ul>
+
+  <h2><span class="no">03</span>何を動かすか</h2>
+  <p>辺を動かす。<b>1遷移ごとに1本だけ即時に除去する</b>（matched-k1）。除去はその遷移にだけ使い、次の遷移には残らない。</p>
+
+  <h2><span class="no">04</span>実験の設計</h2>
+  <ul>
+    <li>予算をいくつか宣言し、各予算で両方の制御器を作る。</li>
+    <li>各予算で oracle との差を測り、宣言した予算範囲で平均して ΔAUC を出す。</li>
+    <li>比較の範囲は先に宣言した（事前登録）。</li>
+  </ul>
+
+  <h2><span class="no">05</span>結果</h2>
+  <div class="kpi">
+    <div><span class="v mono">+0.01933</span><span class="k">ΔAUC（243 family）</span></div>
+    <div><span class="v mono">[+0.01259, +0.02662]</span><span class="k">95% CI</span></div>
+    <div><span class="v mono">0.39</span><span class="k">宣言した予算範囲の平均で、占有ステップ換算</span></div>
+  </div>
+  <p>主結果は ΔAUC +0.01933、95% CI [+0.01259, +0.02662] である。宣言した予算範囲の平均で、占有ステップ 0.39 相当にあたる。</p>
+
+  <h3>副次の結果</h3>
+  <ul>
+    <li>offline が制御器を返した 13,122 cell のうち 3,553 cell では、oracle との差が −0.07827（95% CI [−0.08778, −0.06929]）だった。この cell では offline の方が oracle に近い。</li>
+    <li>最大予算で oracle の 10% 以内に入った割合は、offline が 70.5%、経験から学ぶ制御器が 8.6%。</li>
+    <li>予算ごとの差は +0.020、+0.029、+0.041、+0.053、−0.024、−0.085 と符号が変わる。予算の端点だけを見ると、見出しが逆になる。</li>
+    <li>識別可能性はどの予算でも 0 のままだった。それでも、返された offline 制御器の 75.3%（2,675 / 3,553）は oracle 最適だった。</li>
+  </ul>
+
+  <h2><span class="no">06</span>読むときの注意</h2>
+  <div class="note">
+    <p><b>「Q 学習が上」という主張ではない。</b>宣言した予算範囲の平均で、oracle との差が小さい、という主張である。</p>
+    <p>主結果（範囲の平均）と、10% 以内への到達は別の問いである。片方の数値で、もう片方を説明しない。</p>
+  </div>
+
+  <footer>
+    <p>出典：<a href="https://github.com/koshikai/bn-edge-removal-public" target="_blank" rel="noopener noreferrer">https://github.com/koshikai/bn-edge-removal-public</a></p>
+    <p>最終更新：2026-11-08</p>
+    <p><a href="../">← 研究ラインの地図へ戻る</a></p>
+  </footer>
+</main>
+</body>
+</html>

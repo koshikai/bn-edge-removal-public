@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DQN（閉じたライン） · 研究ラインの地図</title>
+  <meta name="description" content="DQN で状態依存の辺除去制御を学習したライン。2026-10-27 に運用上の区切りとして閉じた。">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<main>
+  <nav class="crumbs"><a href="../">地図</a> / <span>DQN（閉じたライン）</span></nav>
+  <p class="eyebrow mono">LINE 07 · 閉鎖</p>
+  <h1>DQN（閉じたライン）</h1>
+  <p class="lede">状態に応じて切る辺を DQN で選ぶ。2026-10-27 に閉じた。</p>
+  <p class="badges"><span class="badge closed">閉鎖 2026-10-27</span><span class="badge closed">運用上の区切り</span></p>
+
+  <figure>
+    <svg viewBox="0 0 640 260" role="img" aria-labelledby="fig-cap">
+      <defs>
+        <marker id="a-f" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path class="mk-fixed" d="M0 0 L10 5 L0 10 z"/></marker>
+        <marker id="a-r" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path class="mk-rem" d="M0 0 L10 5 L0 10 z"/></marker>
+        <marker id="a-c" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path class="mk-cut" d="M0 0 L10 5 L0 10 z"/></marker>
+      </defs>
+      <!-- Phase 1 -->
+      <rect class="box" x="10" y="30" width="180" height="90" rx="6"/>
+      <text class="lbl-b mid" x="100" y="55">Phase1</text>
+      <text class="lbl mid" x="100" y="78">basin の厳密計算</text>
+      <text class="lbl mid" x="100" y="100">と MC 推定の整合</text>
+      <path class="e e-fixed" d="M190 75 L238 75" marker-end="url(#a-f)"/>
+      <!-- Phase 2 loop -->
+      <rect class="box-a" x="240" y="30" width="200" height="90" rx="6"/>
+      <text class="lbl-b mid" x="340" y="55">Phase2</text>
+      <text class="lbl mid" x="340" y="78">DQN の閉ループ</text>
+      <text class="lbl-s mid" x="340" y="100">状態 → 切る辺 → 次の状態</text>
+      <path class="e e-rem" d="M300 120 C300 150 380 150 380 122" marker-end="url(#a-r)"/>
+      <path class="e e-fixed" d="M440 75 L488 75" marker-end="url(#a-f)"/>
+      <!-- checks -->
+      <rect class="box" x="490" y="30" width="140" height="90" rx="6"/>
+      <text class="lbl-b mid" x="560" y="55">判定</text>
+      <text class="lbl-s mid" x="560" y="78">condition gate</text>
+      <text class="lbl-s mid" x="560" y="96">全体検証</text>
+      <!-- mammalian unmet -->
+      <rect class="box-x" x="240" y="170" width="390" height="70" rx="6"/>
+      <text class="lbl-b mid" x="435" y="195">mammalian：sweep と独立 oracle 18 policy の比較</text>
+      <text class="lbl-s mid lbl-cut" x="435" y="220">condition gate と timing dependency gate の同時通過は未達</text>
+      <path class="e e-cut" d="M560 120 L560 168" marker-end="url(#a-c)"/>
+      <rect class="box" x="10" y="170" width="180" height="70" rx="6"/>
+      <text class="lbl-b mid" x="100" y="195">yeast 3本</text>
+      <text class="lbl-s mid" x="100" y="220">research_gate = false</text>
+    </svg>
+    <figcaption id="fig-cap">Phase1 で basin の厳密計算と MC 推定を突き合わせ、Phase2 で DQN の閉ループを作った。破線の枠は、判定条件を通らないまま閉じた部分である。</figcaption>
+  </figure>
+
+  <h2><span class="no">01</span>問い</h2>
+  <p>状態を見て切る辺を変える制御を、DQN で学習できるか。学習した制御は、決めておいた判定条件を通るか。</p>
+
+  <h2><span class="no">02</span>モデルと規模</h2>
+  <ul>
+    <li>yeast 3本と mammalian を扱った。</li>
+    <li>規模の数値は、結果の節に載せる census だけを書く。</li>
+  </ul>
+
+  <h2><span class="no">03</span>何を動かすか</h2>
+  <p>辺を動かす。状態に応じて、切る辺を毎回選び直す（閉ループ）。</p>
+
+  <h2><span class="no">04</span>実験の設計</h2>
+  <ul>
+    <li>Phase1：basin の厳密計算と MC 推定の整合を確かめた。</li>
+    <li>Phase2：DQN で状態依存の辺除去制御を閉ループで学習した。condition gate と全体検証をつけた。</li>
+    <li>mammalian で sweep を行った。</li>
+    <li>独立な oracle 18 policy と比べた。</li>
+  </ul>
+
+  <h2><span class="no">05</span>結果</h2>
+  <div class="kpi">
+    <div><span class="v mono">182,584 / 262,144</span><span class="k">NO_OP の exact census</span></div>
+    <div><span class="v mono">false</span><span class="k">yeast 3本の research_gate</span></div>
+    <div><span class="v mono">未達</span><span class="k">mammalian の condition gate と timing dependency gate の同時通過</span></div>
+  </div>
+  <h3>未達のまま残したもの</h3>
+  <ul>
+    <li>mammalian で、condition gate と timing dependency gate の同時通過は未達。</li>
+    <li>L08b は未承認のまま。</li>
+    <li>fatal_3 と fatal_4 は未解消。</li>
+  </ul>
+
+  <h2><span class="no">06</span>読むときの注意</h2>
+  <div class="note">
+    <p>2026-10-27 の閉鎖は、研究上の結論ではない。運用上の区切りである。</p>
+    <p><b>未通過の判定条件を、達成と書かない。</b></p>
+    <p>このラインの数値を Paper 1 へ移さない。</p>
+  </div>
+
+  <footer>
+    <p>出典：<a href="https://github.com/koshikai/bn-edge-removal-public" target="_blank" rel="noopener noreferrer">https://github.com/koshikai/bn-edge-removal-public</a></p>
+    <p>最終更新：2026-11-08</p>
+    <p><a href="../">← 研究ラインの地図へ戻る</a></p>
+  </footer>
+</main>
+</body>
+</html>

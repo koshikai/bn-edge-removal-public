@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SF + GPI · 研究ラインの地図</title>
+  <meta name="description" content="MAPK モデルで、successor features と GPI による方策の再利用を試した探索ライン。">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<main>
+  <nav class="crumbs"><a href="../">地図</a> / <span>SF + GPI</span></nav>
+  <p class="eyebrow mono">LINE 04 · 探索</p>
+  <h1>SF + GPI</h1>
+  <p class="lede">学習済みの方策を組み合わせ、新しい報酬で使い回す。</p>
+  <p class="badges"><span class="badge exploratory">exploratory</span><span class="badge exploratory">MAPK 1モデル</span><span class="badge exploratory">多重比較補正なし</span></p>
+
+  <figure>
+    <svg viewBox="0 0 640 300" role="img" aria-labelledby="fig-cap">
+      <defs>
+        <marker id="a-f" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path class="mk-fixed" d="M0 0 L10 5 L0 10 z"/></marker>
+        <marker id="a-r" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path class="mk-rem" d="M0 0 L10 5 L0 10 z"/></marker>
+        <marker id="a-c" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path class="mk-cut" d="M0 0 L10 5 L0 10 z"/></marker>
+      </defs>
+      <!-- policy library -->
+      <text class="lbl-b" x="10" y="22">学習済みの方策群</text>
+      <rect class="box" x="10" y="34" width="120" height="30" rx="5"/><text class="lbl-m mid" x="70" y="53">π1 · ψ1</text>
+      <rect class="box" x="10" y="72" width="120" height="30" rx="5"/><text class="lbl-m mid" x="70" y="91">π2 · ψ2</text>
+      <rect class="box" x="10" y="110" width="120" height="30" rx="5"/><text class="lbl-m mid" x="70" y="129">π3 · ψ3</text>
+      <text class="lbl-m mid" x="70" y="156">⋮</text>
+      <rect class="box-a" x="10" y="180" width="140" height="40" rx="5"/>
+      <text class="lbl mid" x="80" y="205">新しい報酬の重み w</text>
+      <path class="e e-fixed" d="M130 87 L208 110" marker-end="url(#a-f)"/>
+      <path class="e e-rem" d="M150 200 L208 140" marker-end="url(#a-r)"/>
+      <!-- GPI -->
+      <rect class="box-a" x="210" y="90" width="130" height="70" rx="6"/>
+      <text class="lbl-b mid" x="275" y="117">GPI</text>
+      <text class="lbl-m mid" x="275" y="139">max_i ψ_i · w</text>
+      <path class="e e-rem" d="M340 125 L398 125" marker-end="url(#a-r)"/>
+      <!-- action -->
+      <rect class="box-u" x="400" y="100" width="124" height="50" rx="6"/>
+      <text class="lbl-b mid lbl-cut" x="462" y="121">1本だけ切替</text>
+      <text class="lbl-s mid" x="462" y="139">10本中、累積4本まで</text>
+      <path class="e e-cut" d="M524 125 L538 125" marker-end="url(#a-c)"/>
+      <!-- environment -->
+      <rect class="box" x="540" y="70" width="90" height="110" rx="6"/>
+      <text class="lbl-b mid" x="585" y="98">MAPK</text>
+      <text class="lbl-s mid" x="585" y="118">53ノード</text>
+      <text class="lbl-s mid" x="585" y="134">入力4</text>
+      <text class="lbl-s mid" x="585" y="150">内部49</text>
+      <!-- inner microsteps -->
+      <text class="lbl-s" x="10" y="262">1判断の中：ランダムな単一ノード更新を 49 回</text>
+      <g>
+        <rect class="sq" x="10" y="272" width="8" height="18"/><rect class="sq on" x="20" y="272" width="8" height="18"/>
+        <rect class="sq" x="30" y="272" width="8" height="18"/><rect class="sq" x="40" y="272" width="8" height="18"/>
+        <rect class="sq on" x="50" y="272" width="8" height="18"/><rect class="sq" x="60" y="272" width="8" height="18"/>
+        <rect class="sq" x="70" y="272" width="8" height="18"/><rect class="sq on" x="80" y="272" width="8" height="18"/>
+        <rect class="sq" x="90" y="272" width="8" height="18"/><rect class="sq" x="100" y="272" width="8" height="18"/>
+        <text class="lbl-s" x="114" y="286">… 49 回目</text>
+      </g>
+      <path class="e e-fixed e-dash" d="M585 180 L585 236 L275 236 L275 162" marker-end="url(#a-f)"/>
+      <text class="lbl-s" x="420" y="230">次の判断へ状態を返す</text>
+    </svg>
+    <figcaption id="fig-cap">学習済みの方策の successor features（ψ）と新しい報酬の重み w から、GPI が行動を選ぶ。行動は除去可能辺の切替1本。1判断の間に、内部ノードが1つずつランダムに 49 回更新される。</figcaption>
+  </figure>
+
+  <h2><span class="no">01</span>問い</h2>
+  <p>学習済みの方策群を、新しい報酬の下で組み合わせて使い回せるか。そのとき到達率と割引報酬はどうなるか。</p>
+
+  <h2><span class="no">02</span>モデルと規模</h2>
+  <ul>
+    <li>MAPK モデル1つ。53ノードで、外部入力が4、非同期に更新する内部ノードが49。</li>
+    <li>モデルは1つだけで、多重比較の補正はしていない。</li>
+  </ul>
+
+  <h2><span class="no">03</span>何を動かすか</h2>
+  <ul>
+    <li>極性制約つきの除去可能辺が10本ある。累積で4本まで切れる。</li>
+    <li><b>1判断につき1本だけ切り替える。</b></li>
+    <li>1判断の中で、ランダムな単一ノード更新が 49 回起きる。</li>
+  </ul>
+
+  <h2><span class="no">04</span>実験の設計</h2>
+  <p>4つの方法を、到達率と割引報酬で並べる。</p>
+  <ul>
+    <li>SF+GPI</li>
+    <li>多様な方策</li>
+    <li>同数の勾配更新の線形 Q</li>
+    <li>SAT を使う直接制御</li>
+  </ul>
+
+  <h2><span class="no">05</span>結果</h2>
+  <div class="table-wrap">
+  <table class="t">
+    <thead><tr><th>方法</th><th class="num">到達率</th><th class="num">割引報酬</th></tr></thead>
+    <tbody>
+      <tr><td>SF+GPI</td><td class="num">81.04%</td><td class="num">0.615</td></tr>
+      <tr><td>多様な方策</td><td class="num">81.30%</td><td class="num">0.628</td></tr>
+      <tr><td>同数の勾配更新の線形 Q</td><td class="num">79.32%</td><td class="num">0.531</td></tr>
+      <tr><td>SAT を使う直接制御</td><td class="num">95.47%</td><td class="num">0.018</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p>到達率は SAT を使う直接制御が最も高い。割引報酬は SAT を使う直接制御が最も低い。</p>
+
+  <h2><span class="no">06</span>読むときの注意</h2>
+  <div class="note">
+    <p>到達率では SAT が上回る。<b>SF の主張は報酬込みの再利用であって、SAT への優位ではない。</b></p>
+    <p>MAPK 1モデルだけの結果で、多重比較補正はしていない。</p>
+  </div>
+
+  <footer>
+    <p>出典：<a href="https://github.com/koshikai/bn-edge-removal-public" target="_blank" rel="noopener noreferrer">https://github.com/koshikai/bn-edge-removal-public</a></p>
+    <p>最終更新：2026-11-08</p>
+    <p><a href="../">← 研究ラインの地図へ戻る</a></p>
+  </footer>
+</main>
+</body>
+</html>

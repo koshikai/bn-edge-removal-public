@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>非同期 BN · 研究ラインの地図</title>
+  <meta name="description" content="非同期更新のブーリアンネットワークで、辺の mask と保持時間を選ぶ制御。定理と評価を分けて書く。">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<main>
+  <nav class="crumbs"><a href="../">地図</a> / <span>非同期 BN</span></nav>
+  <p class="eyebrow mono">LINE 05 · 定理と評価</p>
+  <h1>非同期 BN</h1>
+  <p class="lede">非同期更新の下で、辺の mask とその保持時間を観測ごとに選ぶ。</p>
+  <p class="badges"><span class="badge exact">exact</span><span class="badge empirical">empirical</span></p>
+
+  <figure>
+    <svg viewBox="0 0 640 270" role="img" aria-labelledby="fig-cap">
+      <text class="lbl-b" x="10" y="22">マイクロステップの列（1ステップで1ノードだけ再計算）</text>
+      <!-- axis of microsteps -->
+      <g>
+        <text class="lbl-s" x="10" y="62">mask</text>
+        <!-- mask A held T=4 -->
+        <rect class="sq cut" x="60" y="48" width="34" height="22" rx="3"/>
+        <rect class="sq cut" x="98" y="48" width="34" height="22" rx="3"/>
+        <rect class="sq cut" x="136" y="48" width="34" height="22" rx="3"/>
+        <rect class="sq cut" x="174" y="48" width="34" height="22" rx="3"/>
+        <!-- mask B held T=2 -->
+        <rect class="sq alt" x="212" y="48" width="34" height="22" rx="3"/>
+        <rect class="sq alt" x="250" y="48" width="34" height="22" rx="3"/>
+        <!-- no mask T=3 -->
+        <rect class="sq" x="288" y="48" width="34" height="22" rx="3"/>
+        <rect class="sq" x="326" y="48" width="34" height="22" rx="3"/>
+        <rect class="sq" x="364" y="48" width="34" height="22" rx="3"/>
+        <!-- mask A again T=5 -->
+        <rect class="sq cut" x="402" y="48" width="34" height="22" rx="3"/>
+        <rect class="sq cut" x="440" y="48" width="34" height="22" rx="3"/>
+        <rect class="sq cut" x="478" y="48" width="34" height="22" rx="3"/>
+        <rect class="sq cut" x="516" y="48" width="34" height="22" rx="3"/>
+        <rect class="sq cut" x="554" y="48" width="34" height="22" rx="3"/>
+
+        <text class="lbl-s" x="10" y="98">更新</text>
+        <text class="lbl-m mid" x="77" y="98">x3</text><text class="lbl-m mid" x="115" y="98">x1</text>
+        <text class="lbl-m mid" x="153" y="98">x3</text><text class="lbl-m mid" x="191" y="98">x2</text>
+        <text class="lbl-m mid" x="229" y="98">x4</text><text class="lbl-m mid" x="267" y="98">x1</text>
+        <text class="lbl-m mid" x="305" y="98">x2</text><text class="lbl-m mid" x="343" y="98">x2</text>
+        <text class="lbl-m mid" x="381" y="98">x4</text><text class="lbl-m mid" x="419" y="98">x1</text>
+        <text class="lbl-m mid" x="457" y="98">x3</text><text class="lbl-m mid" x="495" y="98">x4</text>
+        <text class="lbl-m mid" x="533" y="98">x2</text><text class="lbl-m mid" x="571" y="98">x1</text>
+
+        <!-- observations -->
+        <path class="dot" d="M77 40 l-5 -8 h10 z"/>
+        <path class="dot" d="M229 40 l-5 -8 h10 z"/>
+        <path class="dot" d="M305 40 l-5 -8 h10 z"/>
+        <path class="dot" d="M419 40 l-5 -8 h10 z"/>
+
+        <line class="ax" x1="60" y1="118" x2="208" y2="118"/><text class="lbl-s mid" x="134" y="134">T = 4</text>
+        <line class="ax" x1="212" y1="118" x2="284" y2="118"/><text class="lbl-s mid" x="248" y="134">T = 2</text>
+        <line class="ax" x1="288" y1="118" x2="398" y2="118"/><text class="lbl-s mid" x="343" y="134">T = 3</text>
+        <line class="ax" x1="402" y1="118" x2="588" y2="118"/><text class="lbl-s mid" x="495" y="134">T = 5</text>
+      </g>
+      <text class="lbl-s" x="10" y="160">▾ 観測。観測のたびに mask と T を選ぶ。濃い色と薄い色は別の mask、灰色は mask なし</text>
+
+      <line class="ax-d" x1="10" y1="178" x2="630" y2="178"/>
+
+      <!-- two controllers -->
+      <rect class="box-a" x="10" y="194" width="300" height="64" rx="6"/>
+      <text class="lbl-b mid" x="160" y="218">保持時間を状態依存にする</text>
+      <text class="lbl-m mid" x="160" y="240">mask と T を状態で選ぶ</text>
+      <rect class="box" x="330" y="194" width="300" height="64" rx="6"/>
+      <text class="lbl-b mid" x="480" y="218">mask だけを変える</text>
+      <text class="lbl-m mid" x="480" y="240">保持時間は状態で変えない</text>
+    </svg>
+    <figcaption id="fig-cap">上は1本のエピソードの模式図。各マイクロステップで1ノードだけ再計算する。観測のたびに mask と保持時間 T を選び、T マイクロステップ同じ mask を使う。下は比べる制御器のうち2つ。T の値とノードの並びは説明用で、実験の値ではない。</figcaption>
+  </figure>
+
+  <h2><span class="no">01</span>問い</h2>
+  <p>非同期に更新するネットワークで、辺の mask をいつまで保つかを状態で選ぶと、差が出るか。また、目標の固定点を保ったまま切れる辺はどれか。</p>
+
+  <h2><span class="no">02</span>モデルと規模</h2>
+  <ul>
+    <li>各マイクロステップで、確率に従って1ノードだけ再計算する。</li>
+    <li>評価は 94 ネットワーク（n=50 が 46、n=100 が 48）を使う。</li>
+  </ul>
+
+  <h2><span class="no">03</span>何を動かすか</h2>
+  <p>辺の mask と、その保持時間 T を動かす。観測のたびに両方を選び、T マイクロステップ同じ mask を使う。<b>次の観測で mask を戻せる。</b></p>
+
+  <h2><span class="no">04</span>実験の設計</h2>
+  <ul>
+    <li>94 ネットワーク × 初期状態3 × 制御器3 × 重み5 = 4230 エピソード。</li>
+    <li>制御器のうち2つは、保持時間を状態依存にするものと、mask だけを変えるもの。</li>
+    <li>判定は費用を見る前に固定した（事前登録）。</li>
+  </ul>
+
+  <h2><span class="no">05</span>結果</h2>
+  <h3><span class="badge exact">exact</span> 定理</h3>
+  <p>目標が固定点で、残る辺のグラフが自己ループを含めて DAG であるとする。このとき、x*<sub>j</sub> = 0 の辺を除去しても、その固定点を保てる。</p>
+  <p class="eq">目標 x* が固定点 ∧ 残る辺のグラフが DAG（自己ループを含む）<br>⇒ x*_j = 0 の辺の除去で x* を保てる</p>
+  <p>これは十分条件で、必要条件ではない。</p>
+
+  <h3><span class="badge empirical">empirical</span> 評価</h3>
+  <div class="kpi">
+    <div><span class="v mono">4230 / 4230</span><span class="k">完走したエピソード</span></div>
+    <div><span class="v mono">5 / 5</span><span class="k">保持時間を状態依存にする制御器：平均差の 95% 区間が 0 を除いた重み</span></div>
+    <div><span class="v mono">0 / 5</span><span class="k">mask だけを変える制御器：同じ</span></div>
+  </div>
+  <ul>
+    <li>完走は 4230/4230。</li>
+    <li><b>保持時間を状態依存にする制御器は、5つの重みすべてで平均差の 95% 区間が 0 を除いた。</b>例：W1 で −1839.23、区間 [−2719.88, −1107.84]。</li>
+    <li>mask だけを変える制御器は 0/5。</li>
+  </ul>
+
+  <h2><span class="no">06</span>読むときの注意</h2>
+  <div class="note">
+    <p>定理（exact）と評価（empirical）は別の結果である。評価の数値で定理を裏づけたことにはしない。</p>
+    <p>先行研究に同じ定理がある。このラインの新しい主張として読まない。</p>
+    <p>判定は費用を見る前に固定した（事前登録）。</p>
+  </div>
+
+  <footer>
+    <p>出典：<a href="https://github.com/koshikai/bn-edge-removal-public" target="_blank" rel="noopener noreferrer">https://github.com/koshikai/bn-edge-removal-public</a></p>
+    <p>最終更新：2026-11-08</p>
+    <p><a href="../">← 研究ラインの地図へ戻る</a></p>
+  </footer>
+</main>
+</body>
+</html>
