@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>設定 A/B · 研究ラインの地図</title>
-  <meta name="description" content="詳細モデルと小モデルの関係を2通りに置いて、制御計算の費用と性能を探る探索ライン。">
+  <meta name="description" content="小さい BN の制御知識を大きい BN へ移す探索ライン。設定A は既知の詳細モデルの縮約、設定B は未知の詳細モデルへの事前知識として扱う。">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -12,88 +12,231 @@
   <nav class="crumbs"><a href="../">地図</a> / <span>設定 A/B</span></nav>
   <p class="eyebrow mono">LINE 03 · 探索</p>
   <h1>設定 A/B</h1>
-  <p class="lede">詳細モデルと小モデルを2通りに組み合わせ、制御の性能と費用を探る。</p>
-  <p class="badges"><span class="badge exploratory">exploratory</span></p>
+  <p class="lede">探索。小さい BN の制御知識を大きい BN へ移す。設定A は既知の詳細モデルの縮約、設定B は未知の詳細モデルへの事前知識として扱う。</p>
+  <p class="badges"><span class="badge exploratory">exploratory</span><span class="badge exact">評価は全開始状態の厳密平均</span></p>
 
   <figure>
-    <svg viewBox="0 0 640 300" role="img" aria-labelledby="fig-cap">
+    <svg class="fig-wide" width="100%" viewBox="0 0 360 470" role="img" aria-labelledby="sa-f1-cap">
       <defs>
-        <marker id="a-f" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path class="mk-fixed" d="M0 0 L10 5 L0 10 z"/></marker>
-        <marker id="a-r" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path class="mk-rem" d="M0 0 L10 5 L0 10 z"/></marker>
+        <marker id="saa" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path class="mk-fixed" d="M0 0 L10 5 L0 10 z"/></marker>
       </defs>
-      <!-- Setting A -->
-      <text class="lbl-b" x="10" y="22">設定A　詳細論理は既知</text>
-      <rect class="box" x="10" y="40" width="130" height="80" rx="6"/>
-      <text class="lbl-b mid" x="75" y="72">詳細論理</text>
-      <text class="lbl-m mid" x="75" y="94">既知</text>
-      <path class="e e-rem" d="M140 62 L218 62" marker-end="url(#a-r)"/>
-      <rect class="box-a" x="220" y="40" width="220" height="44" rx="6"/>
-      <text class="lbl mid" x="330" y="67">縮約：構築 → 選択 → 検証 → 合成</text>
-      <path class="e e-fixed" d="M140 104 L218 104" marker-end="url(#a-f)"/>
-      <rect class="box" x="220" y="90" width="220" height="30" rx="6"/>
-      <text class="lbl mid" x="330" y="110">直接計画</text>
-      <path class="e e-fixed" d="M440 62 L498 76" marker-end="url(#a-f)"/>
-      <path class="e e-fixed" d="M440 105 L498 92" marker-end="url(#a-f)"/>
-      <rect class="box" x="500" y="58" width="130" height="44" rx="6"/>
-      <text class="lbl mid" x="565" y="85">性能と費用を比べる</text>
-
-      <line class="ax-d" x1="10" y1="150" x2="630" y2="150"/>
-
-      <!-- Setting B -->
-      <text class="lbl-b" x="10" y="180">設定B　詳細モデルは未知</text>
-      <rect class="box-a" x="10" y="196" width="130" height="80" rx="6"/>
-      <text class="lbl-b mid" x="75" y="222">先行する小モデル</text>
-      <text class="lbl-s mid" x="75" y="244">source の来歴</text>
-      <text class="lbl-s mid" x="75" y="260">対応関係を明示</text>
-      <path class="e e-rem" d="M140 220 L218 220" marker-end="url(#a-r)"/>
-      <text class="lbl-s mid lbl-acc" x="180" y="212">事前知識</text>
-      <rect class="box-x" x="220" y="196" width="220" height="80" rx="6"/>
-      <text class="lbl-b mid" x="330" y="222">未知の詳細モデル</text>
-      <text class="lbl-s mid" x="330" y="244">同じ target 情報</text>
-      <text class="lbl-s mid" x="330" y="260">同じ取得予算</text>
-      <path class="e e-fixed" d="M440 236 L498 236" marker-end="url(#a-f)"/>
-      <rect class="box" x="500" y="214" width="130" height="44" rx="6"/>
-      <text class="lbl mid" x="565" y="241">知識の有無で比べる</text>
+      <rect class="box" x="30" y="10" width="300" height="56" rx="8"/>
+      <text class="lbl-b mid" x="180" y="33">入力：小さい BN の制御知識</text>
+      <text class="lbl mid" x="180" y="53">目標へ到達し、維持する</text>
+      <path class="e e-fixed" d="M120 66 L80 88" marker-end="url(#saa)"/>
+      <path class="e e-fixed" d="M240 66 L280 88" marker-end="url(#saa)"/>
+      <rect class="box-a" x="10" y="90" width="164" height="110" rx="8"/>
+      <text class="lbl-b mid" x="92" y="113">設定A</text>
+      <text class="lbl mid" x="92" y="134">詳細12ノードは既知</text>
+      <text class="lbl mid" x="92" y="153">保持6・8・10・12</text>
+      <text class="lbl mid" x="92" y="172">constant と robust</text>
+      <text class="lbl mid" x="92" y="191">12条件 × 4096開始</text>
+      <rect class="box-a" x="186" y="90" width="164" height="110" rx="8"/>
+      <text class="lbl-b mid" x="268" y="113">設定B</text>
+      <text class="lbl mid" x="268" y="134">10 → 15ノード</text>
+      <text class="lbl mid" x="268" y="153">詳細モデルは未知</text>
+      <text class="lbl mid" x="268" y="172">親 24 / 12 / 48</text>
+      <text class="lbl mid" x="268" y="191">全 2^15 開始</text>
+      <path class="e e-fixed" d="M92 200 L150 222" marker-end="url(#saa)"/>
+      <path class="e e-fixed" d="M268 200 L210 222" marker-end="url(#saa)"/>
+      <rect class="box-u" x="30" y="224" width="300" height="92" rx="8"/>
+      <text class="lbl-b mid" x="180" y="247">判定：真の詳細モデルで測る</text>
+      <text class="lbl mid" x="180" y="267">A：保証できる初期状態の数</text>
+      <text class="lbl mid" x="180" y="286">B：割引報酬の差と区間</text>
+      <text class="lbl mid" x="180" y="305">独立単位は親 BN</text>
+      <path class="e e-fixed" d="M180 316 L180 338" marker-end="url(#saa)"/>
+      <rect class="box-g" x="30" y="340" width="300" height="74" rx="8"/>
+      <text class="lbl-b mid" x="180" y="363">集計：仮説を作るためだけに使う</text>
+      <text class="lbl mid" x="180" y="383">証拠として引用しない</text>
+      <text class="lbl mid" x="180" y="402">確認段階へは自動で移らない</text>
+      <rect class="box-x" x="30" y="426" width="300" height="36" rx="8"/>
+      <text class="lbl mid" x="180" y="449">確認段階：凍結したコードと新しい親で再実行</text>
     </svg>
-    <figcaption id="fig-cap">上が設定A、下が設定B。A では縮約の構築から合成までの費用を含めて、直接計画と比べる。B では target 情報と取得予算を揃え、小モデルの知識があるかないかで比べる。</figcaption>
+    <figcaption id="sa-f1-cap">図1 実験の流れ。同じ「小から大への移しかえ」を2つの設定に分ける。設定A は詳細モデルが既知で、縮約の保存性を調べる。設定B は詳細モデルが未知で、事前知識として使ったときの報酬を調べる。破線の枠はまだ実施していない段階である。</figcaption>
   </figure>
 
   <h2><span class="no">01</span>問い</h2>
-  <p>小さなモデルを使うと、詳細モデルの制御は安く、またはよくなるか。設定を2つに分けて探る。</p>
-  <ul>
-    <li>設定A：詳細論理がわかっているとき、制御計算を縮約して得をするか。</li>
-    <li>設定B：詳細モデルがわからないとき、先行する小モデルの知識で得をするか。</li>
-  </ul>
+  <p><span class="badge exploratory">exploratory</span> このラインは、小さいブーリアンネットワーク（BN）の制御知識を大きい BN へ移せるかを調べる。移せれば、目標状態へ到達し維持するのに必要な学習や計算を減らせる。</p>
+  <span class="cite mono">README.md:3@b4aebf29d</span>
+  <p>同じ「移す」でも、2つの別の問題が混ざっている。1つは、詳細モデルが既知で、それを縮約して計算を減らす問題である。もう1つは、先にある小さいモデルから、まだ分からない詳細モデルへ知識を移す問題である。前者では詳細モデルを答え合わせに使えるが、後者では使えない。だから<b>2つを設定A と設定B に分けて扱う</b>。</p>
+  <span class="cite mono">README.md:5@b4aebf29d</span>
+  <p>当面は、設定A の小規模な保存性の診断を進める。設定B の学習研究や確認研究へは、自動では移らない。</p>
+  <span class="cite mono">docs/CURRENT_STATUS_AND_ROADMAP_ja.md:25@b4aebf29d</span>
 
-  <h2><span class="no">02</span>モデルと規模</h2>
-  <p>設定Aは、既知の詳細論理を出発点にする。設定Bは、先行する小モデルと、未知の詳細モデルの組を扱う。規模の数値はこのページに載せない。</p>
+  <h2><span class="no">02</span>設定</h2>
+  <p><span class="badge exploratory">exploratory</span> 2つの設定の構成を表1に並べる。設定A は12ノードの詳細モデルから一部のノードを残して縮約する。設定B は10ノードの元モデルから15ノードの転移先へ知識を移す。</p>
+  <div class="table-wrap">
+  <table class="t" style="min-width: 0; font-size: 0.84rem;">
+    <caption class="small muted" style="caption-side: top; text-align: left;">表1 設定A と設定B の構成</caption>
+    <thead><tr><th>項目</th><th>設定A</th><th>設定B</th></tr></thead>
+    <tbody>
+      <tr><td>詳細モデル</td><td>12ノード、既知</td><td>15ノード、未知として扱う</td></tr>
+      <tr><td>小さいモデル</td><td>保持6・8・10・12の入れ子</td><td>10ノード</td></tr>
+      <tr><td>縮約や転移の方式</td><td>constant と robust</td><td>事前学習、Source Primitive など</td></tr>
+      <tr><td>目標</td><td>ノード3と4がともに ON</td><td>親ごとの4課題</td></tr>
+      <tr><td>条件の数</td><td>12派生条件 × 4096開始</td><td>親内で4条件 × 4課題 × seed</td></tr>
+      <tr><td>モデル族</td><td>—</td><td><span class="mono">site × gate × hidden</span></td></tr>
+      <tr><td>独立単位</td><td>親 BN</td><td>親 BN（テスト24、検証12、学習48）</td></tr>
+      <tr><td>評価の開始状態</td><td>49152開始</td><td>全 2^15 開始、マスク0</td></tr>
+      <tr><td>更新と時間</td><td>資料に無い</td><td>同期更新、H16、割引0.9</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <span class="cite mono">exploration/conservative_projection_frontier_2026_10_24/REPORT_ja.md:3@b4aebf29d</span>
+  <span class="cite mono">exploration/small_to_large_transfer_2026_10_25/REPORT_ja.md:3@b4aebf29d</span>
+  <span class="cite mono">exploration/small_to_large_transfer_2026_10_25/REPORT_ja.md:16@b4aebf29d</span>
+  <span class="cite mono">exploration/small_to_large_transfer_2026_10_25/REPORT_ja.md:20@b4aebf29d</span>
+  <p>設定B の親内には4条件 × 4課題 × seed がある。これらは平均して、親ごとに1点にまとめる。制御の対象は3本の制御辺で、同時に除去できるのは最大2本である。</p>
+  <p>制御する状態は、BN の状態と持続する除去マスクの組である。マスクは、以後どの辺をトグルできるかを決める。だからマスクも状態の一部として扱う。</p>
+  <span class="cite mono">AGENTS.md:48@b4aebf29d</span>
 
-  <h2><span class="no">03</span>何を動かすか</h2>
-  <p>制御計算に使うモデルを動かす。</p>
-  <ul>
-    <li>設定A：詳細論理から縮約したモデルで制御を計算する。</li>
-    <li>設定B：小モデルを、未知の詳細モデルへの事前知識として使う。</li>
-  </ul>
+  <h2><span class="no">03</span>介入の意味</h2>
+  <p><span class="badge exact">exact</span> 辺の除去は厳密に定義する。制御辺 ctrl_i→dest_i を除去すると、dest_i の更新式の中の否定リテラル <span class="mono">!v_i</span> だけを True に置き換える。肯定のリテラルには触れない。除去は可逆のトグルで、マスクは持続する。</p>
+  <p class="eq">除去前　dest_i ← a ∧ !v_i　　除去後　dest_i ← a ∧ True = a</p>
+  <p>上の式は説明のための例である。v_i が1のとき、除去前の dest_i は0に抑えられる。除去後は v_i の値に関係なく a に従う。つまり除去は、v_i による抑制を外す操作として働く。</p>
+  <span class="cite mono">exploration/small_to_large_transfer_2026_10_25/REPORT_ja.md:16@b4aebf29d</span>
+  <p>設定A の縮約は、隠れたノードを定数に固定して作る。これは条件つきの射影（conditional projection）である。マルコフ準同型や、アトラクタを保つ商や、表現型の制御を保つ変換とは限らない。縮約したモデルで成功した制御が、詳細モデルでも成功するとは限らない。</p>
+  <span class="cite mono">AGENTS.md:50@b4aebf29d</span>
+  <p>他のラインとの違い。<a href="paper1.html">Paper 1</a> などのラインは1つの BN の中で辺除去を考える。このラインは、規模の違う2つの BN の間で、制御の知識を移せるかを問う。</p>
 
-  <h2><span class="no">04</span>実験の設計</h2>
-  <ul>
-    <li>設定A：<b>縮約の構築・選択・検証・合成をすべて費用に含める。</b>そのうえで直接計画と性能と費用を比べる。</li>
-    <li>設定B：source の来歴と対応関係を明示する。同じ target 情報と同じ取得予算で、知識の有無による差を測る。</li>
-    <li>平均成功、全候補保証、有限割引報酬、永久安定化は、分けて書く。</li>
-    <li>同じ公開情報で計算する oracle 診断と、配備できる方式を混同しない。</li>
-  </ul>
+  <h2><span class="no">04</span>実験の手順</h2>
+  <ol class="steps">
+    <li>親 BN を分ける。設定B では、親をテスト24、検証12、学習48に分ける。独立した標本は親の数で数え、派生した縮約や課題や seed や開始状態の繰り返しを独立と数えない。<span class="cite mono">AGENTS.md:55@b4aebf29d</span></li>
+    <li>方式を学習する。設定B では、事前学習ありと転移なし（scratch）を、転移先のデータ量 B を変えて比べる。B は転移先から集めたデータの量である。</li>
+    <li>真のターゲットで評価する。全 2^15 の開始状態で、マスク0から始めた厳密平均をとる。BN は決定論的なので、標本のノイズはない。<span class="cite mono">exploration/small_to_large_transfer_2026_10_25/REPORT_ja.md:20@b4aebf29d</span></li>
+    <li>区間をつける。親を単位としたブートストラップを1万回行い、差の区間を出す。</li>
+    <li>設定A では保証を数える。保持ノード数ごとに、保守的な縮約で成功を保証できる初期状態の数を、49152開始の中で数える。</li>
+    <li>結果の使い道を決める。探索の結果は仮説を作るためだけに使う。証拠として引用せず、<span class="mono">experiments/</span> へ書かない。<span class="cite mono">exploration/README.md:7@b4aebf29d</span></li>
+    <li>確認段階へは自動で移らない。移す場合は、凍結したコードと新しい親で再実行する。<span class="cite mono">AGENTS.md:80@b4aebf29d</span></li>
+  </ol>
+  <p>除外規則と seed の数は、このページの資料に無い。学習の予算も資料に無い。</p>
 
-  <h2><span class="no">05</span>結果</h2>
-  <p>探索のため、数値は載せない。</p>
+  <h2><span class="no">05</span>指標の定義</h2>
+  <p><span class="badge exploratory">exploratory</span> 設定B の主な指標は割引報酬である。地平 H16、割引0.9で、全 2^15 開始の平均をとる。分母は開始状態の数で、親ごとに1つの値になる。報告する差は、その値の親間の平均差である。正規化の細かい方法は、このページの資料に無い。</p>
+  <p class="eq">差 = 親ごとの平均報酬（方式1） − 親ごとの平均報酬（方式2）を親で平均</p>
+  <p>設定A の主な指標は保証数である。保守的な縮約が「必ず成功する」と保証できる初期状態の数を、49152開始の中で数える。分母は49152である。これとは別に、定数方策（constant）が詳細モデルで永久に安定化できた初期状態の数を、永久成功数として数える。</p>
+  <p>到達と維持は、別の量として報告する。いつか ON になった（ever-on）、最後に ON（terminal-on）、最後の k ステップが ON（last-k-on）、割引報酬、有限時間の到達可能性、<b>永久安定化</b>を混ぜない。どれを使うかで、同じ方策の成績が変わるからである。</p>
+  <span class="cite mono">AGENTS.md:52@b4aebf29d</span>
 
-  <h2><span class="no">06</span>読むときの注意</h2>
-  <div class="note">
-    <p><b>探索の結果を、確認研究の有効性の根拠にしない。</b></p>
-    <p>このラインは確認研究へ自動では移らない。</p>
+  <h2><span class="no">06</span>結果</h2>
+  <div class="kpi">
+    <div><span class="v mono">+0.0891</span><span class="k">事前学習 − 転移なし</span><span class="unit">B=32、区間 [+0.0749, +0.1039]、親24</span></div>
+    <div><span class="v mono">−0.0033</span><span class="k">最良の学習方式 − Source Primitive</span><span class="unit">B=256、区間 [−0.0048, −0.0019]</span></div>
+    <div><span class="v mono">1248 / 49152</span><span class="k">設定A 保持10の保証数</span><span class="unit">保持6・8では0</span></div>
+  </div>
+  <p><span class="badge exploratory">exploratory</span> 設定B では、GNN の自ソース事前学習が、転移なしを全データ量で上回った。差は B=32で +0.0891 [+0.0749, +0.1039]、B=256でも +0.0228 [+0.0165, +0.0298] である。どちらの区間もゼロを含まない。ただし探索の結果なので、証拠としては使わない。</p>
+  <span class="cite mono">exploration/small_to_large_transfer_2026_10_25/REPORT_ja.md:7@b4aebf29d</span>
+  <p>一方、学習した方式は、単純な Source Primitive を上回らなかった。最も近いのは GNN の他親事前学習で、差は −0.0033 [−0.0048, −0.0019]（B=256）である。区間はゼロを含まず、負の側にある。さらに、事前学習済みのモデルに転移先のデータを足すと、同じ方式の B=0 より悪くなった。差は B=256で −0.0117 [−0.0140, −0.0094] である。</p>
+  <span class="cite mono">exploration/small_to_large_transfer_2026_10_25/REPORT_ja.md:8@b4aebf29d</span>
+  <span class="cite mono">exploration/small_to_large_transfer_2026_10_25/REPORT_ja.md:9@b4aebf29d</span>
+
+  <div class="table-wrap">
+  <table class="t" style="min-width: 0; font-size: 0.84rem;">
+    <caption class="small muted" style="caption-side: top; text-align: left;">表2 設定B の差（親24、親単位ブートストラップの区間）</caption>
+    <thead><tr><th>比較</th><th>B</th><th style="text-align: right;">差 [区間]</th></tr></thead>
+    <tbody>
+      <tr><td>GNN 自ソース事前学習 − 転移なし</td><td class="mono">32</td><td class="num mono">+0.0891<br>[+0.0749, +0.1039]</td></tr>
+      <tr><td>GNN 自ソース事前学習 − 転移なし</td><td class="mono">256</td><td class="num mono">+0.0228<br>[+0.0165, +0.0298]</td></tr>
+      <tr><td>GNN 他親事前学習 − Source Primitive</td><td class="mono">256</td><td class="num mono">−0.0033<br>[−0.0048, −0.0019]</td></tr>
+      <tr><td>追加データあり − 同じ方式の B=0</td><td class="mono">256</td><td class="num mono">−0.0117<br>[−0.0140, −0.0094]</td></tr>
+    </tbody>
+  </table>
   </div>
 
+  <figure>
+    <svg class="fig-wide" width="100%" viewBox="0 0 360 252" role="img" aria-labelledby="sa-f2-cap">
+      <text class="lbl" x="8" y="16">設定B の差と区間（割引報酬、親24）</text>
+      <line class="ax-d" x1="141.4" y1="48" x2="141.4" y2="68"/>
+      <line class="ax" x1="204.3" y1="50" x2="204.3" y2="66"/>
+      <line class="ax" x1="267.1" y1="50" x2="267.1" y2="66"/>
+      <line class="ax" x1="330" y1="50" x2="330" y2="66"/>
+      <line class="ax-d" x1="141.4" y1="92" x2="141.4" y2="112"/>
+      <line class="ax" x1="204.3" y1="94" x2="204.3" y2="110"/>
+      <line class="ax" x1="267.1" y1="94" x2="267.1" y2="110"/>
+      <line class="ax" x1="330" y1="94" x2="330" y2="110"/>
+      <line class="ax-d" x1="141.4" y1="136" x2="141.4" y2="156"/>
+      <line class="ax" x1="204.3" y1="138" x2="204.3" y2="154"/>
+      <line class="ax" x1="267.1" y1="138" x2="267.1" y2="154"/>
+      <line class="ax" x1="330" y1="138" x2="330" y2="154"/>
+      <line class="ax-d" x1="141.4" y1="180" x2="141.4" y2="200"/>
+      <line class="ax" x1="204.3" y1="182" x2="204.3" y2="198"/>
+      <line class="ax" x1="267.1" y1="182" x2="267.1" y2="198"/>
+      <line class="ax" x1="330" y1="182" x2="330" y2="198"/>
+      <line class="ax" x1="110" y1="204" x2="330" y2="204"/>
+      <line class="ax" x1="141.4" y1="204" x2="141.4" y2="209"/>
+      <line class="ax" x1="204.3" y1="204" x2="204.3" y2="209"/>
+      <line class="ax" x1="267.1" y1="204" x2="267.1" y2="209"/>
+      <line class="ax" x1="330" y1="204" x2="330" y2="209"/>
+      <text class="lbl" x="8" y="44">事前学習 − 転移なし（B=32）　+0.0891</text>
+      <line x1="259.1" y1="58" x2="304.7" y2="58" stroke="var(--accent)" stroke-width="2"/>
+      <circle cx="281.4" cy="58" r="4.5" fill="var(--accent)"/>
+      <text class="lbl" x="8" y="88">事前学習 − 転移なし（B=256）　+0.0228</text>
+      <line x1="167.4" y1="102" x2="188.3" y2="102" stroke="var(--accent)" stroke-width="2"/>
+      <circle cx="177.3" cy="102" r="4.5" fill="var(--accent)"/>
+      <text class="lbl" x="8" y="132">他親事前学習 − Source Primitive（B=256）　−0.0033</text>
+      <line x1="133.9" y1="146" x2="138.4" y2="146" stroke="var(--cut)" stroke-width="2"/>
+      <circle cx="136.2" cy="146" r="4.5" fill="var(--cut)"/>
+      <text class="lbl" x="8" y="176">追加データ − B=0（B=256）　−0.0117</text>
+      <line x1="119.4" y1="190" x2="126.7" y2="190" stroke="var(--cut)" stroke-width="2"/>
+      <circle cx="123" cy="190" r="4.5" fill="var(--cut)"/>
+      <text class="lbl mid" x="141.4" y="222">0</text>
+      <text class="lbl mid" x="204.3" y="222">0.04</text>
+      <text class="lbl mid" x="267.1" y="222">0.08</text>
+      <text class="lbl mid" x="330" y="222">0.12</text>
+      <text class="lbl mid" x="220" y="246">報酬の差（点は推定、線は区間）</text>
+    </svg>
+    <figcaption id="sa-f2-cap">図2 設定B の4つの差。各行の破線がゼロ、細い縦線は 0.04・0.08・0.12 の位置。青の2つは事前学習が転移なしを上回った比較、橙の2つは学習した方式や追加データが下回った比較である。4つとも区間はゼロを含まない。どれも探索の値で、証拠ではない。</figcaption>
+  </figure>
+
+  <p>設定A では、保持6と8のとき、保守的な縮約が保証できる初期状態は0だった。保持10では1248/49152開始を保証した。定数方策の永久成功数は、保持6・8・10・12で5444、7032、7922、23614/49152だった（表3）。</p>
+  <div class="table-wrap">
+  <table class="t" style="min-width: 0;">
+    <caption class="small muted" style="caption-side: top; text-align: left;">表3 設定A の保持ノード数ごとの結果（分母49152）</caption>
+    <thead><tr><th>保持ノード数</th><th style="text-align: right;">保証数</th><th style="text-align: right;">constant の永久成功</th></tr></thead>
+    <tbody>
+      <tr><td>6</td><td class="num mono">0</td><td class="num mono">5444</td></tr>
+      <tr><td>8</td><td class="num mono">0</td><td class="num mono">7032</td></tr>
+      <tr><td>10</td><td class="num mono">1248</td><td class="num mono">7922</td></tr>
+      <tr><td>12</td><td class="num">資料に無い</td><td class="num mono">23614</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <span class="cite mono">exploration/conservative_projection_frontier_2026_10_24/REPORT_ja.md:3@b4aebf29d</span>
+  <span class="cite mono">exploration/conservative_projection_frontier_2026_10_24/REPORT_ja.md:21@b4aebf29d</span>
+
+  <h2><span class="no">07</span>内訳と副次</h2>
+  <p><span class="badge exploratory">exploratory</span> 予測モデルの誤差を除いても、方策は良くならないことがある。収集した分布の上で正確な予測モデル P_mu を与えて計画すると、96条件のうち43件で source 方策より制御報酬が下がった。下がった条件は、8つの親すべてに含まれていた。</p>
+  <p>全条件の平均では、P_mu が source を +0.004994 上回った。平均が正でも、条件ごとに見ると96条件中43件で退行している。<b>平均だけを見て「正確なモデルなら良くなる」と読まない</b>。この値に区間は付いていない。</p>
+  <span class="cite mono">exploration/known_law_projection_diagnostic_2026_10_25/REPORT_ja.md:3@b4aebf29d</span>
+  <p>source の事前知識に追加学習を重ねたときも、結果は条件で揺れた。強い正則化（lambda=10）で32遷移を使うと、平均差は +0.001360 だった。ただし改善したのは4親のうち3親だった。128遷移に増やすと、平均差は −0.000090 になった。データを増やすと符号が変わる。</p>
+  <span class="cite mono">exploration/source_prior_adaptation_2026_10_26/REPORT_ja.md:3@b4aebf29d</span>
+  <p>この追加学習の診断は4親・16派生で行った。親の数が少なく、区間も付いていないので、符号の変化が偶然かどうかは分かっていない。</p>
+
+  <h2><span class="no">08</span>届かなかったこと</h2>
+  <p><span class="badge exploratory">exploratory</span> 設定A で保持6と8のとき、保証数は0だった。これは、縮約したモデルだけからは、詳細モデルでの成功を1つの初期状態についても保証できなかったことを意味する。保持10でようやく1248/49152開始を保証した。</p>
+  <span class="cite mono">exploration/conservative_projection_frontier_2026_10_24/REPORT_ja.md:3@b4aebf29d</span>
+  <p>縮約しても計算は減っていない。保持10の全12条件で、constant の構築は86016モデル行、robust の構築は344064行だった。robust の行数は、詳細12ノードの全マスク遷移表と同じ行数である。ノードを減らしたのに、構築に要る行数は詳細モデルと変わらない。縮約で計算を減らすという設定A の目的には、まだ届いていない。</p>
+  <span class="cite mono">exploration/conservative_projection_frontier_2026_10_24/REPORT_ja.md:51@b4aebf29d</span>
+  <p>設定B では、Source Primitive から全状態の動的計画法（DP）による oracle までに +0.0501 の余地がある。学習した方式はこの余地を取れず、Source Primitive にも届かなかった。</p>
+  <span class="cite mono">exploration/small_to_large_transfer_2026_10_25/REPORT_ja.md:8@b4aebf29d</span>
+
+  <h2><span class="no">09</span>読むときの注意</h2>
+  <div class="note">
+    <p><b>このページの数値はすべて探索の値である。</b>仮説を作るためだけに使い、証拠として引用しない。</p>
+    <p>区間がゼロを含まない比較でも、「有意」とは書かない。確認段階で新しい親を使って再実行するまで、結論にしない。</p>
+    <p>事前学習が転移なしを上回ったことと、学習した方式が Source Primitive に届かなかったことは両立する。前者だけを取り出して「転移が成功した」と読まない。</p>
+    <p>独立した標本は親 BN の数である。派生条件や開始状態の数（49152や 2^15）を標本数として読まない。</p>
+  </div>
+  <p>型の整理。設定B の評価は全開始状態の厳密平均なので、親の中には標本のノイズがない。それでも、親をどう選ぶかに依存する。だからライン全体は exploratory である。</p>
+
+  <h2><span class="no">10</span>再現の手がかり</h2>
+  <p>リポジトリは bn-edge-removal-transfer、commit は b4aebf29d である。方針は <span class="mono" style="overflow-wrap: anywhere;">README.md</span>、<span class="mono" style="overflow-wrap: anywhere;">AGENTS.md</span>、<span class="mono" style="overflow-wrap: anywhere;">docs/CURRENT_STATUS_AND_ROADMAP_ja.md</span> にある。</p>
+  <p>設定B の報告は <span class="mono" style="overflow-wrap: anywhere;">exploration/small_to_large_transfer_2026_10_25/REPORT_ja.md</span> にある。設定A の報告は <span class="mono" style="overflow-wrap: anywhere;">exploration/conservative_projection_frontier_2026_10_24/REPORT_ja.md</span>、<span class="mono" style="overflow-wrap: anywhere;">exploration/known_law_projection_diagnostic_2026_10_25/REPORT_ja.md</span>、<span class="mono" style="overflow-wrap: anywhere;">exploration/source_prior_adaptation_2026_10_26/REPORT_ja.md</span> にある。</p>
+  <p>探索は再現を求めない。確認段階へ移す方式は、凍結したコードと新しい親で再実行するからである。実行時間はこのページの資料に無い。</p>
+  <span class="cite mono">AGENTS.md:80@b4aebf29d</span>
+
   <footer>
-    <p>出典：<a href="https://github.com/koshikai/bn-edge-removal-public" target="_blank" rel="noopener noreferrer">https://github.com/koshikai/bn-edge-removal-public</a></p>
+    <p>出典：bn-edge-removal-transfer @ b4aebf29d · このページ：<a href="https://github.com/koshikai/bn-edge-removal-public" target="_blank" rel="noopener noreferrer">https://github.com/koshikai/bn-edge-removal-public</a></p>
     <p>最終更新：2026-11-08</p>
     <p><a href="../">← 研究ラインの地図へ戻る</a> · <a href="../#numbers">数値の一覧</a> · <a href="../#lines">ライン一覧</a></p>
     <p class="pager"><a href="paper2.html">← 本体 Paper 2</a> · <a href="sfgpi.html">SF + GPI →</a></p>
