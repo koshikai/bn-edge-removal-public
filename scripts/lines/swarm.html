@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ロボット群の通信リンク · 研究ラインの地図</title>
+  <meta name="description" content="4台のロボットの環で、通信リンクを切る制御を全16状態について調べたライン。">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<main>
+  <nav class="crumbs"><a href="../">地図</a> / <span>ロボット群の通信リンク</span></nav>
+  <p class="eyebrow mono">LINE 06 · 全状態探索</p>
+  <h1>ロボット群の通信リンク</h1>
+  <p class="lede">4台のロボットの環で、通信リンクを切って振る舞いを変える。</p>
+  <p class="badges"><span class="badge exact">exact</span></p>
+
+  <figure>
+    <svg viewBox="0 0 640 290" role="img" aria-labelledby="fig-cap">
+      <defs>
+        <marker id="a-f" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path class="mk-fixed" d="M0 0 L10 5 L0 10 z"/></marker>
+        <marker id="a-c" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path class="mk-cut" d="M0 0 L10 5 L0 10 z"/></marker>
+      </defs>
+      <!-- directed -->
+      <text class="lbl-b mid" x="160" y="22">directed</text>
+      <circle class="nd pin" cx="160" cy="60" r="20"/><text class="nt" x="160" y="60">R1</text>
+      <circle class="nd" cx="250" cy="150" r="20"/><text class="nt" x="250" y="150">R2</text>
+      <circle class="nd" cx="160" cy="240" r="20"/><text class="nt" x="160" y="240">R3</text>
+      <circle class="nd" cx="70" cy="150" r="20"/><text class="nt" x="70" y="150">R4</text>
+      <path class="e e-cut" d="M176 74 L234 134" marker-end="url(#a-c)"/>
+      <path class="e e-fixed" d="M236 166 L176 226" marker-end="url(#a-f)"/>
+      <path class="e e-fixed" d="M144 226 L86 166" marker-end="url(#a-f)"/>
+      <path class="e e-fixed" d="M84 134 L144 74" marker-end="url(#a-f)"/>
+      <text class="lbl-s lbl-cut" x="214" y="96">このステップで除去</text>
+      <text class="lbl-s mid" x="160" y="32">leader</text>
+
+      <line class="ax-d" x1="320" y1="20" x2="320" y2="270"/>
+
+      <!-- bidirectional -->
+      <text class="lbl-b mid" x="480" y="22">bidirectional</text>
+      <circle class="nd pin" cx="480" cy="60" r="20"/><text class="nt" x="480" y="60">R1</text>
+      <circle class="nd" cx="570" cy="150" r="20"/><text class="nt" x="570" y="150">R2</text>
+      <circle class="nd" cx="480" cy="240" r="20"/><text class="nt" x="480" y="240">R3</text>
+      <circle class="nd" cx="390" cy="150" r="20"/><text class="nt" x="390" y="150">R4</text>
+      <path class="e e-cut" d="M496 74 L554 134"/>
+      <path class="e e-fixed" d="M556 166 L496 226"/>
+      <path class="e e-fixed" d="M464 226 L406 166"/>
+      <path class="e e-fixed" d="M404 134 L464 74"/>
+      <text class="lbl-s lbl-cut" x="534" y="96">このステップで除去</text>
+      <text class="lbl-s mid" x="480" y="32">leader</text>
+
+      <text class="lbl-s" x="10" y="284">予算 = 1ステップで除去できるリンクの最大数（累積しない）。tie-break は leader 優先</text>
+    </svg>
+    <figcaption id="fig-cap">4台の環。左は向きのあるリンク、右は双方向のリンク。太い枠が leader の R1。リンクの向きと台数の並びは説明用である。各ステップで、予算の数までリンクを除去できる。除去は次のステップには持ち越さない。どのリンクを切るかは図の例で、結果の政策ではない。</figcaption>
+  </figure>
+
+  <h2><span class="no">01</span>問い</h2>
+  <p>通信リンクを切ると、自己起動の trigger は減るか。全状態を安定化できるか。故障があっても使える静的な政策はあるか。</p>
+
+  <h2><span class="no">02</span>モデルと規模</h2>
+  <ul>
+    <li>ring 4台。状態は全部で16。</li>
+    <li>tie-break は leader 優先。</li>
+    <li>リンクの向きで2つのモードを分ける：directed と bidirectional。</li>
+  </ul>
+
+  <h2><span class="no">03</span>何を動かすか</h2>
+  <p>ロボット間の通信リンクを除去する。予算は<b>1ステップで除去できるリンクの最大数</b>で、累積ではない。</p>
+
+  <h2><span class="no">04</span>実験の設計</h2>
+  <ul>
+    <li>全16状態を調べる。乱数は使わない。</li>
+    <li>介入なしと介入ありで、自己起動の trigger 数を数える。</li>
+    <li>follower 単体の故障と、leader の故障まで含めた場合で、robust な最小予算 B_min を求める。</li>
+  </ul>
+
+  <h2><span class="no">05</span>結果</h2>
+  <div class="kpi">
+    <div><span class="v mono">37 → 31</span><span class="k">自己起動の trigger 数（directed）</span></div>
+    <div><span class="v mono">32 → 31</span><span class="k">自己起動の trigger 数（bidirectional）</span></div>
+    <div><span class="v mono">16 / 16</span><span class="k">安定化を確認した状態（両モード）</span></div>
+  </div>
+  <ul>
+    <li>自己起動の trigger 数は、directed で 37 から 31、bidirectional で 32 から 31 になった。</li>
+    <li>全16状態の安定化は、両モードで確認した。</li>
+    <li>平均の整定時間は長くなる。</li>
+  </ul>
+
+  <h3>故障を含めた場合</h3>
+  <div class="table-wrap">
+  <table class="t">
+    <thead><tr><th>故障の範囲</th><th>directed</th><th>bidirectional</th></tr></thead>
+    <tbody>
+      <tr><td>follower 単体</td><td>robust な B_min = 1</td><td>robust な B_min = 2</td></tr>
+      <tr><td>leader まで含める</td><td>全体で不能</td><td>B_min = 4。robust な静的政策は存在しない。open-loop (51,1) は成立する</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h2><span class="no">06</span>読むときの注意</h2>
+  <div class="note">
+    <p><b>状態 feedback が必須かどうかは、まだ確認できていない。</b>そのため、学習の導入は見送った。</p>
+    <p>trigger 数は減るが、平均の整定時間は長くなる。片方だけで良し悪しを決めない。</p>
+  </div>
+
+  <footer>
+    <p>出典：<a href="https://github.com/koshikai/bn-edge-removal-public" target="_blank" rel="noopener noreferrer">https://github.com/koshikai/bn-edge-removal-public</a></p>
+    <p>最終更新：2026-11-08</p>
+    <p><a href="../">← 研究ラインの地図へ戻る</a></p>
+  </footer>
+</main>
+</body>
+</html>

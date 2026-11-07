@@ -1,0 +1,1372 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>研究ラインの地図 · BN Edge Removal</title>
+  <meta name="description" content="ブーリアンネットワークの制御をどう実験しているか。9本の研究ラインについて、何を動かし、どんな実験をして、何が出ているかをまとめた地図。">
+  <style>
+    :root {
+      --bg: #fbfbfa;
+      --panel: #ffffff;
+      --ink: #16181d;
+      --ink-soft: #4b5160;
+      --ink-mute: #7b8190;
+      --line: #dcdee3;
+      --accent: #1f4fd8;
+      --chip: #eef1f8;
+      --on: #1f4fd8;
+      --on-ink: #ffffff;
+      --goal: #1a7f4b;
+      --goal-soft: #e3f3ea;
+      --cut: #c2410c;
+      --cut-soft: #fbe7dc;
+      --fail: #b42318;
+      --edge-fixed: #9aa0ac;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme="light"]) {
+        --bg: #0e1116;
+        --panel: #141821;
+        --ink: #e8eaee;
+        --ink-soft: #a9aebb;
+        --ink-mute: #7d8493;
+        --line: #272c36;
+        --accent: #7aa2ff;
+        --chip: #171c26;
+        --on: #5b86f5;
+        --on-ink: #0b0e14;
+        --goal: #4cc38a;
+        --goal-soft: #14281f;
+        --cut: #f08a4b;
+        --cut-soft: #2e1d14;
+        --fail: #f97066;
+        --edge-fixed: #5a6070;
+      }
+    }
+    :root[data-theme="dark"] {
+      --bg: #0e1116;
+      --panel: #141821;
+      --ink: #e8eaee;
+      --ink-soft: #a9aebb;
+      --ink-mute: #7d8493;
+      --line: #272c36;
+      --accent: #7aa2ff;
+      --chip: #171c26;
+      --on: #5b86f5;
+      --on-ink: #0b0e14;
+      --goal: #4cc38a;
+      --goal-soft: #14281f;
+      --cut: #f08a4b;
+      --cut-soft: #2e1d14;
+      --fail: #f97066;
+      --edge-fixed: #5a6070;
+    }
+
+    * { box-sizing: border-box; }
+    [hidden] { display: none !important; }
+    html { -webkit-text-size-adjust: 100%; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: "Hiragino Sans", "Noto Sans JP", "Yu Gothic", system-ui, sans-serif;
+      font-size: 16px;
+      line-height: 1.9;
+      overflow-x: hidden;
+    }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+    main { max-width: 46rem; margin: 0 auto; padding: 64px 16px 56px; }
+    .wide { max-width: 62rem; margin-left: auto; margin-right: auto; padding: 0 16px; }
+
+    .mono { font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace; }
+    .eyebrow {
+      margin: 0 0 14px;
+      color: var(--ink-mute);
+      font-size: 0.78rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+    h1 {
+      margin: 0 0 8px;
+      font-family: "Hiragino Mincho ProN", "Noto Serif JP", "Yu Mincho", Georgia, serif;
+      font-size: clamp(1.7rem, 4.6vw, 2.35rem);
+      line-height: 1.4;
+      letter-spacing: -0.01em;
+    }
+    .subtitle { margin: 0 0 18px; color: var(--ink-mute); font-size: 0.95rem; line-height: 1.6; }
+    .byline { margin: 0; color: var(--ink-soft); font-size: 0.92rem; }
+    .top-links { display: flex; flex-wrap: wrap; gap: 4px 20px; margin: 10px 0 0; padding: 0; list-style: none; font-size: 0.92rem; }
+
+    .tldr {
+      margin: 36px 0 0;
+      padding: 20px 22px;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-left: 4px solid var(--accent);
+      border-radius: 6px;
+    }
+    .tldr p { margin: 0; }
+
+    h2 {
+      margin: 64px 0 14px;
+      font-family: "Hiragino Mincho ProN", "Noto Serif JP", "Yu Mincho", Georgia, serif;
+      font-size: clamp(1.3rem, 3.4vw, 1.6rem);
+      line-height: 1.5;
+    }
+    h2 .no { display: block; color: var(--ink-mute); font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 0.75rem; letter-spacing: 0.1em; }
+    h3 { margin: 32px 0 6px; font-size: 1.08rem; }
+    p { margin: 0 0 14px; }
+    .muted { color: var(--ink-soft); }
+    .small { font-size: 0.88rem; }
+    .m { font-family: "Times New Roman", "Noto Serif JP", serif; font-style: italic; white-space: nowrap; }
+    .m sub, .m sup { font-style: normal; font-size: 0.7em; }
+
+    ul.setup { margin: 8px 0 18px; padding-left: 1.2em; }
+    ul.setup li { margin: 2px 0; overflow-wrap: anywhere; }
+    ul.setup b { font-weight: 600; }
+
+    table.t {
+      width: 100%;
+      margin: 12px 0 20px;
+      border-collapse: collapse;
+      font-size: 0.9rem;
+      line-height: 1.6;
+    }
+    table.t th, table.t td { padding: 8px 10px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
+    table.t th { color: var(--ink-mute); font-weight: 600; font-size: 0.8rem; }
+    table.t td.num, table.t th.num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+    .table-wrap { overflow-x: auto; max-width: 100%; }
+    .table-wrap table.t { min-width: 34rem; }
+    .table-wrap table.t.narrow { min-width: 24rem; }
+
+    figure { margin: 22px 0; }
+    figcaption { margin-top: 8px; color: var(--ink-mute); font-size: 0.82rem; line-height: 1.7; }
+    svg { display: block; max-width: 100%; height: auto; }
+
+    /* cards */
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin: 20px 0 0;
+      padding: 0;
+      list-style: none;
+    }
+    .cards.two { grid-template-columns: repeat(2, 1fr); }
+    .card {
+      padding: 16px 16px 14px;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      min-width: 0;
+    }
+    .card .tag { color: var(--accent); font-size: 0.75rem; letter-spacing: 0.08em; }
+    .card h3 { margin: 2px 0 6px; font-size: 1.05rem; line-height: 1.5; }
+    .card p { margin: 0; color: var(--ink-soft); font-size: 0.88rem; line-height: 1.75; }
+    .card svg { width: 100%; margin: 4px 0 10px; }
+
+    dl.kv { margin: 6px 0 0; font-size: 0.86rem; line-height: 1.7; }
+    dl.kv div { display: grid; grid-template-columns: 6.6em 1fr; gap: 8px; padding: 5px 0; border-top: 1px solid var(--line); }
+    dl.kv div:first-child { border-top: 0; }
+    dl.kv dt { color: var(--ink-mute); font-size: 0.8rem; }
+    dl.kv dd { margin: 0; color: var(--ink-soft); min-width: 0; overflow-wrap: anywhere; }
+
+    .lines { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; margin: 20px 0 0; padding: 0; list-style: none; }
+    .card .more { display: inline-block; margin-top: 12px; font-size: 0.86rem; text-decoration: none; border-bottom: 1px solid var(--line); }
+    .card .more:hover { border-bottom-color: var(--accent); }
+
+    /* badges */
+    .badge {
+      display: inline-block; margin: 0 4px 0 0; padding: 0 7px; border-radius: 3px;
+      font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 0.72rem; line-height: 1.7;
+      vertical-align: 1px; white-space: nowrap; border: 1px solid transparent;
+    }
+    .b-exact { background: var(--goal-soft); color: var(--goal); border-color: var(--goal); }
+    .b-empirical { background: var(--chip); color: var(--accent); border-color: var(--accent); }
+    .b-exploratory { background: var(--cut-soft); color: var(--cut); border-color: var(--cut); }
+    .b-confirm { background: transparent; color: var(--ink); border-color: var(--ink-soft); }
+    .b-closed { background: transparent; color: var(--ink-mute); border-color: var(--line); border-style: dashed; }
+
+    /* buttons */
+    .btn {
+      padding: 6px 14px; border: 1px solid var(--line); border-radius: 6px;
+      background: var(--panel); color: var(--ink); font: inherit; font-size: 0.86rem; line-height: 1.6; cursor: pointer;
+    }
+    .btn.primary { background: var(--accent); border-color: var(--accent); color: var(--on-ink); }
+    .btn[aria-pressed="true"] { background: var(--cut); border-color: var(--cut); color: var(--on-ink); }
+    .btn:disabled { opacity: 0.4; cursor: default; }
+    .btn:focus-visible, .chip:focus-visible, .cell-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+    .row { display: flex; flex-wrap: wrap; gap: 8px 10px; align-items: center; margin: 10px 0 0; }
+    .ex-label { color: var(--ink-mute); font-size: 0.78rem; margin-right: 4px; }
+    .hint { margin: 8px 0 0; color: var(--ink-mute); font-size: 0.8rem; line-height: 1.7; }
+
+    /* svg vocabulary shared by all figures */
+    .nd { stroke: var(--ink-soft); stroke-width: 1.4; fill: var(--panel); }
+    .nd.on { fill: var(--on); stroke: var(--on); }
+    .nd.pin { stroke: var(--cut); stroke-width: 2.4; }
+    .nt { font: 600 12px ui-monospace, Menlo, Consolas, monospace; text-anchor: middle; dominant-baseline: central; fill: var(--ink); }
+    .nt.on { fill: var(--on-ink); }
+    .e { fill: none; stroke-width: 1.6; }
+    .e-fixed { stroke: var(--edge-fixed); }
+    .e-rem { stroke: var(--accent); }
+    .e-cut { stroke: var(--cut); stroke-dasharray: 4 3; opacity: 0.7; }
+    .mk-fixed { fill: var(--edge-fixed); }
+    .mk-rem { fill: var(--accent); }
+    .mk-cut { fill: var(--cut); }
+    .pulse { fill: none; stroke: var(--accent); stroke-width: 3; stroke-linecap: round; stroke-dasharray: 1 13; animation: flow 1.4s linear infinite; opacity: 0.85; }
+    .pulse.off { display: none; }
+    @keyframes flow { to { stroke-dashoffset: -14; } }
+    .lbl { font: 11px "Hiragino Sans", "Noto Sans JP", system-ui, sans-serif; fill: var(--ink-soft); }
+    .lbl-m { font: 11px ui-monospace, Menlo, Consolas, monospace; fill: var(--ink-soft); }
+    .lbl-s { font: 10px ui-monospace, Menlo, Consolas, monospace; fill: var(--ink-mute); }
+    .box { fill: var(--panel); stroke: var(--line); stroke-width: 1.2; }
+    .box-u { fill: var(--cut-soft); stroke: var(--cut); stroke-width: 1.2; }
+    .goalband { fill: var(--goal-soft); stroke: var(--goal); stroke-width: 1; }
+    .deadline { stroke: var(--ink-mute); stroke-width: 1; stroke-dasharray: 3 3; }
+    .dot { fill: var(--accent); }
+    .sq { fill: var(--chip); stroke: var(--line); }
+    .sq.cut { fill: var(--cut); stroke: var(--cut); }
+    .sq.on { fill: var(--on); stroke: var(--on); }
+    .ax { stroke: var(--line); }
+
+    /* card mini animations: base style is the final frame, so reduced motion shows a still */
+    .anim-reach { transform: translate(96px, -26px); animation: reach 4s ease-in-out infinite both; }
+    @keyframes reach { 0% { transform: translate(0, 0); } 55%, 100% { transform: translate(96px, -26px); } }
+    .anim-hold { transform: translate(100px, 0); animation: hold 4s linear infinite both; }
+    @keyframes hold { 0% { transform: translate(0, 0); } 90%, 100% { transform: translate(100px, 0); } }
+    .anim-leave { opacity: 0.6; }
+    .anim-cost1 { animation: cost 4s steps(1) infinite both; }
+    .anim-cost2 { animation: cost2 4s steps(1) infinite both; }
+    @keyframes cost { 0% { fill: var(--chip); stroke: var(--line); } 30%, 100% { fill: var(--cut); stroke: var(--cut); } }
+    @keyframes cost2 { 0% { fill: var(--chip); stroke: var(--line); } 60%, 100% { fill: var(--cut); stroke: var(--cut); } }
+
+    /* small rasters (operations, sync/async, sandbox) */
+    .raster-wrap { overflow-x: auto; max-width: 100%; }
+    .raster { display: grid; gap: 2px; font-size: 0.72rem; min-width: 0; }
+    .raster .rl { color: var(--ink-soft); padding-right: 6px; white-space: nowrap; display: flex; align-items: center; font-family: ui-monospace, Menlo, Consolas, monospace; }
+    .raster .hd { color: var(--ink-mute); text-align: center; font-family: ui-monospace, Menlo, Consolas, monospace; }
+    .raster .c {
+      height: 18px; border-radius: 3px; background: var(--chip);
+      display: flex; align-items: center; justify-content: center;
+      color: var(--ink-mute); font-family: ui-monospace, Menlo, Consolas, monospace;
+    }
+    .raster .c.on { background: var(--on); color: var(--on-ink); }
+    .raster .c.in-goal { background: var(--goal); color: var(--on-ink); }
+    .raster .c.future { opacity: 0.2; }
+    .raster .c.cur { box-shadow: inset 0 0 0 2px var(--ink); }
+    .raster .c.upd { box-shadow: inset 0 0 0 2px var(--cut); }
+
+    .ops { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin: 18px 0 0; }
+    .op { padding: 14px; background: var(--panel); border: 1px solid var(--line); border-radius: 6px; min-width: 0; }
+    .op h3 { margin: 0 0 2px; font-size: 1rem; }
+    .op .res { margin: 8px 0 0; font-size: 0.82rem; color: var(--ink-soft); line-height: 1.6; min-height: 2.6em; }
+
+    /* hold timelines */
+    .tl { display: grid; grid-template-columns: 8.5em 1fr; gap: 6px 10px; align-items: center; margin: 14px 0 0; }
+    .tl .lab { font-size: 0.86rem; color: var(--ink-soft); line-height: 1.5; }
+    .tl .cells { display: grid; grid-template-columns: repeat(12, 1fr); gap: 2px; min-width: 0; }
+    .tl .cells span {
+      position: relative; height: 24px; border-radius: 3px; background: var(--chip);
+      font: 0.68rem ui-monospace, Menlo, Consolas, monospace; color: var(--ink-mute);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .tl .cells span.k1 { background: var(--cut); color: var(--on-ink); }
+    .tl .cells span.k2 { background: repeating-linear-gradient(45deg, var(--cut), var(--cut) 3px, var(--cut-soft) 3px, var(--cut-soft) 6px); color: var(--ink); }
+    .tl .cells span.obs::before { content: ""; position: absolute; top: -5px; left: 50%; margin-left: -3px; border: 3px solid transparent; border-top-color: var(--ink); }
+    .tl .cells span.hide { background: var(--chip); color: transparent; }
+    .tl .cells span.cur { box-shadow: inset 0 0 0 2px var(--ink); }
+    .tl .axis span { background: transparent; height: 14px; }
+
+    /* sync / async */
+    .sa { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 18px 0 0; }
+    .sa .op svg { max-width: 220px; margin: 0 auto; }
+    .count { font-size: 1.5rem; font-weight: 700; font-variant-numeric: tabular-nums; line-height: 1.3; }
+
+    /* sandbox */
+    .explorer { margin: 26px 0 8px; padding: 18px; background: var(--panel); border: 1px solid var(--line); border-radius: 8px; }
+    .sb-main { display: grid; grid-template-columns: 300px 1fr; gap: 20px; align-items: start; }
+    .graph svg { width: 100%; }
+    .hit { cursor: pointer; }
+    .hit .hitline { stroke: transparent; stroke-width: 16; fill: none; }
+    .hit .elb { fill: var(--panel); stroke: var(--accent); stroke-width: 1.2; }
+    .hit.cut .elb { fill: var(--cut); stroke: var(--cut); }
+    .hit .elt { font: 600 10px ui-monospace, Menlo, Consolas, monospace; text-anchor: middle; dominant-baseline: central; fill: var(--accent); pointer-events: none; }
+    .hit.cut .elt { fill: var(--on-ink); }
+    .hit:focus { outline: none; }
+    .hit:focus-visible .elb { stroke: var(--ink); stroke-width: 3; }
+    .hit:hover .elb { stroke-width: 2.4; }
+
+    .eqs { margin: 0; padding: 10px 12px; background: var(--chip); border-radius: 6px; font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 0.76rem; line-height: 1.9; overflow-x: auto; white-space: pre; }
+    .eqs .term { transition: opacity 0.2s; }
+    .eqs .term.off { opacity: 0.3; }
+    .eqs .term .u { color: var(--accent); }
+    .eqs .term.off .u { color: var(--cut); }
+
+    .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+    .chip {
+      padding: 3px 9px; border: 1px solid var(--accent); border-radius: 999px; background: transparent;
+      color: var(--accent); font: 0.78rem ui-monospace, Menlo, Consolas, monospace; cursor: pointer;
+    }
+    .chip[aria-pressed="true"] { background: var(--cut); border-color: var(--cut); color: var(--on-ink); border-style: dashed; }
+
+    .grid32 { display: grid; grid-template-columns: repeat(8, 1fr); gap: 3px; margin: 6px 0 4px; }
+    .cell-btn {
+      position: relative; padding: 3px 0; border: 1px solid var(--line); border-radius: 4px;
+      background: transparent; color: var(--ink-mute);
+      font: 0.72rem ui-monospace, Menlo, Consolas, monospace; cursor: pointer;
+    }
+    .cell-btn.ok { background: var(--goal-soft); color: var(--goal); border-color: var(--goal-soft); }
+    .cell-btn.goal { border-color: var(--goal); }
+    .cell-btn[aria-pressed="true"] { background: var(--ink); border-color: var(--ink); color: var(--bg); }
+    .legend { display: flex; flex-wrap: wrap; gap: 4px 16px; margin: 6px 0 0; color: var(--ink-mute); font-size: 0.78rem; }
+    .legend i { display: inline-block; width: 10px; height: 10px; margin-right: 5px; border-radius: 2px; vertical-align: -1px; }
+
+    .score { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin: 14px 0 0; }
+    .stat { padding: 10px 12px; background: var(--bg); border: 1px solid var(--line); border-radius: 6px; min-width: 0; }
+    .stat.now { border-color: var(--accent); }
+    .stat .v { font-size: 1.45rem; font-weight: 700; line-height: 1.25; font-variant-numeric: tabular-nums; }
+    .stat .k { color: var(--ink-soft); font-size: 0.78rem; line-height: 1.5; }
+    .statusline { margin: 10px 0 0; padding: 8px 12px; border-radius: 6px; background: var(--chip); font-size: 0.88rem; line-height: 1.7; }
+    .statusline.ok { background: var(--goal-soft); }
+    .statusline.ng { background: var(--cut-soft); }
+
+    .refs { padding-left: 1.4em; font-size: 0.85rem; line-height: 1.7; color: var(--ink-soft); }
+    footer { margin-top: 64px; padding-top: 20px; border-top: 1px solid var(--line); color: var(--ink-mute); font-size: 0.8rem; line-height: 1.9; }
+    footer p { margin: 0; }
+
+    @media (max-width: 760px) {
+      .cards, .cards.two, .ops, .sa, .score { grid-template-columns: 1fr; }
+      .score { grid-template-columns: 1fr 1fr; }
+      .sb-main { grid-template-columns: 1fr; }
+      .graph { max-width: 300px; margin: 0 auto; width: 100%; }
+      main { padding-top: 44px; }
+      .explorer { padding: 14px 10px; }
+      .tl { grid-template-columns: 1fr; gap: 2px; }
+      .tl .lab { margin-top: 8px; }
+    }
+    @media (max-width: 480px) {
+      .grid32 { grid-template-columns: repeat(4, 1fr); }
+      .lines { grid-template-columns: 1fr; }
+      dl.kv div { grid-template-columns: 5.6em 1fr; }
+      .table-wrap table.t.narrow { min-width: 0; }
+      .table-wrap table.t.narrow th, .table-wrap table.t.narrow td { padding: 6px 7px; font-size: 0.82rem; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation: none !important; transition: none !important; }
+      .pulse { display: none; }
+    }
+  </style>
+</head>
+<body>
+<main>
+
+  <!-- ===================================================== 1. hero -->
+  <p class="eyebrow mono">Research lines · 2026</p>
+  <h1>研究ラインの地図</h1>
+  <p class="subtitle">ブーリアンネットワークの制御を、どう実験しているか</p>
+  <p class="byline">越 海斗（Kaito Koshi）</p>
+  <ul class="top-links">
+    <li><a href="#demo">デモ ↓</a></li>
+    <li><a href="./zemi2.html">既存の解説</a></li>
+    <li><a href="https://github.com/koshikai/bn-edge-removal-public" target="_blank" rel="noopener noreferrer">GitHub ↗</a></li>
+  </ul>
+
+  <div class="tldr">
+    <p>研究ラインは9本ある。どのラインも、ネットワークの状態を見て、どこに介入するかを選ぶ。違いは、何を動かすか、介入をどれだけ保つか、方策をどう作るかにある。</p>
+  </div>
+
+  <!-- ===================================================== 2. skeleton -->
+  <h2 id="frame"><span class="no">01</span>実験の骨格</h2>
+  <p>どのラインも同じ骨格をもつ。時刻 <span class="m">t</span> の状態 <span class="m">x<sub>t</sub></span> と制御入力 <span class="m">u<sub>t</sub></span> から、次の状態 <span class="m">x<sub>t+1</sub></span> が決まる。制御入力は<b>どの辺を切るか</b>を表す 0/1 の並びである。</p>
+
+  <figure>
+    <svg id="fig-frame" viewBox="0 0 400 232" role="img" aria-labelledby="fig-frame-cap"></svg>
+    <div class="row">
+      <button type="button" class="btn" id="frame-toggle" role="button" tabindex="0" aria-pressed="false" aria-label="制御入力を切り替える。いまは何も切らない">u を切り替える</button>
+      <span class="small muted" id="frame-note"></span>
+    </div>
+    <figcaption id="fig-frame-cap">状態 → 制御入力 → 次の状態。図の状態とネットワークは下のデモと同じ Cortical モデルである。同じ <span class="m">x<sub>t</sub></span> でも、切る辺が変わると <span class="m">x<sub>t+1</sub></span> が変わる。</figcaption>
+  </figure>
+
+  <p>評価は3つに分ける。</p>
+  <ul class="cards">
+    <li class="card">
+      <span class="tag mono">到達</span>
+      <svg viewBox="0 0 150 64" aria-hidden="true">
+        <rect class="goalband" x="0" y="6" width="150" height="16" rx="3"></rect>
+        <line class="deadline" x1="118" y1="0" x2="118" y2="64"></line>
+        <text class="lbl-s" x="121" y="60">H</text>
+        <circle class="dot anim-reach" cx="12" cy="40" r="5"></circle>
+      </svg>
+      <p>期限 <span class="m">H</span> までに目標集合へ入るか。</p>
+    </li>
+    <li class="card">
+      <span class="tag mono">維持</span>
+      <svg viewBox="0 0 150 64" aria-hidden="true">
+        <rect class="goalband" x="0" y="6" width="150" height="22" rx="3"></rect>
+        <line class="deadline" x1="128" y1="0" x2="128" y2="64"></line>
+        <text class="lbl-s" x="131" y="60">T</text>
+        <path class="e e-cut anim-leave" d="M60 17 Q80 17 92 48"></path>
+        <text class="lbl-s" x="96" y="56">離脱</text>
+        <circle class="dot anim-hold" cx="18" cy="17" r="5"></circle>
+      </svg>
+      <p>入ったあと、終了時刻 <span class="m">T</span> まで目標集合を出ないか。一度出たら、戻っても失敗とする。</p>
+    </li>
+    <li class="card">
+      <span class="tag mono">費用</span>
+      <svg viewBox="0 0 150 64" aria-hidden="true">
+        <rect class="sq" x="6" y="20" width="18" height="18" rx="3"></rect>
+        <rect class="sq" x="30" y="20" width="18" height="18" rx="3"></rect>
+        <rect class="sq anim-cost1 cut" x="54" y="20" width="18" height="18" rx="3"></rect>
+        <rect class="sq" x="78" y="20" width="18" height="18" rx="3"></rect>
+        <rect class="sq" x="102" y="20" width="18" height="18" rx="3"></rect>
+        <rect class="sq anim-cost2 cut" x="126" y="20" width="18" height="18" rx="3"></rect>
+        <text class="lbl-s" x="6" y="56">切った辺を数える</text>
+      </svg>
+      <p>切った辺の数。到達と維持が同じなら、少ないほうがよい。</p>
+    </li>
+  </ul>
+
+  <!-- ===================================================== 3. operations -->
+  <h2 id="ops"><span class="no">02</span>操作は3種類</h2>
+  <p>介入の仕方は3種類ある。大半のラインは辺を切る。図は説明用の4節点の例で、どのラインのモデルでもない。青い点の流れは、信号が辺を伝わる様子を表す。</p>
+</main>
+
+<section class="wide">
+  <div class="ops">
+    <div class="op">
+      <h3>辺を切る</h3>
+      <p class="small muted">依存を外す。<span class="mono">x4 ⊣ x1</span> を切ると、x1 は x4 を見なくなる。</p>
+      <svg id="op1" viewBox="0 0 200 150" role="img" aria-label="4節点の環。x4 から x1 への抑制の辺"></svg>
+      <div class="raster-wrap"><div class="raster" id="op1-r"></div></div>
+      <p class="res" id="op1-res"></p>
+      <button type="button" class="btn" id="op1-b" role="button" tabindex="0" aria-pressed="false" aria-label="辺 x4 から x1 を切る">辺を切る</button>
+    </div>
+    <div class="op">
+      <h3>節点の値を固定する</h3>
+      <p class="small muted">旧 C2D の Axis A だけが使う。x3 を 1 に固定する。</p>
+      <svg id="op2" viewBox="0 0 200 150" role="img" aria-label="4節点の環。x3 の値を固定する"></svg>
+      <div class="raster-wrap"><div class="raster" id="op2-r"></div></div>
+      <p class="res" id="op2-res"></p>
+      <button type="button" class="btn" id="op2-b" role="button" tabindex="0" aria-pressed="false" aria-label="節点 x3 を 1 に固定する">x3 を固定する</button>
+    </div>
+    <div class="op">
+      <h3>通信リンクを切る</h3>
+      <p class="small muted">ロボット群のライン。R1 が持つ情報が隣へ広がる。R1–R2 のリンクを切る。</p>
+      <svg id="op3" viewBox="0 0 200 150" role="img" aria-label="4台のロボットの環。R1 と R2 の通信リンク"></svg>
+      <div class="raster-wrap"><div class="raster" id="op3-r"></div></div>
+      <p class="res" id="op3-res"></p>
+      <button type="button" class="btn" id="op3-b" role="button" tabindex="0" aria-pressed="false" aria-label="通信リンク R1 と R2 を切る">リンクを切る</button>
+    </div>
+  </div>
+</section>
+
+<main style="padding-top: 0; padding-bottom: 0;">
+  <p class="hint">4節点の例の更新則。辺の例は <span class="mono">x1' = not x4, x2' = x1, x3' = x2, x4' = x3</span>（初期状態 0000）。ロボットの例は、自分か、リンクがつながった隣が情報を持てば持つ（初期は R1 だけ）。ロボットの例は、リンクを1本切ると全員に届くまでが長くなる様子だけを見せる。ロボット群ラインの実際のモデルとは違う。</p>
+
+  <!-- ===================================================== 4. holding -->
+  <h2 id="hold"><span class="no">03</span>保持の3通り</h2>
+  <p>切った辺をいつまで切ったままにするかで、ラインが分かれる。色のついた区間が介入している時刻である。</p>
+
+  <div class="tl" id="tl">
+    <div class="lab"></div>
+    <div class="cells axis" id="tl-axis"></div>
+    <div class="lab"><b>1遷移だけ切る</b><br><span class="small muted">本体の論文</span></div>
+    <div class="cells" id="tl-a"></div>
+    <div class="lab">T ステップ保持<br><span class="small muted">非同期ライン（T = 3 の例）</span></div>
+    <div class="cells" id="tl-b"></div>
+    <div class="lab">不可逆に切る<br><span class="small muted">旧 Axis B</span></div>
+    <div class="cells" id="tl-c"></div>
+  </div>
+  <div class="row">
+    <button type="button" class="btn primary" id="tl-play" role="button" tabindex="0" aria-label="3本のタイムラインを同時に再生する">▶ 3本を同時に再生</button>
+    <span class="mono small muted" id="tl-t" aria-live="polite"></span>
+  </div>
+  <ul class="setup small" style="margin-top:14px">
+    <li>1遷移だけ切る：その遷移にだけ使い、次の遷移には残らない。毎回選び直す。</li>
+    <li>T ステップ保持：観測のたびに mask と保持時間 T を選ぶ（▾ が観測の時刻）。T ステップ同じ mask を使い、次の観測で戻せる。斜線は別の mask。</li>
+    <li>不可逆に切る：一度切ったら最後まで戻らない。</li>
+  </ul>
+
+  <!-- ===================================================== 5. sync/async -->
+  <h2 id="sync"><span class="no">04</span>同期と非同期</h2>
+  <p>同じ5節点のネットワーク（Cortical、介入なし）を2通りに更新する。同期では全節点が同時に変わる。非同期では、乱数で1節点を選び、その節点だけを更新する。どちらも、どの節点も変わらない状態（固定点）に入ったら止める。</p>
+</main>
+
+<section class="wide">
+  <div class="sa">
+    <div class="op">
+      <h3>同期</h3>
+      <svg id="sa-s" viewBox="0 0 300 290" role="img" aria-label="同期更新の5節点ネットワーク"></svg>
+      <p class="count" id="sa-s-n" aria-live="polite"></p>
+      <p class="small muted" id="sa-s-x"></p>
+    </div>
+    <div class="op">
+      <h3>非同期</h3>
+      <svg id="sa-a" viewBox="0 0 300 290" role="img" aria-label="非同期更新の5節点ネットワーク"></svg>
+      <p class="count" id="sa-a-n" aria-live="polite"></p>
+      <p class="small muted" id="sa-a-x"></p>
+    </div>
+  </div>
+</section>
+
+<main style="padding-top: 0; padding-bottom: 0;">
+  <div class="row">
+    <button type="button" class="btn primary" id="sa-play" role="button" tabindex="0" aria-label="同期と非同期を同時に再生する">▶ 再生</button>
+    <button type="button" class="btn" id="sa-again" role="button" tabindex="0" aria-label="非同期の乱数を引き直す">乱数を引き直す</button>
+  </div>
+  <p class="hint" id="sa-note"></p>
+
+  <!-- ===================================================== 6. policies -->
+  <h2 id="policy"><span class="no">05</span>方策の作り方4つ</h2>
+  <p>どの辺をいつ切るかを決める規則を方策と呼ぶ。作り方は4つある。保証の強さはそれぞれ違う。</p>
+  <ul class="cards two">
+    <li class="card">
+      <span class="tag mono">exact</span>
+      <h3>全状態探索</h3>
+      <dl class="kv">
+        <div><dt>入力</dt><dd>更新則、目標集合、<span class="m">H</span> と <span class="m">T</span>、入力の制約</dd></div>
+        <div><dt>出力</dt><dd>状態ごとの成否と、成功させる入力列</dd></div>
+        <div><dt>保証</dt><dd>調べた条件の中では成否が確定する。状態数が多いと計算できない</dd></div>
+      </dl>
+    </li>
+    <li class="card">
+      <span class="tag mono">表形式 Q 学習</span>
+      <h3>Q 表を学習する</h3>
+      <dl class="kv">
+        <div><dt>入力</dt><dd>状態（必要なら介入履歴のフラグと監視状態を含める）と報酬</dd></div>
+        <div><dt>出力</dt><dd>状態と行動ごとの Q 値の表、そこから選ぶ方策</dd></div>
+        <div><dt>保証</dt><dd>行動マスキングを使えば入力制約の違反は起きない。到達と維持は評価で確かめる</dd></div>
+      </dl>
+    </li>
+    <li class="card">
+      <span class="tag mono">閉じたライン</span>
+      <h3>DQN</h3>
+      <dl class="kv">
+        <div><dt>入力</dt><dd>状態ベクトル</dd></div>
+        <div><dt>出力</dt><dd>ニューラルネットで近似した Q 値と、そこから選ぶ方策</dd></div>
+        <div><dt>保証</dt><dd>なし。Q 表を関数近似に置き換えた路線で、2026-10-27 に閉じた</dd></div>
+      </dl>
+    </li>
+    <li class="card">
+      <span class="tag mono">SF + GPI</span>
+      <h3>方策を組み合わせて再利用する</h3>
+      <dl class="kv">
+        <div><dt>入力</dt><dd>学習済みの複数の方策の successor features と、新しい報酬の重み</dd></div>
+        <div><dt>出力</dt><dd>各状態で、方策群の中から最も価値の高いものを選ぶ方策</dd></div>
+        <div><dt>保証</dt><dd>方策群の中から価値の高いものを選ぶ（GPI）。近似誤差があると、その分だけ弱まる</dd></div>
+      </dl>
+    </li>
+  </ul>
+
+  <!-- ===================================================== 7. line cards -->
+  <h2 id="lines"><span class="no">06</span>ライン別カード</h2>
+  <p>9本のラインを同じ5項目で並べる。数値の詳しい値と注意書きは <a href="#numbers">08 数値の一覧</a> にある。「—」はこのページで扱わない項目である。</p>
+</main>
+
+<section class="wide">
+  <ul class="lines">
+    <li class="card">
+      <span class="tag mono">1</span>
+      <h3>本体 Paper 1 <span class="badge b-confirm">確認研究</span></h3>
+      <dl class="kv">
+        <div><dt>動かすもの</dt><dd>辺。1本を即時に除去する（matched-k1）</dd></div>
+        <div><dt>時間の扱い</dt><dd>1遷移だけ切る</dd></div>
+        <div><dt>方策の作り方</dt><dd>Q 学習。oracle を基準に、遷移数の予算を揃えて比べる</dd></div>
+        <div><dt>記録の型</dt><dd>確認研究</dd></div>
+        <div><dt>主な数値</dt><dd>243 family で ΔAUC +0.01933（95% CI [+0.01259, +0.02662]）</dd></div>
+      </dl>
+      <a class="more" href="lines/paper1.html">詳しく読む →</a>
+    </li>
+    <li class="card">
+      <span class="tag mono">2</span>
+      <h3>本体 Paper 2 <span class="badge b-confirm">確認研究</span></h3>
+      <dl class="kv">
+        <div><dt>動かすもの</dt><dd>辺（本体の設定）</dd></div>
+        <div><dt>時間の扱い</dt><dd>1遷移だけ切る（本体の設定）</dd></div>
+        <div><dt>方策の作り方</dt><dd>学習済み方策の再利用。cold start と有限回の償却を分けて損得を推定する</dd></div>
+        <div><dt>記録の型</dt><dd>確認研究</dd></div>
+        <div><dt>主な数値</dt><dd>載せない。安全保証は主張しない</dd></div>
+      </dl>
+      <a class="more" href="lines/paper2.html">詳しく読む →</a>
+    </li>
+    <li class="card">
+      <span class="tag mono">3</span>
+      <h3>設定 A/B の探索 <span class="badge b-exploratory">exploratory</span></h3>
+      <dl class="kv">
+        <div><dt>動かすもの</dt><dd>制御計算に使うモデル</dd></div>
+        <div><dt>時間の扱い</dt><dd>—</dd></div>
+        <div><dt>方策の作り方</dt><dd>A：既知の詳細論理から制御計算を縮約する。B：小モデルを、未知の詳細モデルへの事前知識にする</dd></div>
+        <div><dt>記録の型</dt><dd>exploratory</dd></div>
+        <div><dt>主な数値</dt><dd>載せない</dd></div>
+      </dl>
+      <a class="more" href="lines/setab.html">詳しく読む →</a>
+    </li>
+    <li class="card">
+      <span class="tag mono">4</span>
+      <h3>SF + GPI <span class="badge b-exploratory">exploratory</span></h3>
+      <dl class="kv">
+        <div><dt>動かすもの</dt><dd>辺。極性制約つきの除去可能辺10本、累積4本まで、1判断につき1本だけ切替</dd></div>
+        <div><dt>時間の扱い</dt><dd>非同期。1判断に 49 回の単一ノード更新</dd></div>
+        <div><dt>方策の作り方</dt><dd>SF + GPI</dd></div>
+        <div><dt>記録の型</dt><dd>exploratory（MAPK 1モデル、多重比較補正なし）</dd></div>
+        <div><dt>主な数値</dt><dd>到達率 81.04%、割引報酬 0.615。SAT を使う直接制御は 95.47% / 0.018</dd></div>
+      </dl>
+      <a class="more" href="lines/sfgpi.html">詳しく読む →</a>
+    </li>
+    <li class="card">
+      <span class="tag mono">5</span>
+      <h3>非同期 BN <span class="badge b-exact">exact</span><span class="badge b-empirical">empirical</span></h3>
+      <dl class="kv">
+        <div><dt>動かすもの</dt><dd>辺の mask</dd></div>
+        <div><dt>時間の扱い</dt><dd>1マイクロステップで1ノード。観測のたびに mask と保持時間 T を選び、次の観測で戻せる</dd></div>
+        <div><dt>方策の作り方</dt><dd>3つの制御器を比べる。判定は費用を見る前に固定した（事前登録）</dd></div>
+        <div><dt>記録の型</dt><dd>exact（DAG の十分条件）と empirical（伸びしろ測定）を分ける</dd></div>
+        <div><dt>主な数値</dt><dd>完走 4230/4230。保持時間を状態依存にする制御器は5つの重みすべてで区間が 0 を除いた。mask だけを変える制御器は 0/5</dd></div>
+      </dl>
+      <a class="more" href="lines/asyncbn.html">詳しく読む →</a>
+    </li>
+    <li class="card">
+      <span class="tag mono">6</span>
+      <h3>ロボット群の通信リンク <span class="badge b-exact">exact</span></h3>
+      <dl class="kv">
+        <div><dt>動かすもの</dt><dd>通信リンク</dd></div>
+        <div><dt>時間の扱い</dt><dd>—</dd></div>
+        <div><dt>方策の作り方</dt><dd>全状態を調べる（ring 4台、16状態）</dd></div>
+        <div><dt>記録の型</dt><dd>exact</dd></div>
+        <div><dt>主な数値</dt><dd>trigger 数は directed で 37 から 31、bidirectional で 32 から 31。整定時間は長くなる</dd></div>
+      </dl>
+      <a class="more" href="lines/swarm.html">詳しく読む →</a>
+    </li>
+    <li class="card">
+      <span class="tag mono">7</span>
+      <h3>DQN <span class="badge b-closed">閉じた</span></h3>
+      <dl class="kv">
+        <div><dt>動かすもの</dt><dd>辺。状態に応じて切る辺を変える</dd></div>
+        <div><dt>時間の扱い</dt><dd>閉ループ。状態を見て毎回選ぶ</dd></div>
+        <div><dt>方策の作り方</dt><dd>DQN</dd></div>
+        <div><dt>記録の型</dt><dd>閉じたライン（2026-10-27）</dd></div>
+        <div><dt>主な数値</dt><dd>載せない</dd></div>
+      </dl>
+      <a class="more" href="lines/drqn.html">詳しく読む →</a>
+    </li>
+    <li class="card">
+      <span class="tag mono">8</span>
+      <h3>旧 C2D / BBM <span class="badge b-closed">一部閉鎖</span></h3>
+      <dl class="kv">
+        <div><dt>動かすもの</dt><dd>Axis A は節点の値、Axis B は辺</dd></div>
+        <div><dt>時間の扱い</dt><dd>Axis B は不可逆に切る</dd></div>
+        <div><dt>方策の作り方</dt><dd>Axis B の学習路線は閉じた</dd></div>
+        <div><dt>記録の型</dt><dd>一部閉鎖</dd></div>
+        <div><dt>主な数値</dt><dd>載せない</dd></div>
+      </dl>
+      <a class="more" href="lines/c2d.html">詳しく読む →</a>
+    </li>
+    <li class="card">
+      <span class="tag mono">9</span>
+      <h3>卒論・学会ライン <span class="badge b-empirical">empirical</span></h3>
+      <dl class="kv">
+        <div><dt>動かすもの</dt><dd>辺</dd></div>
+        <div><dt>時間の扱い</dt><dd>STL の入力仕様（単調性、休薬期間）をフラグ状態に記録する</dd></div>
+        <div><dt>方策の作り方</dt><dd>Q 学習。行動マスキングで違反を構成的に排除する</dd></div>
+        <div><dt>記録の型</dt><dd>empirical（全状態評価、5 seed）</dd></div>
+        <div><dt>主な数値</dt><dd>Cortical 全32状態、Wnt5a 全128状態で成功率 100%、離脱 0、仕様違反 0。<a href="./zemi2.html">詳細</a></dd></div>
+      </dl>
+      <a class="more" href="lines/undergrad.html">詳しく読む →</a>
+    </li>
+  </ul>
+</section>
+
+<main style="padding-top: 0; padding-bottom: 0;">
+  <!-- ===================================================== 8. sandbox -->
+  <h2 id="demo"><span class="no">07</span>触って確かめる</h2>
+  <p>Cortical モデル（5節点、同期更新）で、切る辺を選んで結果を見る。<span class="m">u<sub>i</sub></span> = 1 で辺 <span class="m">i</span> を切る。選んだ辺は <span class="m">t</span> = 0 から 10 まで毎ステップ切り続ける。目標集合は <span class="mono">10101</span> と <span class="mono">01010</span> で、どちらも介入なしで固定点である。</p>
+  <p>成功は、<span class="m">H</span> = 5 以内に初めて目標集合へ入り、その後 <span class="m">T</span> = 10 まで目標集合を出ないこと。<b>切る辺を増やすほど成功が増えるわけではない。</b>「全部切る」と「辺3と6を切る」を比べてほしい。</p>
+</main>
+
+<section class="wide" id="sandbox">
+  <div class="explorer">
+    <div class="row" style="margin-top:0">
+      <span class="ex-label">プリセット</span>
+      <button type="button" class="btn" data-preset="none" role="button" tabindex="0" aria-label="プリセット：介入なし">介入なし</button>
+      <button type="button" class="btn" data-preset="all" role="button" tabindex="0" aria-label="プリセット：6本すべて切る">全部切る</button>
+      <button type="button" class="btn" data-preset="36" role="button" tabindex="0" aria-label="プリセット：辺3と辺6を切る">辺3と6を切る</button>
+    </div>
+
+    <div class="score" aria-live="polite">
+      <div class="stat now"><div class="v mono" id="sc-now"></div><div class="k">いまの選択での成功数</div></div>
+      <div class="stat"><div class="v mono" id="sc-none"></div><div class="k">介入なし</div></div>
+      <div class="stat"><div class="v mono" id="sc-all"></div><div class="k">全部切る</div></div>
+      <div class="stat"><div class="v mono" id="sc-36"></div><div class="k">辺3と6を切る</div></div>
+    </div>
+
+    <div class="sb-main" style="margin-top:16px">
+      <div class="graph">
+        <svg id="sb-graph" viewBox="0 0 300 290" role="group" aria-label="Cortical モデルのネットワーク。番号つきの辺を押すと切る、もう一度押すと戻す"></svg>
+        <p class="hint" style="text-align:center;margin-top:0">番号の丸を押すと辺を切る。もう一度押すと戻す。</p>
+      </div>
+      <div style="min-width:0">
+        <div class="ex-label">切る辺</div>
+        <div class="chips" id="sb-chips"></div>
+        <div class="ex-label" style="margin-top:12px">更新則（切った辺の項は薄く表示）</div>
+        <pre class="eqs" id="sb-eqs"></pre>
+
+        <div class="ex-label" style="margin-top:12px">初期状態 <span class="mono">x1..x5</span>（色つきは、いまの選択で成功する初期状態）</div>
+        <div class="grid32" id="sb-grid" role="group" aria-label="32個の初期状態"></div>
+        <div class="legend">
+          <span><i style="background:var(--goal-soft);border:1px solid var(--goal-soft)"></i>成功</span>
+          <span><i style="border:1px solid var(--line)"></i>失敗</span>
+          <span><i style="border:1px solid var(--goal)"></i>目標集合の状態</span>
+          <span><i style="background:var(--ink)"></i>選択中</span>
+        </div>
+      </div>
+    </div>
+
+    <div style="margin-top:16px">
+      <div class="raster-wrap"><div class="raster" id="sb-raster"></div></div>
+      <div class="row">
+        <button type="button" class="btn primary" id="sb-play" role="button" tabindex="0" aria-label="再生する">▶ 再生</button>
+        <button type="button" class="btn" id="sb-step" role="button" tabindex="0" aria-label="1ステップ進める">1 ステップ →</button>
+        <button type="button" class="btn" id="sb-reset" role="button" tabindex="0" aria-label="t = 0 に戻す">t = 0 に戻す</button>
+      </div>
+      <p class="statusline" id="sb-status" aria-live="polite"></p>
+    </div>
+    <p class="hint">介入なしの吸引子は、<span class="mono">00000</span> と <span class="mono">01011</span> の2周期（22状態）、<span class="mono">10101</span>（7状態）、<span class="mono">01010</span>（3状態）。キーボードでは Tab で移動し、Enter か Space で押す。</p>
+  </div>
+</section>
+
+<main style="padding-top: 0;">
+  <!-- ===================================================== 9. numbers -->
+  <h2 id="numbers"><span class="no">08</span>数値の一覧</h2>
+  <p>ラインごとに、記録の型を先に書く。型の意味は <a href="#reading">09</a> にある。</p>
+
+  <h3>本体 Paper 1 <span class="badge b-confirm">確認研究</span></h3>
+  <ul class="setup">
+    <li>対象は 243 family。目的関数は <span class="m">H</span> = 20 の occupancy。即時の単一辺除去（matched-k1）。遷移数の予算を揃えて比べた。</li>
+    <li>主結果は ΔAUC +0.01933、95% CI [+0.01259, +0.02662]。</li>
+    <li>予算ごとの差は +0.020、<wbr>+0.029、<wbr>+0.041、<wbr>+0.053、<wbr>-0.024、<wbr>-0.085 と符号が変わる。</li>
+    <li>最大予算で oracle の 10% 以内に入った割合は、offline が 70.5%、学習器が 8.6%。</li>
+  </ul>
+  <p class="small muted">注意：「Q 学習が上」という主張ではない。宣言した予算範囲の平均で、oracle との差が小さい、という主張である。</p>
+
+  <h3>本体 Paper 2 <span class="badge b-confirm">確認研究</span></h3>
+  <p>再利用の損得を推定する。cold start と有限回の償却を分ける。安全保証は主張しない。数値はこのページに載せない。</p>
+
+  <h3>設定 A/B <span class="badge b-exploratory">exploratory</span></h3>
+  <p>設定Aは、既知の詳細論理から制御計算を縮約する。設定Bは、小モデルを未知の詳細モデルへの事前知識にする。数値は載せない。</p>
+
+  <h3>SF + GPI <span class="badge b-exploratory">exploratory</span></h3>
+  <p>MAPK 1モデルだけの結果で、多重比較補正はしていない。MAPK は 53ノード、外部入力4、非同期に更新する内部ノード49。極性制約つきの除去可能辺は10本で、累積4本まで切れる。1判断につき1本だけ切り替え、1判断に 49 回の単一ノード更新を行う。</p>
+  <div class="table-wrap">
+  <table class="t narrow">
+    <thead><tr><th>方法</th><th class="num">到達率</th><th class="num">割引報酬</th></tr></thead>
+    <tbody>
+      <tr><td>SF+GPI</td><td class="num">81.04%</td><td class="num">0.615</td></tr>
+      <tr><td>多様な方策</td><td class="num">81.30%</td><td class="num">0.628</td></tr>
+      <tr><td>同数の勾配更新の線形 Q</td><td class="num">79.32%</td><td class="num">0.531</td></tr>
+      <tr><td>SAT を使う直接制御</td><td class="num">95.47%</td><td class="num">0.018</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p class="small muted">注意：到達率では SAT が上回る。SF の主張は報酬込みの再利用であって、SAT への優位ではない。</p>
+
+  <h3>非同期 BN <span class="badge b-exact">exact</span><span class="badge b-empirical">empirical</span></h3>
+  <ul class="setup">
+    <li>1マイクロステップで1ノードだけ再計算する。観測のたびに mask と保持時間 T を選び、T ステップ同じ mask を使い、次の観測で戻せる。</li>
+    <li><span class="badge b-exact">exact</span>目標を保つ mask の十分条件は DAG である。必要条件ではない。</li>
+    <li><span class="badge b-empirical">empirical</span>伸びしろ測定：94ネットワーク（n=50 が 46、n=100 が 48）× 初期状態3 × 制御器3 × 重み5 = 4230 エピソード。完走 4230/4230。</li>
+    <li><span class="badge b-empirical">empirical</span>保持時間を状態依存にする制御器は、5つの重みすべてで平均差の 95% 区間が 0 を除いた（例：W1 で −1839.23、区間 [−2719.88, −1107.84]）。マスクだけを変える制御器は 0/5。</li>
+    <li>判定は費用を見る前に固定した（事前登録）。</li>
+  </ul>
+
+  <h3>ロボット群の通信リンク <span class="badge b-exact">exact</span></h3>
+  <p>ring 4台（16状態）。trigger 数は directed で 37 から 31、bidirectional で 32 から 31 に減る。整定時間は長くなる。</p>
+
+  <h3>DQN <span class="badge b-closed">閉じた</span></h3>
+  <p>状態依存の辺除去を DQN の閉ループで学習した。Q 表を関数近似に置き換える路線で、mammalian では条件判定を2つ同時に通せず、2026-10-27 に本人の指示で区切った。研究上の結論ではない。数値は載せない。</p>
+
+  <h3>旧 C2D / BBM <span class="badge b-closed">一部閉鎖</span></h3>
+  <p>Axis A は節点介入、Axis B は不可逆の辺除去。Axis B の学習路線は閉じた。数値は載せない。</p>
+
+  <h3>卒論・学会ライン <span class="badge b-empirical">empirical</span></h3>
+  <ul class="setup">
+    <li>STL の入力仕様（単調性、休薬期間）をフラグ状態に記録し、行動マスキングで違反を構成的に排除する。</li>
+    <li>全状態評価。Cortical は全32状態、Wnt5a は全128状態、5 seed。成功率 100%、離脱 0、仕様違反 0。</li>
+    <li>介入なしでは、Cortical の 32 状態中 10 状態だけが同じ基準で成功する。</li>
+  </ul>
+
+  <h3>目標別の厳密値 <span class="badge b-exact">exact</span></h3>
+  <p class="small muted">条件は <span class="m">H</span> = 7、<span class="m">T</span> = 10、制約なしの仕様。費用は見ていない。</p>
+  <div class="table-wrap">
+  <table class="t">
+    <thead>
+      <tr><th>目標</th><th class="num">初期状態</th><th class="num">制御できる（制約なし）</th><th class="num">到達後に除去を続ける最小ステップ j*</th><th class="num">治療を止める最小時刻 t_off*</th><th class="num">単調性で失う状態</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>cell_cycle10 アトラクタ</td><td class="num">1,024</td><td class="num">512</td><td class="num">0</td><td class="num">5</td><td class="num">0</td></tr>
+      <tr><td>s_pombe アトラクタ</td><td class="num">1,024</td><td class="num">1,000</td><td class="num">0</td><td class="num">7</td><td class="num">0</td></tr>
+      <tr><td>yeast アトラクタ</td><td class="num">262,144</td><td class="num">262,144</td><td class="num">0</td><td class="num">5</td><td class="num">0</td></tr>
+      <tr><td>tumor アトラクタ</td><td class="num">262,144</td><td class="num">262,144</td><td class="num">0</td><td class="num">4</td><td class="num">0</td></tr>
+      <tr><td>tumor 浸潤なし</td><td class="num">262,144</td><td class="num">262,144</td><td class="num">10</td><td class="num">10</td><td class="num">0</td></tr>
+      <tr><td>tumor 細胞周期停止</td><td class="num">262,144</td><td class="num">238,336</td><td class="num">3</td><td class="num">4</td><td class="num">0</td></tr>
+      <tr><td>EMT スイッチ</td><td class="num">4,096</td><td class="num">672</td><td class="num">2</td><td class="num">2</td><td class="num">0</td></tr>
+      <tr><td>T-LGL</td><td class="num">262,144</td><td class="num">262,144</td><td class="num">0</td><td class="num">2</td><td class="num">0</td></tr>
+      <tr><td>HCC</td><td class="num">524,288</td><td class="num">393,216</td><td class="num">1</td><td class="num">2</td><td class="num">0</td></tr>
+      <tr><td>哺乳類細胞周期</td><td class="num">524,288</td><td class="num">268,096</td><td class="num">1</td><td class="num">3</td><td class="num">80,704</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p>表の読み方。j* は、目標に入ったあとも除去を続ける必要がある最小のステップ数である。j* = 0 の目標は5つあり、到達すれば除去を止めてよい。残る5つは到達後も除去を続ける必要があり、j* は 1、1、2、3、10 である。単調性の代償（単調性で失う状態）が出るのは、哺乳類細胞周期の 80,704 状態だけである。<b>これは10目標・条件1通りだけの結果で、モデル一般の性質ではない。</b></p>
+
+  <!-- ===================================================== 10. reading -->
+  <h2 id="reading"><span class="no">09</span>数字の読み方</h2>
+  <ul class="setup">
+    <li><span class="badge b-exact">exact</span>全状態と全入力を調べて得た値。乱数を含まない。条件を変えると値も変わる。</li>
+    <li><span class="badge b-empirical">empirical</span>学習や乱数を含む実験で測った値。seed の数と分母を一緒に書く。</li>
+    <li><span class="badge b-exploratory">exploratory</span>仮説を先に固定せずに探った結果。モデルが1つだけ、多重比較補正なし、などの制限がある。</li>
+  </ul>
+  <p><b>型の違う数字は、同じ表に並べない。</b>確かさの違う値を、同じ物差しで比べてしまうからである。</p>
+  <p class="small muted">「確認研究」は、比較の範囲を先に宣言してから確かめた研究を指す。「閉じた」「一部閉鎖」は、そのラインの実験を止めたことを示す。</p>
+
+  <!-- ===================================================== 11. footer -->
+  <footer>
+    <p>出典：<a href="https://github.com/koshikai/bn-edge-removal-public" target="_blank" rel="noopener noreferrer">https://github.com/koshikai/bn-edge-removal-public</a> · 既存の解説ページ <a href="./zemi2.html">zemi2</a>（時間入力制約下のエッジ除去制御）</p>
+    <p>最終更新：2026-11-08</p>
+    <p>著者：越 海斗（Kaito Koshi）</p>
+  </footer>
+</main>
+
+<!-- Pure logic for the Cortical model. No DOM access, so it can be checked with node. -->
+<script id="cortical-logic">
+var CorticalLogic = (function () {
+  "use strict";
+  var NOT = function (v) { return 1 - v; };
+  var H = 5, T = 10, N = 5, GOAL = [21, 10];   // 10101, 01010 (x1 is the most significant bit)
+  // removable edges, all inhibitory: k, source, target
+  var REMOVABLE = [[1, 2, 1], [2, 4, 1], [3, 5, 2], [4, 2, 3], [5, 4, 3], [6, 5, 4]];
+  // fixed edges: source, target, sign
+  var FIXED = [[5, 1, "+"], [1, 2, "-"], [3, 2, "-"], [1, 3, "+"], [1, 4, "-"], [3, 4, "-"], [2, 5, "-"], [4, 5, "-"]];
+
+  function step(x, u) {
+    var x1 = x[0], x2 = x[1], x3 = x[2], x4 = x[3], x5 = x[4];
+    return [
+      x5 & NOT(x2 & NOT(u[0])) & NOT(x4 & NOT(u[1])),
+      NOT(x5 & NOT(u[2])) & NOT(x1) & NOT(x3),
+      x1 & NOT(x2 & NOT(u[3])) & NOT(x4 & NOT(u[4])),
+      NOT(x5 & NOT(u[5])) & NOT(x1) & NOT(x3),
+      NOT(x2) & NOT(x4)
+    ];
+  }
+  function bits(v) { var b = []; for (var i = N - 1; i >= 0; i--) b.push((v >> i) & 1); return b; }
+  function id(b) { var v = 0; for (var i = 0; i < b.length; i++) v = (v << 1) | b[i]; return v; }
+  function str(v) { return bits(v).join(""); }
+  function inGoal(v) { return GOAL.indexOf(v) >= 0; }
+  function trajectory(x0, u) {
+    var xs = [x0], x = bits(x0);
+    for (var t = 0; t < T; t++) { x = step(x, u); xs.push(id(x)); }
+    return xs;
+  }
+  // success: first entry at some t <= H, then never leaves up to T
+  function judge(x0, u) {
+    var xs = trajectory(x0, u), first = -1;
+    for (var t = 0; t <= T; t++) if (inGoal(xs[t])) { first = t; break; }
+    if (first < 0) return { ok: false, first: -1, leave: -1, xs: xs, why: "never" };
+    if (first > H) return { ok: false, first: first, leave: -1, xs: xs, why: "late" };
+    for (var s = first + 1; s <= T; s++) if (!inGoal(xs[s])) return { ok: false, first: first, leave: s, xs: xs, why: "leave" };
+    return { ok: true, first: first, leave: -1, xs: xs, why: "" };
+  }
+  function successCount(u) { var c = 0; for (var s = 0; s < 32; s++) if (judge(s, u).ok) c++; return c; }
+  function mask(ks) { var u = [0, 0, 0, 0, 0, 0]; ks.forEach(function (k) { u[k - 1] = 1; }); return u; }
+  function isFixedPoint(v) { return id(step(bits(v), [0, 0, 0, 0, 0, 0])) === v; }
+  // one asynchronous micro-step: recompute only node i (0-based)
+  function asyncStep(x, i) { var y = x.slice(); y[i] = step(x, [0, 0, 0, 0, 0, 0])[i]; return y; }
+
+  return { H: H, T: T, N: N, GOAL: GOAL, REMOVABLE: REMOVABLE, FIXED: FIXED,
+    step: step, bits: bits, id: id, str: str, inGoal: inGoal, trajectory: trajectory,
+    judge: judge, successCount: successCount, mask: mask, isFixedPoint: isFixedPoint, asyncStep: asyncStep };
+})();
+if (typeof module !== "undefined" && module.exports) module.exports = CorticalLogic;
+</script>
+
+<script>
+(function () {
+  "use strict";
+  var L = CorticalLogic;
+  var RM = window.matchMedia ? window.matchMedia("(prefers-reduced-motion: reduce)") : { matches: false };
+  function reduced() { return RM.matches; }
+  var SVGNS = "http://www.w3.org/2000/svg";
+  function el(name, attrs, parent) {
+    var e = document.createElementNS(SVGNS, name);
+    for (var a in attrs) e.setAttribute(a, attrs[a]);
+    if (parent) parent.appendChild(e);
+    return e;
+  }
+  function $(id) { return document.getElementById(id); }
+  function unit(dx, dy) { var l = Math.hypot(dx, dy) || 1; return [dx / l, dy / l]; }
+  // Enter / Space on non-button elements with role="button"
+  function activate(node, fn) {
+    node.addEventListener("click", fn);
+    if (node.tagName !== "BUTTON") {
+      node.addEventListener("keydown", function (ev) {
+        if (ev.key === "Enter" || ev.key === " " || ev.key === "Spacebar") { ev.preventDefault(); fn(ev); }
+      });
+    }
+  }
+  function markers(svg, prefix) {
+    var defs = el("defs", {}, svg);
+    ["fixed", "rem", "cut"].forEach(function (c) {
+      var ma = el("marker", { id: prefix + "a-" + c, viewBox: "0 0 10 10", refX: "9", refY: "5", markerWidth: "7", markerHeight: "7", orient: "auto-start-reverse" }, defs);
+      el("path", { d: "M0,1 L10,5 L0,9 z", "class": "mk-" + c }, ma);
+      var mi = el("marker", { id: prefix + "i-" + c, viewBox: "0 0 10 10", refX: "6", refY: "5", markerWidth: "7", markerHeight: "7", orient: "auto" }, defs);
+      el("rect", { x: "4", y: "0", width: "2.6", height: "10", "class": "mk-" + c }, mi);
+    });
+  }
+
+  /* ---------- Cortical graph (shared by sync/async and the sandbox) ---------- */
+  var R = 17, CX = 150, CY = 142, RAD = 104;
+  function nodePos(i) {
+    var a = -Math.PI / 2 + (2 * Math.PI * (i - 1)) / 5;
+    return { x: CX + RAD * Math.cos(a), y: CY + RAD * Math.sin(a) };
+  }
+  var ALL_EDGES = L.FIXED.map(function (e) { return { s: e[0], t: e[1], sign: e[2], k: 0 }; })
+    .concat(L.REMOVABLE.map(function (e) { return { s: e[1], t: e[2], sign: "-", k: e[0] }; }));
+  var HAS = {}; ALL_EDGES.forEach(function (e) { HAS[e.s + "-" + e.t] = true; });
+  function edgeGeom(e) {
+    var P = nodePos(e.s), Q = nodePos(e.t);
+    var dir = unit(Q.x - P.x, Q.y - P.y), nrm = [-dir[1], dir[0]];
+    var off = HAS[e.t + "-" + e.s] ? 16 : 9;
+    var mx = (P.x + Q.x) / 2 + nrm[0] * off, my = (P.y + Q.y) / 2 + nrm[1] * off;
+    var u1 = unit(mx - P.x, my - P.y), u2 = unit(mx - Q.x, my - Q.y);
+    var sx = P.x + u1[0] * R, sy = P.y + u1[1] * R, ex = Q.x + u2[0] * (R + 2), ey = Q.y + u2[1] * (R + 2);
+    return { d: "M" + sx.toFixed(1) + "," + sy.toFixed(1) + " Q" + mx.toFixed(1) + "," + my.toFixed(1) + " " + ex.toFixed(1) + "," + ey.toFixed(1),
+      mid: { x: 0.25 * sx + 0.5 * mx + 0.25 * ex, y: 0.25 * sy + 0.5 * my + 0.25 * ey } };
+  }
+  // build once; returns an updater (x bits, u mask, highlighted node index or -1)
+  function buildCortical(svg, prefix, interactive, onToggle) {
+    markers(svg, prefix);
+    var edgeEls = {}, hitEls = {}, nodeEls = [];
+    ALL_EDGES.forEach(function (e) {
+      var g = edgeGeom(e);
+      if (e.k === 0) {
+        el("path", { d: g.d, "class": "e e-fixed", "marker-end": "url(#" + prefix + (e.sign === "+" ? "a-" : "i-") + "fixed)" }, svg);
+      } else {
+        var grp = el("g", interactive ? { "class": "hit", role: "button", tabindex: "0", "data-k": e.k,
+          "aria-label": "辺" + e.k + "（x" + e.s + " → x" + e.t + "）を切る", "aria-pressed": "false" } : { "class": "hit" }, svg);
+        var path = el("path", { d: g.d, "class": "e e-rem", "marker-end": "url(#" + prefix + "i-rem)" }, grp);
+        if (interactive) el("path", { d: g.d, "class": "hitline" }, grp);
+        el("circle", { cx: g.mid.x.toFixed(1), cy: g.mid.y.toFixed(1), r: 8, "class": "elb" }, grp);
+        var tx = el("text", { x: g.mid.x.toFixed(1), y: g.mid.y.toFixed(1), "class": "elt" }, grp); tx.textContent = String(e.k);
+        edgeEls[e.k] = path; hitEls[e.k] = grp;
+        if (interactive) activate(grp, function () { onToggle(e.k); });
+      }
+    });
+    for (var i = 1; i <= 5; i++) {
+      var p = nodePos(i);
+      var c = el("circle", { cx: p.x.toFixed(1), cy: p.y.toFixed(1), r: R, "class": "nd" }, svg);
+      var t = el("text", { x: p.x.toFixed(1), y: p.y.toFixed(1), "class": "nt" }, svg); t.textContent = "x" + i;
+      nodeEls.push([c, t]);
+    }
+    return function (x, u, hl) {
+      for (var k = 1; k <= 6; k++) {
+        var cut = u && u[k - 1] === 1;
+        edgeEls[k].setAttribute("class", "e " + (cut ? "e-cut" : "e-rem"));
+        edgeEls[k].setAttribute("marker-end", "url(#" + prefix + "i-" + (cut ? "cut" : "rem") + ")");
+        hitEls[k].setAttribute("class", "hit" + (cut ? " cut" : ""));
+        if (interactive) {
+          hitEls[k].setAttribute("aria-pressed", String(!!cut));
+          var e = ALL_EDGES.filter(function (E) { return E.k === k; })[0];
+          hitEls[k].setAttribute("aria-label", "辺" + k + "（x" + e.s + " → x" + e.t + "）を" + (cut ? "戻す" : "切る"));
+        }
+      }
+      for (var j = 0; j < 5; j++) {
+        var on = x[j] === 1;
+        nodeEls[j][0].setAttribute("class", "nd" + (on ? " on" : "") + (hl === j ? " pin" : ""));
+        nodeEls[j][1].setAttribute("class", "nt" + (on ? " on" : ""));
+      }
+    };
+  }
+
+  /* ---------- 01 frame figure ---------- */
+  (function () {
+    var svg = $("fig-frame"); markers(svg, "fr");
+    var X0 = 1; // 00001
+    var masks = [[0, 0, 0, 0, 0, 0], L.mask([3, 6])], cur = 0;
+    function boxState(x, y, title, v, cls) {
+      el("rect", { x: x, y: y, width: 110, height: 64, rx: 6, "class": "box" }, svg);
+      var t = el("text", { x: x + 55, y: y + 18, "class": "lbl", "text-anchor": "middle" }, svg); t.textContent = title;
+      var sqs = [];
+      for (var i = 0; i < 5; i++) {
+        var r = el("rect", { x: x + 12 + i * 18, y: y + 30, width: 14, height: 14, rx: 2, "class": "sq" }, svg);
+        var tt = el("text", { x: x + 19 + i * 18, y: y + 56, "class": "lbl-s", "text-anchor": "middle" }, svg); tt.textContent = "x" + (i + 1);
+        sqs.push(r);
+      }
+      return sqs;
+    }
+    var A = boxState(6, 20, "状態 x_t", X0), B = boxState(284, 20, "次の状態 x_t+1", 0);
+    el("rect", { x: 150, y: 28, width: 100, height: 48, rx: 6, "class": "box" }, svg);
+    var tf = el("text", { x: 200, y: 50, "class": "lbl", "text-anchor": "middle" }, svg); tf.textContent = "更新則 f̃(x, u)";
+    var tf2 = el("text", { x: 200, y: 66, "class": "lbl-s", "text-anchor": "middle" }, svg); tf2.textContent = "同期更新";
+    [["M116,52 L148,52"], ["M250,52 L282,52"], ["M200,140 L200,78"]].forEach(function (d) {
+      el("path", { d: d[0], "class": "e e-fixed", "marker-end": "url(#fra-fixed)" }, svg);
+      el("path", { d: d[0], "class": "pulse" }, svg);
+    });
+    // feedback: observe the next state and choose again
+    var fb = "M339,86 C339,190 270,200 252,186";
+    el("path", { d: fb, "class": "e e-fixed", "marker-end": "url(#fra-fixed)", "stroke-dasharray": "3 3" }, svg);
+    var tfb = el("text", { x: 300, y: 214, "class": "lbl-s", "text-anchor": "middle" }, svg); tfb.textContent = "観測して次を選ぶ";
+    el("rect", { x: 92, y: 142, width: 216, height: 66, rx: 6, "class": "box-u" }, svg);
+    var tu = el("text", { x: 200, y: 160, "class": "lbl", "text-anchor": "middle" }, svg); tu.textContent = "制御入力 u_t：どの辺を切るか";
+    var U = [];
+    for (var k = 0; k < 6; k++) {
+      var r = el("rect", { x: 112 + k * 30, y: 170, width: 20, height: 20, rx: 3, "class": "sq" }, svg);
+      var tk = el("text", { x: 122 + k * 30, y: 184, "class": "lbl-s", "text-anchor": "middle" }, svg); tk.textContent = String(k + 1);
+      U.push([r, tk]);
+    }
+    function render() {
+      var u = masks[cur], x = L.bits(X0), y = L.step(x, u);
+      A.forEach(function (r, i) { r.setAttribute("class", "sq" + (x[i] ? " on" : "")); });
+      B.forEach(function (r, i) { r.setAttribute("class", "sq" + (y[i] ? " on" : "")); });
+      U.forEach(function (p, i) { p[0].setAttribute("class", "sq" + (u[i] ? " cut" : "")); p[1].setAttribute("class", "lbl-s"); p[1].style.fill = u[i] ? "var(--on-ink)" : ""; });
+      $("frame-note").textContent = "x_t = " + L.str(X0) + "、切る辺 " + (cur ? "3, 6" : "なし") + " → x_t+1 = " + L.str(L.id(y));
+      var b = $("frame-toggle");
+      b.setAttribute("aria-pressed", String(cur === 1));
+      b.setAttribute("aria-label", "制御入力を切り替える。いまは" + (cur ? "辺3と辺6を切る" : "何も切らない"));
+    }
+    activate($("frame-toggle"), function () { cur = 1 - cur; render(); });
+    render();
+  })();
+
+  /* ---------- 02 operations (toy 4-node examples) ---------- */
+  var SQ = [{ x: 50, y: 32 }, { x: 150, y: 32 }, { x: 150, y: 118 }, { x: 50, y: 118 }];
+  function seg(p, q, r1, r2) {
+    var d = unit(q.x - p.x, q.y - p.y);
+    return "M" + (p.x + d[0] * r1) + "," + (p.y + d[1] * r1) + " L" + (q.x - d[0] * r2) + "," + (q.y - d[1] * r2);
+  }
+  function opPanel(cfg) {
+    var svg = $(cfg.svg), on = false, timer = null, col = 0;
+    markers(svg, cfg.svg);
+    var edges = cfg.edges.map(function (e) {
+      var d = seg(SQ[e.s], SQ[e.t], 16, e.dir ? 18 : 16);
+      var path = el("path", { d: d, "class": "e e-rem" }, svg);
+      var pulse = el("path", { d: d, "class": "pulse" }, svg);
+      if (e.dir) path.setAttribute("marker-end", "url(#" + cfg.svg + (e.sign === "+" ? "a-" : "i-") + "rem)");
+      return { e: e, path: path, pulse: pulse };
+    });
+    var nodes = SQ.map(function (p, i) {
+      var c = el("circle", { cx: p.x, cy: p.y, r: 15, "class": "nd" }, svg);
+      var t = el("text", { x: p.x, y: p.y, "class": "nt" }, svg); t.textContent = cfg.names[i];
+      return [c, t];
+    });
+    function traj() {
+      var x = cfg.x0.slice(), xs = [x.slice()];
+      for (var t = 0; t < cfg.steps; t++) { x = cfg.f(x, on); xs.push(x.slice()); }
+      return xs;
+    }
+    function render() {
+      var xs = traj(), show = reduced() ? cfg.steps : col;
+      edges.forEach(function (E) {
+        var cut = on && E.e.cuttable;
+        E.path.setAttribute("class", "e " + (cut ? "e-cut" : "e-rem"));
+        if (E.e.dir) E.path.setAttribute("marker-end", "url(#" + cfg.svg + (E.e.sign === "+" ? "a-" : "i-") + (cut ? "cut" : "rem") + ")");
+        E.pulse.setAttribute("class", "pulse" + (cut ? " off" : ""));
+      });
+      var x = xs[show];
+      nodes.forEach(function (n, i) {
+        n[0].setAttribute("class", "nd" + (x[i] ? " on" : "") + (on && cfg.pin === i ? " pin" : ""));
+        n[1].setAttribute("class", "nt" + (x[i] ? " on" : ""));
+      });
+      var box = $(cfg.svg + "-r");
+      box.innerHTML = "";
+      box.style.gridTemplateColumns = "auto repeat(" + (cfg.steps + 1) + ", minmax(14px, 1fr))";
+      var lab = document.createElement("div"); lab.className = "rl"; lab.textContent = "t"; box.appendChild(lab);
+      for (var c = 0; c <= cfg.steps; c++) { var h = document.createElement("div"); h.className = "hd"; h.textContent = c; box.appendChild(h); }
+      for (var i = 0; i < 4; i++) {
+        var l = document.createElement("div"); l.className = "rl"; l.textContent = cfg.names[i]; box.appendChild(l);
+        for (var c2 = 0; c2 <= cfg.steps; c2++) {
+          var d = document.createElement("div");
+          d.className = "c" + (xs[c2][i] ? " on" : "") + (c2 > show ? " future" : "") + (c2 === show && !reduced() ? " cur" : "");
+          d.textContent = xs[c2][i];
+          box.appendChild(d);
+        }
+      }
+      $(cfg.svg + "-res").textContent = cfg.summary(xs, on);
+      var b = $(cfg.svg + "-b");
+      b.setAttribute("aria-pressed", String(on));
+      b.textContent = on ? cfg.undoLabel : cfg.doLabel;
+      b.setAttribute("aria-label", on ? cfg.undoAria : cfg.doAria);
+    }
+    function run() {
+      if (timer) { clearInterval(timer); timer = null; }
+      col = 0; render();
+      if (reduced()) return;
+      timer = setInterval(function () { col = col >= cfg.steps ? 0 : col + 1; render(); }, 700);
+    }
+    activate($(cfg.svg + "-b"), function () { on = !on; run(); });
+    run();
+  }
+  function settle(xs) {
+    for (var t = 1; t < xs.length; t++) if (xs[t].join("") === xs[t - 1].join("")) return t - 1;
+    return -1;
+  }
+  opPanel({
+    svg: "op1", names: ["x1", "x2", "x3", "x4"], x0: [0, 0, 0, 0], steps: 8,
+    edges: [{ s: 0, t: 1, dir: true, sign: "+" }, { s: 1, t: 2, dir: true, sign: "+" }, { s: 2, t: 3, dir: true, sign: "+" }, { s: 3, t: 0, dir: true, sign: "-", cuttable: true }],
+    f: function (x, cut) { return [cut ? 1 : 1 - x[3], x[0], x[1], x[2]]; },
+    summary: function (xs, on) {
+      var s = settle(xs);
+      return s >= 0 ? "t = " + s + " から " + xs[s].join("") + " で止まる。" : "止まらずに回り続ける（t = 8 で 0000 に戻る）。";
+    },
+    doLabel: "辺を切る", undoLabel: "辺を戻す", doAria: "辺 x4 から x1 を切る", undoAria: "辺 x4 から x1 を戻す"
+  });
+  opPanel({
+    svg: "op2", names: ["x1", "x2", "x3", "x4"], x0: [0, 0, 0, 0], steps: 8, pin: 2,
+    edges: [{ s: 0, t: 1, dir: true, sign: "+" }, { s: 1, t: 2, dir: true, sign: "+", cuttable: true }, { s: 2, t: 3, dir: true, sign: "+" }, { s: 3, t: 0, dir: true, sign: "-" }],
+    f: function (x, pin) { return [1 - x[3], x[0], pin ? 1 : x[1], x[2]]; },
+    summary: function (xs, on) {
+      var s = settle(xs);
+      return s >= 0 ? "t = " + s + " から " + xs[s].join("") + " で止まる。" + (on ? "x3 は入力を見ない。" : "") : "止まらずに回り続ける（t = 8 で 0000 に戻る）。";
+    },
+    doLabel: "x3 を固定する", undoLabel: "固定を外す", doAria: "節点 x3 を 1 に固定する", undoAria: "節点 x3 の固定を外す"
+  });
+  opPanel({
+    svg: "op3", names: ["R1", "R2", "R3", "R4"], x0: [1, 0, 0, 0], steps: 4,
+    edges: [{ s: 0, t: 1, cuttable: true }, { s: 1, t: 2 }, { s: 2, t: 3 }, { s: 3, t: 0 }],
+    f: function (x, cut) {
+      var link = function (a, b) { return !(cut && ((a === 0 && b === 1) || (a === 1 && b === 0))); };
+      return x.map(function (v, i) {
+        var l = (i + 3) % 4, r = (i + 1) % 4;
+        return v | (link(i, l) ? x[l] : 0) | (link(i, r) ? x[r] : 0);
+      });
+    },
+    summary: function (xs) {
+      for (var t = 0; t < xs.length; t++) if (xs[t].join("") === "1111") return "全員に届くまで " + t + " ステップ。";
+      return "t = " + (xs.length - 1) + " までに全員には届かない。";
+    },
+    doLabel: "リンクを切る", undoLabel: "リンクを戻す", doAria: "通信リンク R1 と R2 を切る", undoAria: "通信リンク R1 と R2 を戻す"
+  });
+
+  /* ---------- 03 holding timelines ---------- */
+  (function () {
+    var N = 12;
+    // k1: mask A, k2: mask B, obs: observation time
+    var rows = {
+      "tl-a": [0, 0, 1, 0, 1, 0, 0, 1, 0, 0, 0, 1].map(function (v) { return { k: v ? "k1" : "", obs: false }; }),
+      "tl-b": [1, 1, 1, 2, 2, 2, 0, 0, 0, 1, 1, 1].map(function (v, t) { return { k: v === 1 ? "k1" : v === 2 ? "k2" : "", obs: t % 3 === 0 }; }),
+      "tl-c": [0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1].map(function (v) { return { k: v ? "k1" : "", obs: false }; })
+    };
+    var axis = $("tl-axis");
+    for (var t = 0; t < N; t++) { var s = document.createElement("span"); s.textContent = t; axis.appendChild(s); }
+    var cur = reduced() ? N : N, timer = null;
+    function render() {
+      Object.keys(rows).forEach(function (id) {
+        var box = $(id); box.innerHTML = "";
+        rows[id].forEach(function (c, t) {
+          var sp = document.createElement("span");
+          var cls = [];
+          if (c.k) cls.push(c.k);
+          if (c.obs) cls.push("obs");
+          if (t > cur) cls.push("hide");
+          if (t === cur && cur < N) cls.push("cur");
+          sp.className = cls.join(" ");
+          sp.textContent = c.k && t <= cur ? "切" : "";
+          box.appendChild(sp);
+        });
+      });
+      $("tl-t").textContent = cur < N ? "t = " + cur : "";
+    }
+    activate($("tl-play"), function () {
+      if (timer) { clearInterval(timer); timer = null; }
+      if (reduced()) { cur = N; render(); return; }
+      cur = 0; render();
+      timer = setInterval(function () {
+        cur += 1; render();
+        if (cur >= N) { clearInterval(timer); timer = null; }
+      }, 450);
+    });
+    render();
+  })();
+
+  /* ---------- 04 sync vs async ---------- */
+  (function () {
+    var X0 = 4; // 00100
+    var upS = buildCortical($("sa-s"), "sas", false), upA = buildCortical($("sa-a"), "saa", false);
+    var NONE = [0, 0, 0, 0, 0, 0], CAP = 500;
+    function runSync() {
+      var xs = [X0], x = X0;
+      while (!L.isFixedPoint(x) && xs.length < 50) { x = L.id(L.step(L.bits(x), NONE)); xs.push(x); }
+      return xs;
+    }
+    function runAsync() {
+      var xs = [X0], who = [-1], b = L.bits(X0);
+      while (!L.isFixedPoint(L.id(b)) && xs.length <= CAP) {
+        var i = Math.floor(Math.random() * 5);
+        b = L.asyncStep(b, i); xs.push(L.id(b)); who.push(i);
+      }
+      return { xs: xs, who: who };
+    }
+    function spread() {
+      var lo = Infinity, hi = 0;
+      for (var r = 0; r < 200; r++) { var n = runAsync().xs.length - 1; lo = Math.min(lo, n); hi = Math.max(hi, n); }
+      return [lo, hi];
+    }
+    var S = runSync(), A = runAsync(), sp = spread(), i = 0, timer = null;
+    function render() {
+      var si = Math.min(i, S.length - 1), ai = Math.min(i, A.xs.length - 1);
+      upS(L.bits(S[si]), null, -1);
+      upA(L.bits(A.xs[ai]), null, ai > 0 ? A.who[ai] : -1);
+      var sDone = si === S.length - 1, aDone = ai === A.xs.length - 1;
+      $("sa-s-n").textContent = si + " ステップ" + (sDone ? "で停止" : "");
+      $("sa-s-x").textContent = "状態 " + L.str(S[si]) + (sDone ? "（固定点）" : "") + "。1ステップで5節点すべてを更新する。";
+      $("sa-a-n").textContent = ai + " 回" + (aDone ? "で停止" : "");
+      $("sa-a-x").textContent = "状態 " + L.str(A.xs[ai]) + (aDone ? "（固定点）" : "") + "。1回で1節点だけ更新する（赤い枠が更新した節点）。";
+    }
+    function play() {
+      if (timer) { clearInterval(timer); timer = null; }
+      var end = Math.max(S.length, A.xs.length) - 1;
+      if (reduced()) { i = end; render(); return; }
+      i = 0; render();
+      timer = setInterval(function () { i += 1; render(); if (i >= end) { clearInterval(timer); timer = null; } }, 500);
+    }
+    activate($("sa-play"), play);
+    activate($("sa-again"), function () { A = runAsync(); play(); });
+    $("sa-note").textContent = "初期状態は " + L.str(X0) + "。同期は毎回 " + (S.length - 1) + " ステップで " + L.str(S[S.length - 1]) +
+      " に止まる。非同期は乱数で回数が変わる。このページで 200 回試すと、" + sp[0] + " 回から " + sp[1] + " 回までばらついた。これはデモの計算で、研究の結果ではない。";
+    i = Math.max(S.length, A.xs.length) - 1; // still image first: show the end state
+    render();
+  })();
+
+  /* ---------- 07 sandbox ---------- */
+  (function () {
+    var st = { x0: 0, u: [0, 0, 0, 0, 0, 0], t: 0, timer: null };
+    var EQ = [
+      ["x1' = x5 and ", [1, "not (x2 and not ", "u1", ")"], " and ", [2, "not (x4 and not ", "u2", ")"]],
+      ["x2' = ", [3, "not (x5 and not ", "u3", ")"], " and (not x1) and (not x3)"],
+      ["x3' = x1 and ", [4, "not (x2 and not ", "u4", ")"], " and ", [5, "not (x4 and not ", "u5", ")"]],
+      ["x4' = ", [6, "not (x5 and not ", "u6", ")"], " and (not x1) and (not x3)"],
+      ["x5' = (not x2) and (not x4)"]
+    ];
+    var terms = {};
+    var pre = $("sb-eqs");
+    EQ.forEach(function (line, li) {
+      line.forEach(function (part) {
+        if (typeof part === "string") { pre.appendChild(document.createTextNode(part)); return; }
+        var s = document.createElement("span"); s.className = "term";
+        s.appendChild(document.createTextNode(part[1]));
+        var u = document.createElement("span"); u.className = "u"; u.textContent = part[2]; s.appendChild(u);
+        s.appendChild(document.createTextNode(part[3]));
+        terms[part[0]] = s; pre.appendChild(s);
+      });
+      if (li < EQ.length - 1) pre.appendChild(document.createTextNode("\n"));
+    });
+
+    function toggle(k) { st.u[k - 1] = 1 - st.u[k - 1]; stop(); st.t = 0; render(); }
+    var upG = buildCortical($("sb-graph"), "sb", true, toggle);
+
+    var chips = $("sb-chips"), chipEls = [];
+    L.REMOVABLE.forEach(function (e) {
+      var b = document.createElement("button");
+      b.type = "button"; b.className = "chip"; b.setAttribute("role", "button"); b.setAttribute("tabindex", "0");
+      b.textContent = "辺" + e[0] + " x" + e[1] + "→x" + e[2];
+      activate(b, function () { toggle(e[0]); });
+      chips.appendChild(b); chipEls.push(b);
+    });
+
+    var grid = $("sb-grid"), cellEls = [];
+    for (var s = 0; s < 32; s++) {
+      var b = document.createElement("button");
+      b.type = "button"; b.className = "cell-btn"; b.setAttribute("role", "button"); b.setAttribute("tabindex", "0");
+      b.textContent = L.str(s);
+      (function (v) { activate(b, function () { st.x0 = v; stop(); st.t = 0; render(); }); })(s);
+      grid.appendChild(b); cellEls.push(b);
+    }
+
+    document.querySelectorAll("[data-preset]").forEach(function (b) {
+      activate(b, function () {
+        var p = b.getAttribute("data-preset");
+        st.u = p === "all" ? L.mask([1, 2, 3, 4, 5, 6]) : p === "36" ? L.mask([3, 6]) : L.mask([]);
+        stop(); st.t = 0; render();
+      });
+    });
+
+    $("sc-none").textContent = L.successCount(L.mask([])) + "/32";
+    $("sc-all").textContent = L.successCount(L.mask([1, 2, 3, 4, 5, 6])) + "/32";
+    $("sc-36").textContent = L.successCount(L.mask([3, 6])) + "/32";
+
+    function cutList() { var r = []; st.u.forEach(function (v, i) { if (v) r.push(i + 1); }); return r; }
+
+    function render() {
+      var J = L.judge(st.x0, st.u), xs = J.xs, t = st.t, x = xs[t];
+      upG(L.bits(x), st.u, -1);
+      for (var k = 1; k <= 6; k++) {
+        var cut = st.u[k - 1] === 1;
+        terms[k].className = "term" + (cut ? " off" : "");
+        chipEls[k - 1].setAttribute("aria-pressed", String(cut));
+        chipEls[k - 1].setAttribute("aria-label", "辺" + k + "（" + chipEls[k - 1].textContent.split(" ")[1] + "）を" + (cut ? "戻す" : "切る"));
+      }
+      $("sc-now").textContent = L.successCount(st.u) + "/32";
+      for (var s = 0; s < 32; s++) {
+        var ok = L.judge(s, st.u).ok, sel = s === st.x0;
+        cellEls[s].className = "cell-btn" + (ok ? " ok" : "") + (L.inGoal(s) ? " goal" : "");
+        cellEls[s].setAttribute("aria-pressed", String(sel));
+        cellEls[s].setAttribute("aria-label", "初期状態 " + L.str(s) + "、" + (ok ? "成功" : "失敗") + (L.inGoal(s) ? "、目標集合" : "") + (sel ? "、選択中" : ""));
+      }
+
+      // raster
+      var R_ = $("sb-raster"); R_.innerHTML = "";
+      R_.style.gridTemplateColumns = "auto repeat(" + (L.T + 1) + ", minmax(18px, 1fr))";
+      function lab(txt) { var d = document.createElement("div"); d.className = "rl"; d.textContent = txt; R_.appendChild(d); }
+      lab("t");
+      for (var c = 0; c <= L.T; c++) { var h = document.createElement("div"); h.className = "hd"; h.textContent = c; R_.appendChild(h); }
+      for (var i = 0; i < 5; i++) {
+        lab("x" + (i + 1));
+        for (var c2 = 0; c2 <= L.T; c2++) {
+          var on = L.bits(xs[c2])[i] === 1, d = document.createElement("div");
+          d.className = "c" + (on ? " on" : "") + (c2 > t ? " future" : "") + (c2 === t ? " cur" : "");
+          d.textContent = on ? "1" : "0"; R_.appendChild(d);
+        }
+      }
+      lab("目標");
+      for (var c3 = 0; c3 <= L.T; c3++) {
+        var g = L.inGoal(xs[c3]), d3 = document.createElement("div");
+        d3.className = "c" + (g ? " in-goal" : "") + (c3 > t ? " future" : "") + (c3 === t ? " cur" : "");
+        d3.textContent = g ? "✓" : ""; R_.appendChild(d3);
+      }
+
+      // status
+      var inG = L.inGoal(x), line = "t = " + t + "　状態 " + L.str(x) + "　目標集合：" + (inG ? "入っている" : "入っていない") +
+        "　切る辺：" + (cutList().length ? cutList().join(", ") : "なし");
+      var S = $("sb-status");
+      if (t < L.T) { S.className = "statusline"; S.textContent = line; }
+      else if (J.ok) { S.className = "statusline ok"; S.textContent = line + "。成功：t = " + J.first + " で初めて目標集合に入り、t = " + L.T + " まで出なかった。"; }
+      else {
+        S.className = "statusline ng";
+        S.textContent = line + "。失敗：" + (J.why === "leave" ? "t = " + J.first + " で入ったが、t = " + J.leave + " で出た。" :
+          J.why === "late" ? "初めて入ったのが t = " + J.first + " で、期限 H = " + L.H + " を過ぎた。" : "t = " + L.T + " までに目標集合へ入らなかった。");
+      }
+      $("sb-step").disabled = t >= L.T;
+      $("sb-play").textContent = st.timer ? "❚❚ 停止" : "▶ 再生";
+      $("sb-play").setAttribute("aria-label", st.timer ? "停止する" : "再生する");
+    }
+    function stop() { if (st.timer) { clearInterval(st.timer); st.timer = null; } }
+    activate($("sb-play"), function () {
+      if (st.timer) { stop(); render(); return; }
+      if (reduced()) { st.t = L.T; render(); return; }
+      if (st.t >= L.T) st.t = 0;
+      st.timer = setInterval(function () {
+        if (st.t >= L.T) { stop(); render(); return; }
+        st.t += 1; render();
+      }, 650);
+      render();
+    });
+    activate($("sb-step"), function () { stop(); if (st.t < L.T) st.t += 1; render(); });
+    activate($("sb-reset"), function () { stop(); st.t = 0; render(); });
+    render();
+  })();
+})();
+</script>
+</body>
+</html>

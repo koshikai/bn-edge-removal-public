@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>本体 Paper 2 · 研究ラインの地図</title>
+  <meta name="description" content="一度作った制御器を別の目標や個体へ使い回すと得か損かを確かめた確認研究。">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<main>
+  <nav class="crumbs"><a href="../">地図</a> / <span>本体 Paper 2</span></nav>
+  <p class="eyebrow mono">LINE 02 · 確認研究</p>
+  <h1>本体 Paper 2</h1>
+  <p class="lede">一度作った制御器を使い回すと、得か損かを測る。</p>
+  <p class="badges"><span class="badge confirm">確認研究</span><span class="badge closed">安全保証は主張しない</span></p>
+
+  <figure>
+    <svg viewBox="0 0 640 250" role="img" aria-labelledby="fig-cap">
+      <defs>
+        <marker id="a-f" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path class="mk-fixed" d="M0 0 L10 5 L0 10 z"/></marker>
+        <marker id="a-r" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path class="mk-rem" d="M0 0 L10 5 L0 10 z"/></marker>
+      </defs>
+      <!-- source -->
+      <rect class="box-a" x="10" y="85" width="150" height="70" rx="6"/>
+      <text class="lbl-b mid" x="85" y="112">source で作る</text>
+      <text class="lbl-m mid" x="85" y="134">費用 B_source</text>
+      <path class="e e-fixed" d="M160 120 L218 120" marker-end="url(#a-f)"/>
+      <rect class="box" x="220" y="95" width="110" height="50" rx="6"/>
+      <text class="lbl-b mid" x="275" y="125">制御器</text>
+      <!-- targets -->
+      <path class="e e-rem" d="M330 110 L418 40" marker-end="url(#a-r)"/>
+      <path class="e e-rem" d="M330 116 L418 90" marker-end="url(#a-r)"/>
+      <path class="e e-rem" d="M330 124 L418 150" marker-end="url(#a-r)"/>
+      <path class="e e-rem e-dash" d="M330 130 L418 200" marker-end="url(#a-r)"/>
+      <rect class="box" x="420" y="22" width="140" height="36" rx="5"/><text class="lbl mid" x="490" y="45">target 1 ＋B_target</text>
+      <rect class="box" x="420" y="72" width="140" height="36" rx="5"/><text class="lbl mid" x="490" y="95">target 2 ＋B_target</text>
+      <rect class="box" x="420" y="132" width="140" height="36" rx="5"/><text class="lbl mid" x="490" y="155">target 3 ＋B_target</text>
+      <text class="lbl-m mid" x="490" y="185">⋮</text>
+      <rect class="box-x" x="420" y="190" width="140" height="36" rx="5"/><text class="lbl mid" x="490" y="213">target M ＋B_target</text>
+      <text class="lbl-s" x="575" y="45">1回目</text>
+      <text class="lbl-s" x="575" y="213">最大 50 回</text>
+      <!-- axis note -->
+      <text class="lbl-s" x="10" y="200">1回あたりの費用 = B_source/M + B_target</text>
+      <text class="lbl-s" x="10" y="218">層：8→4、10→6、12→8 ／ horizon 20</text>
+    </svg>
+    <figcaption id="fig-cap">source で一度だけ制御器を作り、M 回の target に使い回す。source の費用は M 回で割る。各 target では B_target がかかる。M は最大 50。</figcaption>
+  </figure>
+
+  <h2><span class="no">01</span>問い</h2>
+  <p>一度作った制御器を、別の目標や個体へ使い回す。そうすると得か損か。</p>
+
+  <h2><span class="no">02</span>モデルと規模</h2>
+  <ul>
+    <li>population-v-r5-transfer-confirmatory の 633 family を使う。試行 633、完走 633、枯渇 0。</li>
+    <li>層は3つ（8→4、10→6、12→8）。</li>
+    <li>horizon は 20。統計単位は family である。</li>
+  </ul>
+
+  <h2><span class="no">03</span>何を動かすか</h2>
+  <p>介入の型は本体の設定と同じで、辺を除去する。このラインで動かすのは<b>再利用の回数</b>である。最大 50 回まで使い回す。</p>
+
+  <h2><span class="no">04</span>実験の設計</h2>
+  <p>費用の軸を次のように置く。source で作る費用を再利用の回数 M で割り、target ごとの費用を足す。</p>
+  <p class="eq">1回あたりの費用 = B_source / M + B_target</p>
+  <p>この軸の上で、再利用の回数ごとに損得を比べる。損と得が釣り合う回数を求める。</p>
+
+  <h2><span class="no">05</span>結果</h2>
+  <div class="kpi">
+    <div><span class="v mono">4 · 9 · 18</span><span class="k">損得が釣り合う再利用回数（分位点）</span></div>
+    <div><span class="v mono">5 / 633</span><span class="k">不利だった family</span></div>
+    <div><span class="v mono">0.79%</span><span class="k">不利だった割合（95% 区間 0.16〜1.58%）</span></div>
+  </div>
+  <p>損得が釣り合う再利用回数は、分位点で 4、9、18 回だった。不利だったのは 633 family のうち 5 family、0.79%（95% 区間 0.16〜1.58%）である。</p>
+
+  <h2><span class="no">06</span>読むときの注意</h2>
+  <div class="note">
+    <p><b>平均の損得の話であって、個別の転移での安全を保証しない。</b></p>
+    <p>不利だった family があることも、結果の一部として読む。</p>
+  </div>
+
+  <footer>
+    <p>出典：<a href="https://github.com/koshikai/bn-edge-removal-public" target="_blank" rel="noopener noreferrer">https://github.com/koshikai/bn-edge-removal-public</a></p>
+    <p>最終更新：2026-11-08</p>
+    <p><a href="../">← 研究ラインの地図へ戻る</a></p>
+  </footer>
+</main>
+</body>
+</html>
