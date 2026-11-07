@@ -370,6 +370,7 @@
   <p class="subtitle">ブーリアンネットワークの制御を、どう実験しているか</p>
   <p class="byline">越 海斗（Kaito Koshi）</p>
   <ul class="top-links">
+    <li><a href="#lines">ライン一覧 ↓</a></li>
     <li><a href="#demo">デモ ↓</a></li>
     <li><a href="./zemi2.html">既存の解説</a></li>
     <li><a href="https://github.com/koshikai/bn-edge-removal-public" target="_blank" rel="noopener noreferrer">GitHub ↗</a></li>
@@ -744,7 +745,7 @@
   <h2 id="numbers"><span class="no">08</span>数値の一覧</h2>
   <p>ラインごとに、記録の型を先に書く。型の意味は <a href="#reading">09</a> にある。</p>
 
-  <h3>本体 Paper 1 <span class="badge b-confirm">確認研究</span></h3>
+  <h3>本体 Paper 1 <span class="badge b-confirm">確認研究</span></h3> <a class="more" href="lines/paper1.html">詳しく読む →</a>
   <ul class="setup">
     <li>対象は 243 family。目的関数は <span class="m">H</span> = 20 の occupancy。即時の単一辺除去（matched-k1）。遷移数の予算を揃えて比べた。</li>
     <li>主結果は ΔAUC +0.01933、95% CI [+0.01259, +0.02662]。</li>
@@ -753,13 +754,13 @@
   </ul>
   <p class="small muted">注意：「Q 学習が上」という主張ではない。宣言した予算範囲の平均で、oracle との差が小さい、という主張である。</p>
 
-  <h3>本体 Paper 2 <span class="badge b-confirm">確認研究</span></h3>
+  <h3>本体 Paper 2 <span class="badge b-confirm">確認研究</span></h3> <a class="more" href="lines/paper2.html">詳しく読む →</a>
   <p>再利用の損得を推定する。cold start と有限回の償却を分ける。安全保証は主張しない。数値はこのページに載せない。</p>
 
-  <h3>設定 A/B <span class="badge b-exploratory">exploratory</span></h3>
+  <h3>設定 A/B <span class="badge b-exploratory">exploratory</span></h3> <a class="more" href="lines/setab.html">詳しく読む →</a>
   <p>設定Aは、既知の詳細論理から制御計算を縮約する。設定Bは、小モデルを未知の詳細モデルへの事前知識にする。数値は載せない。</p>
 
-  <h3>SF + GPI <span class="badge b-exploratory">exploratory</span></h3>
+  <h3>SF + GPI <span class="badge b-exploratory">exploratory</span></h3> <a class="more" href="lines/sfgpi.html">詳しく読む →</a>
   <p>MAPK 1モデルだけの結果で、多重比較補正はしていない。MAPK は 53ノード、外部入力4、非同期に更新する内部ノード49。極性制約つきの除去可能辺は10本で、累積4本まで切れる。1判断につき1本だけ切り替え、1判断に 49 回の単一ノード更新を行う。</p>
   <div class="table-wrap">
   <table class="t narrow">
@@ -774,7 +775,7 @@
   </div>
   <p class="small muted">注意：到達率では SAT が上回る。SF の主張は報酬込みの再利用であって、SAT への優位ではない。</p>
 
-  <h3>非同期 BN <span class="badge b-exact">exact</span><span class="badge b-empirical">empirical</span></h3>
+  <h3>非同期 BN <span class="badge b-exact">exact</span><span class="badge b-empirical">empirical</span></h3> <a class="more" href="lines/asyncbn.html">詳しく読む →</a>
   <ul class="setup">
     <li>1マイクロステップで1ノードだけ再計算する。観測のたびに mask と保持時間 T を選び、T ステップ同じ mask を使い、次の観測で戻せる。</li>
     <li><span class="badge b-exact">exact</span>目標を保つ mask の十分条件は DAG である。必要条件ではない。</li>
@@ -783,16 +784,16 @@
     <li>判定は費用を見る前に固定した（事前登録）。</li>
   </ul>
 
-  <h3>ロボット群の通信リンク <span class="badge b-exact">exact</span></h3>
+  <h3>ロボット群の通信リンク <span class="badge b-exact">exact</span></h3> <a class="more" href="lines/swarm.html">詳しく読む →</a>
   <p>ring 4台（16状態）。trigger 数は directed で 37 から 31、bidirectional で 32 から 31 に減る。整定時間は長くなる。</p>
 
-  <h3>DQN <span class="badge b-closed">閉じた</span></h3>
+  <h3>DQN <span class="badge b-closed">閉じた</span></h3> <a class="more" href="lines/drqn.html">詳しく読む →</a>
   <p>状態依存の辺除去を DQN の閉ループで学習した。Q 表を関数近似に置き換える路線で、mammalian では条件判定を2つ同時に通せず、2026-10-27 に本人の指示で区切った。研究上の結論ではない。数値は載せない。</p>
 
-  <h3>旧 C2D / BBM <span class="badge b-closed">一部閉鎖</span></h3>
+  <h3>旧 C2D / BBM <span class="badge b-closed">一部閉鎖</span></h3> <a class="more" href="lines/c2d.html">詳しく読む →</a>
   <p>Axis A は節点介入、Axis B は不可逆の辺除去。Axis B の学習路線は閉じた。数値は載せない。</p>
 
-  <h3>卒論・学会ライン <span class="badge b-empirical">empirical</span></h3>
+  <h3>卒論・学会ライン <span class="badge b-empirical">empirical</span></h3> <a class="more" href="lines/undergrad.html">詳しく読む →</a>
   <ul class="setup">
     <li>STL の入力仕様（単調性、休薬期間）をフラグ状態に記録し、行動マスキングで違反を構成的に排除する。</li>
     <li>全状態評価。Cortical は全32状態、Wnt5a は全128状態、5 seed。成功率 100%、離脱 0、仕様違反 0。</li>

@@ -198,6 +198,12 @@ svg { display: block; max-width: 100%; height: auto; }
 
 footer { margin-top: 64px; padding-top: 20px; border-top: 1px solid var(--line); color: var(--ink-mute); font-size: 0.8rem; line-height: 1.9; }
 footer p { margin: 0; }
+footer p + p { margin-top: 6px; }
+footer a { color: inherit; text-decoration: none; border-bottom: 1px solid var(--line2, rgba(128,128,128,.35)); }
+footer a:hover { border-bottom-color: var(--accent); }
+footer .pager { margin-top: 10px; font-size: 0.86rem; }
+a.more { display: inline-block; margin: 6px 0 10px; font-size: 0.88rem; text-decoration: none; border-bottom: 1px solid var(--line2, rgba(128,128,128,.35)); }
+a.more:hover { border-bottom-color: var(--accent); }
 
 /* svg vocabulary (same names as the map page) */
 .nd { stroke: var(--ink-soft); stroke-width: 1.4; fill: var(--panel); }
